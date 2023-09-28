@@ -2,7 +2,7 @@
 title: "Using CDMHandler"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{connection_tutorial}
+  %\VignetteIndexEntry{Using CDMHandler}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -44,7 +44,7 @@ cat(config_yaml)
 config <- yaml::yaml.load(config_yaml)
 ```
 
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
 configurationName <- "dev_bigquery"
 configurationName <- "dev_eunomia"

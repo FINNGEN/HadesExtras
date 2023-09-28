@@ -1,2 +1,4 @@
 *.html
 *.R
+errorReportSql.txt
+asthma.csv
