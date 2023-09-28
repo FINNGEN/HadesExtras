@@ -1,0 +1,16 @@
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+inst/doc
+.vscode/*
+
+docs/*
+
+errorReportSql.txt
+notes.md
+export*
+*.sqlite
+*.log
+.quarto

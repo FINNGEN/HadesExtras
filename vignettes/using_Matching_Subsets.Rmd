@@ -1,0 +1,149 @@
+---
+title: "Using Matching Subset"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{test_subsetdefinitions}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#library(HadesExtras)
+devtools::load_all(".")
+#options("DEBUG_DATABASECONNECTOR_DBPLYR" = FALSE)
+```
+
+# Configuration 
+
+Create a `CohortTableHandles` with a test cohort. 
+
+```{r}
+config_yaml <- "
+  databaseName: Eunomia1
+  connection:
+    connectionDetailsSettings:
+        dbms: eunomia
+  cdm:
+      cdmDatabaseSchema: main
+      vocabularyDatabaseSchema: main
+  cohortTable:
+      cohortDatabaseSchema: main
+      cohortTableName: test_cohort_table"
+
+cat(config_yaml)
+```
+
+```{r}
+config <- yaml::yaml.load(config_yaml)
+```
+
+```{r}
+configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
+configurationName <- "dev_bigquery"
+configurationName <- "dev_eunomia"
+config <- configurations[[configurationName]]
+```
+
+# Create CohortTableHandler
+
+As in `CDMHandled`, to create a `CohortTableHandles`, for convenience `createCohortTableHandlerFromList` can be used. 
+```{r}
+cohortTableHandler <- createCohortTableHandlerFromList(config)
+```
+
+In addition to the checks performed by `CDMHandled`, `cohortTableHandler` includes a check on the creation of the `cohort` table. 
+
+```{r}
+cohortTableHandler$connectionStatusLog |> 
+  reactable_connectionStatus()
+```
+
+```{r}
+
+# cohort 10:
+# 1 M born in 1970
+# 1 F born in 1971
+#
+# cohort 20:
+# 10 M born in 1970
+# 10 F born in 1970
+# 10 F born in 1971
+# 10 F born in 1972
+
+cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+  settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
+  jsonFolder = here::here("inst/testdata/matching/cohorts"),
+  sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
+  cohortFileNameFormat = "%s",
+  cohortFileNameValue = c("cohortName"),
+  #packageName = "HadesExtras",
+  verbose = FALSE
+)
+
+```
+
+# Create a matching subset 
+
+```{r}
+# Match to sex and bday, match ratio 10
+  subsetDef <- CohortGenerator::createCohortSubsetDefinition(
+    name = "",
+    definitionId = 20,
+    subsetOperators = list(
+      createMatchingSubset(
+        matchToCohortId = 10,
+        matchRatio = 10,
+        matchSex = TRUE,
+        matchBirthYear = TRUE,
+        matchCohortStartDateWithInDuration = FALSE,
+        newCohortStartDate = "keep",
+        newCohortEndDate = "keep"
+      )
+    )
+  )
+```
+
+```{r}
+
+cohortDefinitionSetWithSubsetDef <- cohortDefinitionSet |>
+  CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 20)
+
+cohortDefinitionSetWithSubsetDef |>  tibble::as_tibble() |> dplyr::select(-sql, -json)
+```
+
+
+Build cohorts 
+```{r}
+cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef |> dplyr::filter(cohortId==20020))
+```
+
+```{r}
+cohortsSummary <- cohortTableHandler$getCohortsSummary()
+```
+
+```{r}
+rectable_cohortsSummary(cohortsSummary)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
