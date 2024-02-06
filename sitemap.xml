@@ -34,9 +34,6 @@
     <loc>/reference/CDMdbHandler.html</loc>
   </url>
   <url>
-    <loc>/reference/CohortDiagnostics_runTimeCodeWAS.html</loc>
-  </url>
-  <url>
     <loc>/reference/CohortGenerator_MatchingSubsetOperator.html</loc>
   </url>
   <url>
@@ -88,6 +85,9 @@
     <loc>/reference/createMatchingSubset.html</loc>
   </url>
   <url>
+    <loc>/reference/csvFilesToSqlite.html</loc>
+  </url>
+  <url>
     <loc>/reference/dot-addFisherTestToCodeCounts.html</loc>
   </url>
   <url>
@@ -116,6 +116,9 @@
   </url>
   <url>
     <loc>/reference/dot-tippyText.html</loc>
+  </url>
+  <url>
+    <loc>/reference/executeTimeCodeWAS.html</loc>
   </url>
   <url>
     <loc>/reference/getCohortDataFromCohortTable.html</loc>

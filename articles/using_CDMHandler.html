@@ -81,7 +81,7 @@
 
       
 
-      </header><script src="using_CDMHandler_files/core-js-2.5.3/shim.min.js"></script><script src="using_CDMHandler_files/react-17.0.0/react.min.js"></script><script src="using_CDMHandler_files/react-17.0.0/react-dom.min.js"></script><script src="using_CDMHandler_files/reactwidget-1.0.0/react-tools.js"></script><script src="using_CDMHandler_files/htmlwidgets-1.6.2/htmlwidgets.js"></script><link href="using_CDMHandler_files/reactable-0.4.4/reactable.css" rel="stylesheet">
+      </header><script src="using_CDMHandler_files/core-js-2.5.3/shim.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react-dom.min.js"></script><script src="using_CDMHandler_files/reactwidget-1.0.0/react-tools.js"></script><script src="using_CDMHandler_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="using_CDMHandler_files/reactable-0.4.4/reactable.css" rel="stylesheet">
 <script src="using_CDMHandler_files/reactable-binding-0.4.4/reactable.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
@@ -152,13 +152,17 @@ used.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>CDMdb <span class="ot">&lt;-</span> <span class="fu">createCDMdbHandlerFromList</span>(config)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Connecting using SQLite driver</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1m [22mCreated a temporary table named #cars</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Inserting data took 0.0431 secs</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Executing SQL took 0.00758 secs</span></span></code></pre></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Note: method with signature 'DBIConnection#Id#ANY' chosen for function 'dbWriteTable',</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  target signature 'DatabaseConnectorDbiConnection#Id#data.frame'.</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  "DatabaseConnectorConnection#ANY#ANY" would also be valid</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Inserting data took 0.0195 secs</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Executing SQL took 0.00535 secs</span></span></code></pre></div>
 <p>First thing to do is to check the status of the connection.
 <code>CDMdb$connectionStatusLog</code> not only shows if the connection
 is correct, but also if the <code>tempEmulationSchema</code> works, and
@@ -177,8 +181,8 @@ interactive table with this information.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">connectionStatusLog</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/reactable_connectionStatus.html">reactable_connectionStatus</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-02107b33a3ccf00255e0" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-02107b33a3ccf00255e0">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"databaseName":["eunomia1","eunomia1","eunomia1","eunomia1"],"type":["✅","✅","✅","✅"],"step":["Check database connection","Check temp table creation","vocabularyDatabaseSchema connection","cdmDatabaseSchema connection"],"message":["Valid connection","can create temp tables","Connected to vocabulary: OMOP Standardized Vocabularies Version:  v5.0 18-JAN-19","Connected to cdm: Synthea synthetic health database Version:  v5.3.1"]},"columns":[{"id":"databaseName","name":"Database","type":"character"},{"id":"type","name":"Status","type":"character","aggregate":"frequency"},{"id":"step","name":"Check","type":"character"},{"id":"message","name":"Message","type":"character"}],"groupBy":["databaseName"],"dataKey":"3d32ea9e9fd6bd125ac21591dc3a6a06"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We can get information on the CDM and Vocabulary version:</p>
+<div class="reactable html-widget html-fill-item" id="htmlwidget-992d930c8bbb196760e0" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-992d930c8bbb196760e0">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"databaseName":["eunomia1","eunomia1","eunomia1","eunomia1"],"type":["✅","✅","✅","✅"],"step":["Check database connection","Check temp table creation","vocabularyDatabaseSchema connection","cdmDatabaseSchema connection"],"message":["Valid connection","can create temp tables","Connected to vocabulary: OMOP Standardized Vocabularies Version:  v5.0 18-JAN-19","Connected to cdm: Synthea synthetic health database Version:  v5.3.1"]},"columns":[{"id":"databaseName","name":"Database","type":"character"},{"id":"type","name":"Status","type":"character","aggregate":"frequency"},{"id":"step","name":"Check","type":"character"},{"id":"message","name":"Message","type":"character"}],"groupBy":["databaseName"],"dataKey":"3d32ea9e9fd6bd125ac21591dc3a6a06"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We can get information on the CDM and Vocabulary version:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">CDMInfo</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
