@@ -5,7 +5,9 @@
 #' Inherits from CDMdbHandler.
 #'
 #' @field cohortDatabaseSchema Name of the cohort database schema (read-only).
-#' @field cohortTableNames Names of the cohort tables (read-only).
+#' @field databaseId           A text id for the database the it connects to (read-only).
+#' @field databaseName           A text id for the database the it connects to (read-only).
+#' @field databaseDescription    A text description for the database the it connects to (read-only).
 #' @field incrementalFolder Path to folder used by CohortGenerator in inclemetnal mode (read-only).
 #' @field cohortDefinitionSet Table in cohortDefinitionSet with the current cohorts in the cohortTable (read-only).
 #' @field cohortGeneratorResults Table with results from CohortGenerator_generateCohortSet with the current cohorts in the cohortTable(read-only).
@@ -48,17 +50,23 @@ CohortTableHandler <- R6::R6Class(
     #' Initialize the CohortTableHandler object
     #'
     #' @param connectionHandler The connection handler object.
-    #' @param databaseName A text id for the database the it connects to.
+    #' @param databaseId             A text id for the database the it connects to
+    #' @param databaseName           A text name for the database the it connects to
+    #' @param databaseDescription    A text description for the database the it connects to
     #' @param cdmDatabaseSchema Name of the CDM database schema.
     #' @param vocabularyDatabaseSchema Name of the vocabulary database schema. Default is the same as the CDM database schema.
     #' @param cohortDatabaseSchema Name of the cohort database schema.
     #' @param cohortTableName Name of the cohort table.
+    #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
     initialize = function(connectionHandler,
+                          databseId,
                           databaseName,
+                          databaseDescription,
                           cdmDatabaseSchema,
                           vocabularyDatabaseSchema = cdmDatabaseSchema,
                           cohortDatabaseSchema,
-                          cohortTableName) {
+                          cohortTableName,
+                          loadConnectionChecksLevel = "allChecks") {
       checkmate::assertClass(connectionHandler, "ConnectionHandler")
       checkmate::assertString(cdmDatabaseSchema)
       checkmate::assertString(vocabularyDatabaseSchema)
@@ -81,7 +89,9 @@ CohortTableHandler <- R6::R6Class(
       # super$initialize is calling self$loadConnection(), self$loadConnection() is calling super$loadConnection()
 
       super$initialize(
+        databaseId = databseId,
         databaseName = databaseName,
+        databaseDescription = databaseDescription,
         connectionHandler = connectionHandler,
         cdmDatabaseSchema = cdmDatabaseSchema,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema
@@ -106,9 +116,14 @@ CohortTableHandler <- R6::R6Class(
     #' loadConnection
     #' @description
     #' Reloads the connection with the initial setting and updates connection status
-    loadConnection = function() {
+    loadConnection = function(loadConnectionChecksLevel) {
 
-      super$loadConnection()
+      if (loadConnectionChecksLevel == "dontConnect") {
+        private$.connectionStatusLog <- connectionStatusLog
+        return()
+      }
+
+      super$loadConnection(loadConnectionChecksLevel)
 
       # Check cohort database schema
       errorMessage <- ""
@@ -324,7 +339,7 @@ createCohortTableHandlerFromList <- function(
 ) {
 
   cohortTableHandlerConfig |> checkmate::assertList()
-  cohortTableHandlerConfig |> names() |> checkmate::assertSubset(c("databaseName", "connection", "cdm", "cohortTable" ))
+  cohortTableHandlerConfig |> names() |> checkmate::assertSubset(c("database", "connection", "cdm", "cohortTable" ))
 
   connectionHandler <- ResultModelManager_createConnectionHandler(
     connectionDetailsSettings = cohortTableHandlerConfig$connection$connectionDetailsSettings,
@@ -333,7 +348,9 @@ createCohortTableHandlerFromList <- function(
   )
   cohortTableHandler <- CohortTableHandler$new(
     connectionHandler = connectionHandler,
-    databaseName = cohortTableHandlerConfig$databaseName,
+    databseId = cohortTableHandlerConfig$database$databaseName,
+    databaseName = cohortTableHandlerConfig$database$databaseName,
+    databaseDescription = cohortTableHandlerConfig$database$databaseDescription,
     cdmDatabaseSchema = cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = cohortTableHandlerConfig$cdm$vocabularyDatabaseSchema,
     cohortDatabaseSchema = cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,

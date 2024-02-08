@@ -8,7 +8,9 @@ test_that("createConnectionHandler works", {
   )
 
   CDMdb <- CDMdbHandler$new(
-    databaseName = testSelectedConfiguration$databaseName,
+    databaseId = testSelectedConfiguration$database$databaseId,
+    databaseName = testSelectedConfiguration$database$databaseName,
+    databaseDescription = testSelectedConfiguration$database$databaseDescription,
     connectionHandler = connectionHandler,
     cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = testSelectedConfiguration$cdm$vocabularyDatabaseSchema

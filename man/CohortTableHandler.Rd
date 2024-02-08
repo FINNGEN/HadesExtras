@@ -10,12 +10,27 @@ Inherits from CDMdbHandler.
 \section{Super class}{
 \code{\link[HadesExtras:CDMdbHandler]{HadesExtras::CDMdbHandler}} -> \code{CohortTableHandler}
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{databaseId}}{A text id for the database the it connects to (read-only).}
+
+\item{\code{databaseName}}{A text id for the database the it connects to (read-only).}
+
+\item{\code{databaseDescription}}{A text description for the database the it connects to (read-only).}
+}
+\if{html}{\out{</div>}}
+}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{cohortDatabaseSchema}}{Name of the cohort database schema (read-only).}
 
-\item{\code{cohortTableNames}}{Names of the cohort tables (read-only).}
+\item{\code{databaseId}}{A text id for the database the it connects to (read-only).}
+
+\item{\code{databaseName}}{A text id for the database the it connects to (read-only).}
+
+\item{\code{databaseDescription}}{A text description for the database the it connects to (read-only).}
 
 \item{\code{incrementalFolder}}{Path to folder used by CohortGenerator in inclemetnal mode (read-only).}
 
@@ -49,11 +64,14 @@ Initialize the CohortTableHandler object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$new(
   connectionHandler,
+  databseId,
   databaseName,
+  databaseDescription,
   cdmDatabaseSchema,
   vocabularyDatabaseSchema = cdmDatabaseSchema,
   cohortDatabaseSchema,
-  cohortTableName
+  cohortTableName,
+  loadConnectionChecksLevel = "allChecks"
 )}\if{html}{\out{</div>}}
 }
 
@@ -62,7 +80,9 @@ Initialize the CohortTableHandler object
 \describe{
 \item{\code{connectionHandler}}{The connection handler object.}
 
-\item{\code{databaseName}}{A text id for the database the it connects to.}
+\item{\code{databaseName}}{A text name for the database the it connects to}
+
+\item{\code{databaseDescription}}{A text description for the database the it connects to}
 
 \item{\code{cdmDatabaseSchema}}{Name of the CDM database schema.}
 
@@ -70,8 +90,12 @@ Initialize the CohortTableHandler object
 
 \item{\code{cohortDatabaseSchema}}{Name of the cohort database schema.}
 
-\item{\code{cohortTableName}}{Name of the cohort table.
+\item{\code{cohortTableName}}{Name of the cohort table.}
+
+\item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
 Finalize method}
+
+\item{\code{databaseId}}{A text id for the database the it connects to}
 }
 \if{html}{\out{</div>}}
 }
@@ -96,7 +120,7 @@ Reloads the connection with the initial setting and updates connection status
 
 insertOrUpdateCohorts
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$loadConnection()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$loadConnection(loadConnectionChecksLevel)}\if{html}{\out{</div>}}
 }
 
 }

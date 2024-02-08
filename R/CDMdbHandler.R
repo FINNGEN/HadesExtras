@@ -3,7 +3,9 @@
 #' @description
 #' Class for handling database connection and schema information for a CDM database
 #'
+#' @field databaseId           A text id for the database the it connects to (read-only).
 #' @field databaseName           A text id for the database the it connects to (read-only).
+#' @field databaseDescription    A text description for the database the it connects to (read-only).
 #' @field connectionHandler           ConnectionHandler object for managing the database connection (read-only).
 #' @field vocabularyDatabaseSchema    Name of the vocabulary database schema (read-only).
 #' @field cdmDatabaseSchema           Name of the CDM database schema (read-only).
@@ -23,7 +25,9 @@
 CDMdbHandler <- R6::R6Class(
   classname = "CDMdbHandler",
   private = list(
+    .databaseId = NULL,
     .databaseName = NULL,
+    .databaseDescription = NULL,
     # database parameters
     .connectionHandler = NULL,
     .vocabularyDatabaseSchema = NULL,
@@ -37,14 +41,16 @@ CDMdbHandler <- R6::R6Class(
     .getTblCDMSchema = NULL
   ),
   active = list(
+    databaseId = function(){return(private$.databaseId)},
     databaseName = function(){return(private$.databaseName)},
+    databaseDescription = function(){return(private$.databaseDescription)},
     # database parameters
     connectionHandler = function(){return(private$.connectionHandler)},
     vocabularyDatabaseSchema = function(){return(private$.vocabularyDatabaseSchema)},
     cdmDatabaseSchema = function(){return(private$.cdmDatabaseSchema)},
     connectionStatusLog = function(){return(private$.connectionStatusLog$logTibble |>
-                                              dplyr::mutate(databaseName = private$.databaseName) |>
-                                              dplyr::relocate(databaseName, .before = 1))},
+                                              dplyr::mutate(databaseId = private$.databaseId, databaseName = private$.databaseName) |>
+                                              dplyr::relocate(databaseId, databaseName, .before = 1))},
     #
     vocabularyInfo = function(){return(private$.vocabularyInfo)},
     CDMInfo = function(){return(private$.CDMInfo)},
@@ -54,26 +60,37 @@ CDMdbHandler <- R6::R6Class(
   ),
   public = list(
     #'
-    #' @param databaseName           A text id for the database the it connects to
+    #' @param databaseId             A text id for the database the it connects to
+    #' @param databaseName           A text name for the database the it connects to
+    #' @param databaseDescription    A text description for the database the it connects to
     #' @param connectionHandler             A ConnectionHandler object
     #' @param cdmDatabaseSchema             Name of the CDM database schema
     #' @param vocabularyDatabaseSchema      (Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)
+    #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
     initialize = function(
+    databaseId,
     databaseName,
+    databaseDescription,
     connectionHandler,
     cdmDatabaseSchema,
-    vocabularyDatabaseSchema = cdmDatabaseSchema) {
-      checkmate::assertString(databaseName)
+    vocabularyDatabaseSchema = cdmDatabaseSchema,
+    loadConnectionChecksLevel = "allChecks"
+    ) {
+      checkmate::assertString(databaseId)
+      checkmate::assertString(databaseName, )
+      checkmate::assertString(databaseDescription)
       checkmate::assertClass(connectionHandler, "ConnectionHandler")
       checkmate::assertString(cdmDatabaseSchema)
       checkmate::assertString(vocabularyDatabaseSchema)
 
+      private$.databaseId <- databaseId
       private$.databaseName <- databaseName
+      private$.databaseDescription <- databaseDescription
       private$.connectionHandler <- connectionHandler
       private$.vocabularyDatabaseSchema <- vocabularyDatabaseSchema
       private$.cdmDatabaseSchema <- cdmDatabaseSchema
 
-      self$loadConnection()
+      self$loadConnection(loadConnectionChecksLevel)
     },
 
     #' Finalize method
@@ -86,8 +103,16 @@ CDMdbHandler <- R6::R6Class(
     #' Reload connection
     #' @description
     #' Updates the connection status by checking the database connection, vocabulary database schema, and CDM database schema.
-    loadConnection = function() {
+    loadConnection = function(loadConnectionChecksLevel) {
+      checkmate::assertString(loadConnectionChecksLevel)
+      checkmate::assertSubset(loadConnectionChecksLevel, c("dontConnect", "basicChecks", "allChecks"))
+
       connectionStatusLog <- LogTibble$new()
+
+      if (loadConnectionChecksLevel == "dontConnect") {
+        private$.connectionStatusLog <- connectionStatusLog
+        return()
+      }
 
       # Check db connection
       errorMessage <- ""
@@ -108,24 +133,29 @@ CDMdbHandler <- R6::R6Class(
       }
 
       # Check can create temp tables
-      errorMessage <- ""
-      tryCatch(
-        {
-          private$.connectionHandler$getConnection() |>
-            tmp_dplyr_copy_to(cars, overwrite = TRUE)
-          private$.connectionHandler$getConnection() |>
-            DatabaseConnector::dropEmulatedTempTables()
-        },
-        error = function(error) {
-          errorMessage <<- error$message
-        }
-      )
+      if(loadConnectionChecksLevel == "allChecks"){
+        errorMessage <- ""
+        tryCatch(
+          {
+            private$.connectionHandler$getConnection() |>
+              tmp_dplyr_copy_to(cars, overwrite = TRUE)
+            private$.connectionHandler$getConnection() |>
+              DatabaseConnector::dropEmulatedTempTables()
+          },
+          error = function(error) {
+            errorMessage <<- error$message
+          }
+        )
 
-      if (errorMessage != "") {
-        connectionStatusLog$WARNING("Check temp table creation", errorMessage)
-      } else {
-        connectionStatusLog$SUCCESS("Check temp table creation", "can create temp tables")
+        if (errorMessage != "") {
+          connectionStatusLog$ERROR("Check temp table creation", errorMessage)
+        } else {
+          connectionStatusLog$SUCCESS("Check temp table creation", "can create temp tables")
+        }
+      }else{
+        connectionStatusLog$WARNING("Check temp table creation", "skipped")
       }
+
 
       # Check vocabularyDatabaseSchema and populates getTblVocabularySchema
       getTblVocabularySchema <- list()
@@ -272,7 +302,7 @@ createCDMdbHandlerFromList <- function(
   ) {
 
   config |> checkmate::assertList()
-  config |> names() |> checkmate::assertNames(must.include = c("databaseName", "connection", "cdm" ))
+  config |> names() |> checkmate::assertNames(must.include = c("database", "connection", "cdm" ))
 
   connectionHandler <- ResultModelManager_createConnectionHandler(
     connectionDetailsSettings = config$connection$connectionDetailsSettings,
@@ -281,7 +311,9 @@ createCDMdbHandlerFromList <- function(
   )
 
   CDMdb <- CDMdbHandler$new(
-    databaseName = config$databaseName,
+    databaseId = config$database$databaseId,
+    databaseName = config$database$databaseName,
+    databaseDescription = config$database$databaseDescription,
     connectionHandler = connectionHandler,
     cdmDatabaseSchema = config$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = config$cdm$vocabularyDatabaseSchema

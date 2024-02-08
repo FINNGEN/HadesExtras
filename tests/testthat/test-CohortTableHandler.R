@@ -16,6 +16,7 @@ test_that("CohortTableHandler creates object with correct params", {
 })
 
 
+
 #
 # insertOrUpdateCohorts
 #

@@ -34,7 +34,10 @@ We need the following configuration. We write this in yaml format for clarity.
 
 ```{r}
 config_yaml <- "
-  databaseName: Eunomia1
+  database: 
+     databaseId: E1
+     databaseName: Eunomia
+     databaseDescription: Eunomia database
   connection:
     connectionDetailsSettings:
         dbms: eunomia

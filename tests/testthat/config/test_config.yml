@@ -1,5 +1,8 @@
-dev_eunomia:
-  databaseName: eunomia1
+E1:
+  database:
+    databaseId: E1
+    databaseName: eunomia1
+    databaseDescription: Eunomia database
   connection:
     connectionDetailsSettings:
         dbms: eunomia
@@ -9,8 +12,11 @@ dev_eunomia:
   cohortTable:
       cohortDatabaseSchema: main
       cohortTableName: test_cohort_table
-dev_bigquery:
-  databaseName: bigquery1
+BQ1:
+  database:
+    databaseId: BQ1
+    databaseName: bigquery1
+    databaseDescription: BigQuery database
   connection:
     connectionDetailsSettings:
       dbms: bigquery

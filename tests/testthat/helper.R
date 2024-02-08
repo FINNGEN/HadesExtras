@@ -75,9 +75,12 @@ helper_createNewCohortTableHandler <- function(){
     connectionDetailsSettings = testSelectedConfiguration$connection$connectionDetailsSettings,
     tempEmulationSchema = testSelectedConfiguration$connection$tempEmulationSchema
   )
+
   cohortTableHandler <- CohortTableHandler$new(
     connectionHandler = connectionHandler,
-    databaseName = testSelectedConfiguration$databaseName,
+    databseId = testSelectedConfiguration$database$databaseId,
+    databaseName = testSelectedConfiguration$database$databaseName,
+    databaseDescription = testSelectedConfiguration$database$databaseDescription,
     cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = testSelectedConfiguration$cdm$vocabularyDatabaseSchema,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
