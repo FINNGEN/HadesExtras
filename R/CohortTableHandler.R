@@ -290,6 +290,7 @@ CohortTableHandler <- R6::R6Class(
 
       cohortsSummaryWithNames <- private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId) |>
         dplyr::mutate(
+          databaseId = super$databaseId,
           databaseName = super$databaseName,
           shortName = paste0("C", cohortId)
         ) |>
@@ -348,7 +349,7 @@ createCohortTableHandlerFromList <- function(
   )
   cohortTableHandler <- CohortTableHandler$new(
     connectionHandler = connectionHandler,
-    databseId = cohortTableHandlerConfig$database$databaseName,
+    databseId = cohortTableHandlerConfig$database$databaseId,
     databaseName = cohortTableHandlerConfig$database$databaseName,
     databaseDescription = cohortTableHandlerConfig$database$databaseDescription,
     cdmDatabaseSchema = cohortTableHandlerConfig$cdm$cdmDatabaseSchema,

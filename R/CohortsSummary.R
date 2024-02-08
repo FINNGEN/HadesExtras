@@ -7,6 +7,7 @@
 createEmptyCohortsSummary <- function() {
 
   emptyCohortsSummary <- tibble::tibble(
+    databaseId = as.character(NA),
     databaseName = as.character(NA),
     cohortId = as.double(NA),
     shortName = as.character(NA),
@@ -85,7 +86,8 @@ correctEmptyCohortsInCohortsSummary <- function(cohortsSummary) {
       cohortSubjects = dplyr::if_else(is.na(cohortSubjects), 0L, as.integer(cohortSubjects))
     ) |>
     dplyr::select(
-      databaseName,  cohortId, cohortName,  shortName,
+      databaseId, databaseName,
+      cohortId, cohortName,  shortName,
       cohortEntries, cohortSubjects,
       histogramCohortStartYear, histogramCohortEndYear, histogramBirthYear, sexCounts,
       buildInfo
