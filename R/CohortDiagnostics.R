@@ -16,10 +16,6 @@ CohortDiagnostics_mergeCsvResults <- function(pathToResultFolders, pathToMergedR
     checkmate::assertDirectoryExists(pathToResultFolder)
   }
 
-  if (length(pathToResultFolders) == 1) {
-    return(pathToResultFolders)
-  }
-
   fileNames <- list.files(pathToResultFolders[1], pattern = "csv$")
   for (fileName in fileNames) {
     file.copy(from = file.path(pathToResultFolders[1], fileName), to = pathToMergedRestulsFolder)
