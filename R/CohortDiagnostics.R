@@ -7,8 +7,6 @@
 #' @return path to the merged results folder
 #'
 #' @importFrom checkmate assertCharacter assertDirectoryExists
-#' @importFrom base file.copy
-#' @importFrom brio writeLines
 #'
 #' @export
 CohortDiagnostics_mergeCsvResults <- function(pathToResultFolders, pathToMergedRestulsFolder) {

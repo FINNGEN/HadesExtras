@@ -2,6 +2,7 @@
 
 export(.addFisherTestToCodeCounts)
 export(CDMdbHandler)
+export(CohortDiagnostics_mergeCsvResults)
 export(CohortGenerator_MatchingSubsetOperator)
 export(CohortGenerator_deleteCohortFromCohortTable)
 export(CohortGenerator_generateCohortSet)
