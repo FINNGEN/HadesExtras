@@ -21,13 +21,13 @@ CohortDiagnostics_mergeCsvResults <- function(pathToResultFolders, pathToMergedR
     file.copy(from = file.path(pathToResultFolders[1], fileName), to = pathToMergedRestulsFolder)
   }
 
-  for (pathToResultFolder in pathToResultFolders[2:length(pathToResultFolders)]) {
-    for (fileName in fileNames) {
-      file_content <- readLines(file.path(pathToResultFolder, fileName))[-1]
-      cat(file_content, file = file.path(pathToMergedRestulsFolder, fileName),sep = "\n",append = TRUE)
+  if(length(pathToResultFolders)>1){
+    for (pathToResultFolder in pathToResultFolders[2:length(pathToResultFolders)]) {
+      for (fileName in fileNames) {
+        file_content <- readLines(file.path(pathToResultFolder, fileName))[-1]
+        cat(file_content, file = file.path(pathToMergedRestulsFolder, fileName),sep = "\n",append = TRUE)
+      }
     }
-
-
   }
 
   return(pathToMergedRestulsFolder)
