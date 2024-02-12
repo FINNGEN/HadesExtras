@@ -107,7 +107,10 @@
 clarity.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">config_yaml</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
-<span><span class="st">  databaseName: eunomia1</span></span>
+<span><span class="st">  database: </span></span>
+<span><span class="st">     databaseId: E1</span></span>
+<span><span class="st">     databaseName: Eunomia</span></span>
+<span><span class="st">     databaseDescription: Eunomia database</span></span>
 <span><span class="st">  connection:</span></span>
 <span><span class="st">    connectionDetailsSettings:</span></span>
 <span><span class="st">        dbms: eunomia</span></span>
@@ -118,7 +121,10 @@ clarity.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">config_yaml</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   databaseName: eunomia1</span></span>
+<span><span class="co">#&gt;   database: </span></span>
+<span><span class="co">#&gt;      databaseId: E1</span></span>
+<span><span class="co">#&gt;      databaseName: Eunomia</span></span>
+<span><span class="co">#&gt;      databaseDescription: Eunomia database</span></span>
 <span><span class="co">#&gt;   connection:</span></span>
 <span><span class="co">#&gt;     connectionDetailsSettings:</span></span>
 <span><span class="co">#&gt;         dbms: eunomia</span></span>
@@ -142,7 +148,9 @@ work with the tables.</p>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">CDMdb</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/CDMdbHandler.html">CDMdbHandler</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
-<span>    databaseName <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">databaseName</span>,</span>
+<span>    databaseId <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">database</span><span class="op">$</span><span class="va">databaseId</span>,</span>
+<span>    databaseName <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">database</span><span class="op">$</span><span class="va">databaseName</span>,</span>
+<span>    databaseDescription <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">database</span><span class="op">$</span><span class="va">databaseDescription</span>,</span>
 <span>    connectionHandler <span class="op">=</span> <span class="va">connectionHandler</span>,</span>
 <span>    cdmDatabaseSchema <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">cdm</span><span class="op">$</span><span class="va">cdmDatabaseSchema</span>,</span>
 <span>    vocabularyDatabaseSchema <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">cdm</span><span class="op">$</span><span class="va">vocabularyDatabaseSchema</span></span>
@@ -162,27 +170,27 @@ used.</p>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Executing SQL took 0.00535 secs</span></span></code></pre></div>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Executing SQL took 0.00553 secs</span></span></code></pre></div>
 <p>First thing to do is to check the status of the connection.
 <code>CDMdb$connectionStatusLog</code> not only shows if the connection
 is correct, but also if the <code>tempEmulationSchema</code> works, and
 all the CDM and Vocabulary tables are available in the database.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">connectionStatusLog</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
-<span><span class="co">#&gt;   databaseName type    step                                message              </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> eunomia1     SUCCESS Check database connection           Valid connection     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> eunomia1     SUCCESS Check temp table creation           can create temp tabl…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> eunomia1     SUCCESS vocabularyDatabaseSchema connection Connected to vocabul…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> eunomia1     SUCCESS cdmDatabaseSchema connection        Connected to cdm: Sy…</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
+<span><span class="co">#&gt;   databaseId databaseName type    step                                message   </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> E1         Eunomia      SUCCESS Check database connection           Valid con…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> E1         Eunomia      SUCCESS Check temp table creation           can creat…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> E1         Eunomia      SUCCESS vocabularyDatabaseSchema connection Connected…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> E1         Eunomia      SUCCESS cdmDatabaseSchema connection        Connected…</span></span></code></pre></div>
 <p>Function <code>reactable_connectionStatus</code> creates an
 interactive table with this information.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">connectionStatusLog</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/reactable_connectionStatus.html">reactable_connectionStatus</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-992d930c8bbb196760e0" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-992d930c8bbb196760e0">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"databaseName":["eunomia1","eunomia1","eunomia1","eunomia1"],"type":["✅","✅","✅","✅"],"step":["Check database connection","Check temp table creation","vocabularyDatabaseSchema connection","cdmDatabaseSchema connection"],"message":["Valid connection","can create temp tables","Connected to vocabulary: OMOP Standardized Vocabularies Version:  v5.0 18-JAN-19","Connected to cdm: Synthea synthetic health database Version:  v5.3.1"]},"columns":[{"id":"databaseName","name":"Database","type":"character"},{"id":"type","name":"Status","type":"character","aggregate":"frequency"},{"id":"step","name":"Check","type":"character"},{"id":"message","name":"Message","type":"character"}],"groupBy":["databaseName"],"dataKey":"3d32ea9e9fd6bd125ac21591dc3a6a06"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We can get information on the CDM and Vocabulary version:</p>
+<div class="reactable html-widget html-fill-item" id="htmlwidget-3ccedcfc925ab7e94774" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-3ccedcfc925ab7e94774">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"databaseId":["E1","E1","E1","E1"],"databaseName":["Eunomia","Eunomia","Eunomia","Eunomia"],"type":["✅","✅","✅","✅"],"step":["Check database connection","Check temp table creation","vocabularyDatabaseSchema connection","cdmDatabaseSchema connection"],"message":["Valid connection","can create temp tables","Connected to vocabulary: OMOP Standardized Vocabularies Version:  v5.0 18-JAN-19","Connected to cdm: Synthea synthetic health database Version:  v5.3.1"]},"columns":[{"id":"databaseId","name":"databaseId","type":"character"},{"id":"databaseName","name":"Database","type":"character"},{"id":"type","name":"Status","type":"character","aggregate":"frequency"},{"id":"step","name":"Check","type":"character"},{"id":"message","name":"Message","type":"character"}],"groupBy":["databaseName"],"dataKey":"f95d1e05e42eb269a6f73414ce24af10"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We can get information on the CDM and Vocabulary version:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">CDMInfo</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>

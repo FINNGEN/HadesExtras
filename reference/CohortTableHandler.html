@@ -75,14 +75,38 @@ Inherits from CDMdbHandler.</p>
     <h2>Super class</h2>
     <p><code><a href="CDMdbHandler.html">HadesExtras::CDMdbHandler</a></code> -&gt; <code>CohortTableHandler</code></p>
     </div>
+    <div id="public-fields">
+    <h2>Public fields</h2>
+    <p></p><div class="r6-fields"><dl><dt><code>databaseId</code></dt>
+<dd><p>A text id for the database the it connects to (read-only).</p></dd>
+
+
+<dt><code>databaseName</code></dt>
+<dd><p>A text id for the database the it connects to (read-only).</p></dd>
+
+
+<dt><code>databaseDescription</code></dt>
+<dd><p>A text description for the database the it connects to (read-only).</p></dd>
+
+
+</dl><p></p></div>
+    </div>
     <div id="active-bindings">
     <h2>Active bindings</h2>
     <p></p><div class="r6-active-bindings"><dl><dt><code>cohortDatabaseSchema</code></dt>
 <dd><p>Name of the cohort database schema (read-only).</p></dd>
 
 
-<dt><code>cohortTableNames</code></dt>
-<dd><p>Names of the cohort tables (read-only).</p></dd>
+<dt><code>databaseId</code></dt>
+<dd><p>A text id for the database the it connects to (read-only).</p></dd>
+
+
+<dt><code>databaseName</code></dt>
+<dd><p>A text id for the database the it connects to (read-only).</p></dd>
+
+
+<dt><code>databaseDescription</code></dt>
+<dd><p>A text description for the database the it connects to (read-only).</p></dd>
 
 
 <dt><code>incrementalFolder</code></dt>
@@ -124,11 +148,14 @@ Inherits from CDMdbHandler.</p>
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/CohortTableHandler.html">CohortTableHandler</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  <span class="va">connectionHandler</span>,</span>
+<span>  <span class="va">databseId</span>,</span>
 <span>  <span class="va">databaseName</span>,</span>
+<span>  <span class="va">databaseDescription</span>,</span>
 <span>  <span class="va">cdmDatabaseSchema</span>,</span>
 <span>  vocabularyDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,</span>
 <span>  <span class="va">cohortDatabaseSchema</span>,</span>
-<span>  <span class="va">cohortTableName</span></span>
+<span>  <span class="va">cohortTableName</span>,</span>
+<span>  loadConnectionChecksLevel <span class="op">=</span> <span class="st">"allChecks"</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -139,7 +166,11 @@ Inherits from CDMdbHandler.</p>
 
 
 <dt><code>databaseName</code></dt>
-<dd><p>A text id for the database the it connects to.</p></dd>
+<dd><p>A text name for the database the it connects to</p></dd>
+
+
+<dt><code>databaseDescription</code></dt>
+<dd><p>A text description for the database the it connects to</p></dd>
 
 
 <dt><code>cdmDatabaseSchema</code></dt>
@@ -155,8 +186,16 @@ Inherits from CDMdbHandler.</p>
 
 
 <dt><code>cohortTableName</code></dt>
-<dd><p>Name of the cohort table.
+<dd><p>Name of the cohort table.</p></dd>
+
+
+<dt><code>loadConnectionChecksLevel</code></dt>
+<dd><p>(Optional) Level of checks to perform when loading the connection (default is "allChecks")
 Finalize method</p></dd>
+
+
+<dt><code>databaseId</code></dt>
+<dd><p>A text id for the database the it connects to</p></dd>
 
 
 </dl><p></p></div>
@@ -176,7 +215,7 @@ Finalize method</p></dd>
 <p>Reloads the connection with the initial setting and updates connection status</p>
 <p>insertOrUpdateCohorts</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">loadConnection</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">loadConnection</span><span class="op">(</span><span class="va">loadConnectionChecksLevel</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
