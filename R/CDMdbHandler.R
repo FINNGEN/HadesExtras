@@ -291,6 +291,7 @@ CDMdbHandler <- R6::R6Class(
 #'   - connection: A list of connection details settings.
 #'   - cdm: A list of CDM database schema settings.
 #'   - cohortTable: The name of the cohort table.
+#' @param loadConnectionChecksLevel The level of checks to perform when loading the connection.
 #'
 #' @return A CDMdbHandler object.
 #'
@@ -298,7 +299,8 @@ CDMdbHandler <- R6::R6Class(
 #'
 #' @export
 createCDMdbHandlerFromList <- function(
-    config
+    config,
+    loadConnectionChecksLevel = "allChecks"
   ) {
 
   config |> checkmate::assertList()
@@ -316,7 +318,8 @@ createCDMdbHandlerFromList <- function(
     databaseDescription = config$database$databaseDescription,
     connectionHandler = connectionHandler,
     cdmDatabaseSchema = config$cdm$cdmDatabaseSchema,
-    vocabularyDatabaseSchema = config$cdm$vocabularyDatabaseSchema
+    vocabularyDatabaseSchema = config$cdm$vocabularyDatabaseSchema,
+    loadConnectionChecksLevel = loadConnectionChecksLevel
   )
 
   return(CDMdb)
