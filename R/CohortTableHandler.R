@@ -78,7 +78,7 @@ CohortTableHandler <- R6::R6Class(
       private$.incrementalFolder <- file.path(tempdir(),stringr::str_remove_all(Sys.time(),"-|:|\\.|\\s"))
 
       private$.cohortDefinitionSet <- tibble::tibble(
-        cohortId=0L,   cohortName="", sql="",        json="",
+        cohortId=0,   cohortName="", sql="",        json="",
         subsetParent=0, isSubset=TRUE, subsetDefinitionId=0,
         .rows = 0 )
 
@@ -159,10 +159,9 @@ CohortTableHandler <- R6::R6Class(
       #
       # Check parameters
       #
-      #if(!CohortGenerator::isCohortDefinitionSet(cohortDefinitionSet)){
-      # TEMP not working
-      # stop("Provided table is not of cohortDefinitionSet format")
-      #}
+      if(!CohortGenerator::isCohortDefinitionSet(cohortDefinitionSet)){
+       stop("Provided table is not of cohortDefinitionSet format")
+      }
 
       cohortIdsExists <- intersect( private$.cohortDefinitionSet$cohortId,  cohortDefinitionSet$cohortId  )
       if(length(cohortIdsExists)!=0){
