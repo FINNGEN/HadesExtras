@@ -4,7 +4,10 @@
 \alias{createCohortTableHandlerFromList}
 \title{createCohortTableHandlerFromList}
 \usage{
-createCohortTableHandlerFromList(cohortTableHandlerConfig)
+createCohortTableHandlerFromList(
+  cohortTableHandlerConfig,
+  loadConnectionChecksLevel = "allChecks"
+)
 }
 \arguments{
 \item{cohortTableHandlerConfig}{A list containing cohortTableHandlerConfiguration settings for the CohortTableHandler.
@@ -14,6 +17,8 @@ createCohortTableHandlerFromList(cohortTableHandlerConfig)
 \item cdm: A list of CDM database schema settings.
 \item cohortTable: A list of cohort table settings.
 }}
+
+\item{loadConnectionChecksLevel}{(Optional) Level of checks to perform when loading the connection (default is "allChecks").}
 }
 \value{
 A CohortTableHandler object.
