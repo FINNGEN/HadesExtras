@@ -69,7 +69,10 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createCohortTableHandlerFromList</span><span class="op">(</span><span class="va">cohortTableHandlerConfig</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createCohortTableHandlerFromList</span><span class="op">(</span></span>
+<span>  <span class="va">cohortTableHandlerConfig</span>,</span>
+<span>  loadConnectionChecksLevel <span class="op">=</span> <span class="st">"allChecks"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -80,6 +83,10 @@
 <li><p>cdm: A list of CDM database schema settings.</p></li>
 <li><p>cohortTable: A list of cohort table settings.</p></li>
 </ul></dd>
+
+
+<dt>loadConnectionChecksLevel</dt>
+<dd><p>(Optional) Level of checks to perform when loading the connection (default is "allChecks").</p></dd>
 
 </dl></div>
     <div id="value">
