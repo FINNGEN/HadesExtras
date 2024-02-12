@@ -94,7 +94,8 @@ CohortTableHandler <- R6::R6Class(
         databaseDescription = databaseDescription,
         connectionHandler = connectionHandler,
         cdmDatabaseSchema = cdmDatabaseSchema,
-        vocabularyDatabaseSchema = vocabularyDatabaseSchema
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+       loadConnectionChecksLevel = loadConnectionChecksLevel
       )
     },
     #' Finalize method
