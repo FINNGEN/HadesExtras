@@ -95,14 +95,14 @@
     },
     "DBI": {
       "Package": "DBI",
-      "Version": "1.2.1",
+      "Version": "1.2.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
       ],
-      "Hash": "9b4993e98e0e19da84c168460c032fef"
+      "Hash": "164809cd72e1d5160b4cb3aa57f510fe"
     },
     "DatabaseConnector": {
       "Package": "DatabaseConnector",
@@ -152,13 +152,13 @@
     },
     "FeatureExtraction": {
       "Package": "FeatureExtraction",
-      "Version": "3.3.2",
+      "Version": "3.4.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteUsername": "ohdsi",
       "RemoteRepo": "FeatureExtraction",
       "RemoteRef": "main",
-      "RemoteSha": "6a7e90a76d28e74ab50604a97a6066e38a594d74",
+      "RemoteSha": "8a7cb70c3d0cae4862fdf8ca286d5bc77adc74e8",
       "RemoteHost": "api.github.com",
       "Remotes": "ohdsi/Eunomia",
       "Requirements": [
@@ -179,7 +179,7 @@
         "readr",
         "rlang"
       ],
-      "Hash": "73a717cbc778735805b3b620550b6b72"
+      "Hash": "28d5a076958fc58316c805189c7a20b4"
     },
     "MASS": {
       "Package": "MASS",

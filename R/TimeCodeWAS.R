@@ -180,6 +180,12 @@ executeTimeCodeWAS <- function(
     dplyr::mutate(
       n_cases_yes = dplyr::if_else(is.na(n_cases_yes), 0, n_cases_yes),
       n_controls_yes = dplyr::if_else(is.na(n_controls_yes), 0, n_controls_yes),
+      n_cases = dplyr::if_else(is.na(n_cases), 0, n_cases),
+      n_controls = dplyr::if_else(is.na(n_controls), 0, n_controls),
+      # force n_cases to be same or lower than n_cases_yes, same for controls
+      n_cases = dplyr::if_else(n_cases < n_cases_yes, n_cases_yes, n_cases),
+      n_controls = dplyr::if_else(n_controls < n_controls_yes, n_controls_yes, n_controls),
+      #
       n_cases_no = n_cases - n_cases_yes,
       n_controls_no = n_controls - n_controls_yes
     ) |>
