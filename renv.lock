@@ -69,7 +69,7 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "ohdsi",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "CohortGenerator",
       "RemoteRef": "main",
       "RemoteSha": "78757f1b191a395cf9dcff0d5bbe2b9fa4aa163e",
@@ -91,7 +91,7 @@
         "rlang",
         "stringi"
       ],
-      "Hash": "12b26b68b771bbe771c627452aefe8b5"
+      "Hash": "1ba14745ec29dc17a7226cd079e93d8b"
     },
     "DBI": {
       "Package": "DBI",
