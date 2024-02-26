@@ -151,7 +151,6 @@ rectable_cohortsSummary <- function(
 #' Renders an Apex chart for the given data.
 #'
 #' @param data A data frame containing the data to be plotted.
-#' @param colorTimeHist The color for the time histogram (default is "#00BFFF").
 #'
 #' @importFrom apexcharter apex aes ax_chart ax_colors ax_yaxis
 #'
