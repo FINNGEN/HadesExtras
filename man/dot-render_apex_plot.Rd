@@ -8,8 +8,6 @@
 }
 \arguments{
 \item{data}{A data frame containing the data to be plotted.}
-
-\item{colorTimeHist}{The color for the time histogram (default is "#00BFFF").}
 }
 \value{
 An Apex chart object.
