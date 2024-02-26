@@ -1,6 +1,6 @@
 # settings
-#configurationName  <- getOption("configurationName", default = "dev_eunomia")
-configurationName  <- getOption("configurationName", default = "dev_bigquery")
+configurationName  <- getOption("configurationName", default = "E1")
+#configurationName  <- getOption("configurationName", default = "BQ1")
 #
 configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
 

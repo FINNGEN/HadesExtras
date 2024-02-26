@@ -9,7 +9,11 @@ Class for handling database connection and schema information for a CDM database
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{databaseId}}{A text id for the database the it connects to (read-only).}
+
 \item{\code{databaseName}}{A text id for the database the it connects to (read-only).}
+
+\item{\code{databaseDescription}}{A text description for the database the it connects to (read-only).}
 
 \item{\code{connectionHandler}}{ConnectionHandler object for managing the database connection (read-only).}
 
@@ -44,23 +48,32 @@ Class for handling database connection and schema information for a CDM database
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$new(
+  databaseId,
   databaseName,
+  databaseDescription,
   connectionHandler,
   cdmDatabaseSchema,
-  vocabularyDatabaseSchema = cdmDatabaseSchema
+  vocabularyDatabaseSchema = cdmDatabaseSchema,
+  loadConnectionChecksLevel = "allChecks"
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{databaseName}}{A text id for the database the it connects to}
+\item{\code{databaseId}}{A text id for the database the it connects to}
+
+\item{\code{databaseName}}{A text name for the database the it connects to}
+
+\item{\code{databaseDescription}}{A text description for the database the it connects to}
 
 \item{\code{connectionHandler}}{A ConnectionHandler object}
 
 \item{\code{cdmDatabaseSchema}}{Name of the CDM database schema}
 
-\item{\code{vocabularyDatabaseSchema}}{(Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)
+\item{\code{vocabularyDatabaseSchema}}{(Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)}
+
+\item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
 Finalize method}
 }
 \if{html}{\out{</div>}}
@@ -83,7 +96,7 @@ Reload connection
 \subsection{Method \code{loadConnection()}}{
 Updates the connection status by checking the database connection, vocabulary database schema, and CDM database schema.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$loadConnection()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$loadConnection(loadConnectionChecksLevel)}\if{html}{\out{</div>}}
 }
 
 }

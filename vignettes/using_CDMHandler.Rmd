@@ -2,7 +2,7 @@
 title: "Using CDMHandler"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{connection_tutorial}
+  %\VignetteIndexEntry{Using CDMHandler}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -28,7 +28,10 @@ We need the following configuration. We write this in yaml format for clarity.
 
 ```{r}
 config_yaml <- "
-  databaseName: eunomia1
+  database: 
+     databaseId: E1
+     databaseName: Eunomia
+     databaseDescription: Eunomia database
   connection:
     connectionDetailsSettings:
         dbms: eunomia
@@ -44,7 +47,7 @@ cat(config_yaml)
 config <- yaml::yaml.load(config_yaml)
 ```
 
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
 configurationName <- "dev_bigquery"
 configurationName <- "dev_eunomia"
@@ -64,7 +67,9 @@ connectionHandler <- ResultModelManager_createConnectionHandler(
   )
 
   CDMdb <- CDMdbHandler$new(
-    databaseName = config$databaseName,
+    databaseId = config$database$databaseId,
+    databaseName = config$database$databaseName,
+    databaseDescription = config$database$databaseDescription,
     connectionHandler = connectionHandler,
     cdmDatabaseSchema = config$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = config$cdm$vocabularyDatabaseSchema

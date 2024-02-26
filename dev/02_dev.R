@@ -16,15 +16,18 @@ usethis::use_package( "lubridate")
 #
 usethis::use_package( "DatabaseConnector")
 usethis::use_package( "SqlRender")
-usethis::use_package( "ROhdsiWebApi")
+usethis::use_package( "ROhdsiWebApi", type = "Suggests")
+usethis::use_package( "here", type = "Suggests")
 #
 usethis::use_package( "checkmate")
-usethis::use_package( "yaml")
+usethis::use_package( "yaml", type = "Suggests")
 usethis::use_package( "validate")
 
 
 usethis::use_package( "devtools", type = "Suggests")
 usethis::use_package( "ggplot2", type = "Suggests")
+
+
 
 
 ## Add internal datasets ----

@@ -26,15 +26,25 @@ rectable_cohortsSummary <- function(
 
   cohortsSummaryToPlot <- cohortsSummary  |>
     dplyr::mutate(
+      databaseId = databaseId,
       databaseName = databaseName,
       shortName = shortName,
       fullName = cohortName,
-      cohortName = paste0(
+      database = paste0(
+        databaseId,
+        "<br>",
+        dplyr::if_else(nchar(databaseName)>cohortNameNcharLimit, paste0(substr(databaseName, 1, 15), "..."), databaseName)
+      ),
+      cohort = paste0(
         shortName,
         "<br>",
         dplyr::if_else(nchar(fullName)>cohortNameNcharLimit, paste0(substr(fullName, 1, 15), "..."), fullName)
       ),
-      shortNameTooltip = paste0(
+      databaseTooltip = paste0(
+        "Database Id: ", databaseId, "<br>",
+        "Database Name: ", databaseName, "<br>"
+      ),
+      cohortTooltip = paste0(
         "Short name: ", shortName, "<br>",
         "Full name: ", fullName
       ),
@@ -60,12 +70,14 @@ rectable_cohortsSummary <- function(
   onClick = ""
 
   columns <- list(
-    databaseName = reactable::colDef(
-      name = "Database"
+    database = reactable::colDef(
+      name = "Database",
+      cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$databaseTooltip[[index]])},
+      html = TRUE
     ),
-    cohortName = reactable::colDef(
-      name = "Cohort Name",
-      cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$shortNameTooltip[[index]])},
+    cohort = reactable::colDef(
+      name = "Cohort",
+      cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$cohortTooltip[[index]])},
       html = TRUE
     ),
     cohortCountsStr = reactable::colDef(
@@ -139,7 +151,6 @@ rectable_cohortsSummary <- function(
 #' Renders an Apex chart for the given data.
 #'
 #' @param data A data frame containing the data to be plotted.
-#' @param colorTimeHist The color for the time histogram (default is "#00BFFF").
 #'
 #' @importFrom apexcharter apex aes ax_chart ax_colors ax_yaxis
 #'

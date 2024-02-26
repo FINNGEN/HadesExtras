@@ -16,6 +16,26 @@ test_that("CohortTableHandler creates object with correct params", {
 })
 
 
+test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks", {
+
+  cohortTableHandler <-  createCohortTableHandlerFromList(
+    cohortTableHandlerConfig = testSelectedConfiguration,
+    loadConnectionChecksLevel = "basicChecks"
+  )
+
+  on.exit({rm(cohortTableHandler);gc()})
+
+  cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
+  cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
+  cohortTableHandler$connectionStatusLog |> dplyr::filter(type != "SUCCESS") |> nrow() |>  expect_equal(0)
+
+  # check returns empty valid tables
+  cohortTableHandler$getCohortIdAndNames() |> checkmate::expect_tibble(max.rows = 0)
+  cohortTableHandler$getCohortCounts() |> checkmate::expect_tibble(max.rows = 0)
+  cohortTableHandler$getCohortsSummary() |> assertCohortsSummary()
+})
+
+
 #
 # insertOrUpdateCohorts
 #

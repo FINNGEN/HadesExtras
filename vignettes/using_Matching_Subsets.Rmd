@@ -28,7 +28,10 @@ Create a `CohortTableHandles` with a test cohort.
 
 ```{r}
 config_yaml <- "
-  databaseName: Eunomia1
+  database: 
+     databaseId: E1
+     databaseName: Eunomia
+     databaseDescription: Eunomia database
   connection:
     connectionDetailsSettings:
         dbms: eunomia
@@ -46,7 +49,7 @@ cat(config_yaml)
 config <- yaml::yaml.load(config_yaml)
 ```
 
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
 configurationName <- "dev_bigquery"
 configurationName <- "dev_eunomia"

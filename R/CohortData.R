@@ -174,7 +174,7 @@ cohortDataToCohortDefinitionSet <- function(
   cohortDefinitionSet <- cohortData |>
     tidyr::nest(.key = "cohort", .by = c("cohort_name")) |>
     dplyr::transmute(
-      cohortId = dplyr::row_number()+cohortIdOffset,
+      cohortId = as.double(dplyr::row_number()+cohortIdOffset),
       cohortName = cohort_name,
       json = purrr::map_chr(.x = cohort, .f=.cohortDataToJson),
       sql = purrr::map2_chr(

@@ -4,7 +4,7 @@
 \alias{createCDMdbHandlerFromList}
 \title{createCDMdbHandlerFromList}
 \usage{
-createCDMdbHandlerFromList(config)
+createCDMdbHandlerFromList(config, loadConnectionChecksLevel = "allChecks")
 }
 \arguments{
 \item{config}{A list containing configuration settings for the CDMdbHandler.
@@ -14,6 +14,8 @@ createCDMdbHandlerFromList(config)
 \item cdm: A list of CDM database schema settings.
 \item cohortTable: The name of the cohort table.
 }}
+
+\item{loadConnectionChecksLevel}{The level of checks to perform when loading the connection.}
 }
 \value{
 A CDMdbHandler object.
