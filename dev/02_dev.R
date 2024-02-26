@@ -28,6 +28,8 @@ usethis::use_package( "devtools", type = "Suggests")
 usethis::use_package( "ggplot2", type = "Suggests")
 
 
+
+
 ## Add internal datasets ----
 ## If you have data in your package
 #usethis::use_data_raw( name = "my_dataset", open = FALSE )

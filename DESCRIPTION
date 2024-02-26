@@ -16,7 +16,6 @@ Imports:
     apexcharter,
     bigrquery,
     checkmate,
-    CohortGenerator,
     DatabaseConnector,
     DBI,
     dbplyr,
@@ -41,6 +40,8 @@ Imports:
     tidyr,
     tippy,
     validate
+Remotes: 
+    OHDSI/CohortGenerator
 Suggests: 
     devtools,
     ROhdsiWebApi,
