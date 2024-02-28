@@ -16,14 +16,10 @@ Imports:
     apexcharter,
     bigrquery,
     checkmate,
-    CohortGenerator,
-    DatabaseConnector,
     DBI,
     dbplyr,
     digest,
     dplyr,
-    Eunomia,
-    FeatureExtraction,
     htmltools,
     lubridate,
     ParallelLogger,
@@ -31,7 +27,6 @@ Imports:
     R6,
     reactable,
     readr,
-    ResultModelManager,
     RJSONIO,
     rlang,
     shiny,
@@ -41,6 +36,12 @@ Imports:
     tidyr,
     tippy,
     validate
+Remotes: 
+    OHDSI/DatabaseConnector,
+    OHDSI/FeatureExtraction,
+    OHDSI/CohortGenerator,
+    OHDSI/ResultModelManager,
+    OHDSI/Eunomia
 Suggests: 
     devtools,
     ROhdsiWebApi,
