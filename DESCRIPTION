@@ -35,13 +35,13 @@ Imports:
     tibble,
     tidyr,
     tippy,
-    validate
-Remotes: 
-    OHDSI/DatabaseConnector,
-    OHDSI/FeatureExtraction,
-    OHDSI/CohortGenerator,
-    OHDSI/ResultModelManager,
-    OHDSI/Eunomia
+    validate,
+    DatabaseConnector,
+    FeatureExtraction,
+    CohortGenerator,
+    ResultModelManager,
+    CohortDiagnostics,
+    Eunomia
 Suggests: 
     devtools,
     ROhdsiWebApi,
