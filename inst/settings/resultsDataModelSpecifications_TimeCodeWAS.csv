@@ -7,6 +7,10 @@ cohort,sql,varchar,Yes,No,No,Yes,No,No,No
 cohort,subset_parent,bigint,No,No,Yes,Yes,No,No,No
 cohort,subset_definition_id,bigint,No,No,Yes,Yes,No,No,No
 cohort,is_subset,int,No,No,Yes,Yes,No,No,No
+cohort_count,cohort_id,bigint,Yes,Yes,No,Yes,No,No,No
+cohort_count,cohort_entries,float,Yes,No,No,Yes,Yes,No,No
+cohort_count,cohort_subjects,float,Yes,No,No,Yes,Yes,No,No
+cohort_count,database_id,varchar,Yes,Yes,No,Yes,No,No,No
 database,database_id,varchar,Yes,Yes,No,Yes,No,No,No
 database,database_name,varchar,No,No,No,Yes,No,No,No
 database,description,varchar,No,No,No,Yes,No,No,No
