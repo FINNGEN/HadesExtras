@@ -1,6 +1,6 @@
 
 helper_createNewConnection <- function(){
-  connectionDetailsSettings <- testSelectedConfiguration$connection$connectionDetailsSettings
+    connectionDetailsSettings <- testSelectedConfiguration$connection$connectionDetailsSettings
 
   if(connectionDetailsSettings$dbms == "eunomia"){
     connectionDetails <- Eunomia::getEunomiaConnectionDetails()

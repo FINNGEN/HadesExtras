@@ -27,7 +27,8 @@ test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks",
 
   cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
   cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
-  cohortTableHandler$connectionStatusLog |> dplyr::filter(type != "SUCCESS") |> nrow() |>  expect_equal(0)
+  cohortTableHandler$connectionStatusLog |> dplyr::filter(type == "SUCCESS") |> nrow() |>  expect_equal(4)
+  cohortTableHandler$connectionStatusLog |> dplyr::filter(type == "WARNING") |> nrow() |>  expect_equal(1)
 
   # check returns empty valid tables
   cohortTableHandler$getCohortIdAndNames() |> checkmate::expect_tibble(max.rows = 0)

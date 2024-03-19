@@ -89,7 +89,7 @@ test_that("CohortDiagnostics_mergeCsvResults copies CSV results if only one fold
 
   # Call the function
   merged_folder <- CohortDiagnostics_mergeCsvResults(
-    c(result_folder1, result_folder2),
+      c(result_folder1),
     merged_results_folder
   )
 
@@ -105,9 +105,7 @@ test_that("CohortDiagnostics_mergeCsvResults copies CSV results if only one fold
   merged_file1_content |> expect_equal(
     c("Header1,Header2,Header3",
       "folder1file1data1,folder1file1data2,folder1file1data3",
-      "folder1file1data4,folder1file1data5,folder1file1data6",
-      "folder2file1data1,folder2file1data2,folder2file1data3",
-      "folder2file1data4,folder2file1data5,folder2file1data6")
+        "folder1file1data4,folder1file1data5,folder1file1data6")
   )
 
   # Clean up
