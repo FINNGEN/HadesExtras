@@ -72,7 +72,7 @@ checkCohortDefinitionTables <- function(
     )
   }
 
-  return(connectionStatusLog$log)
+  return(connectionStatusLog)
 }
 
 #' Get Cohort Names from Cohort Definition Table
