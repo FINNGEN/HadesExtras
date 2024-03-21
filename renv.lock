@@ -109,11 +109,11 @@
       "Version": "6.3.2",
       "Source": "GitHub",
       "RemoteType": "github",
+      "RemoteHost": "api.github.com",
       "RemoteUsername": "OHDSI",
       "RemoteRepo": "DatabaseConnector",
-      "RemoteRef": "develop",
+      "RemoteRef": "main",
       "RemoteSha": "bee58a314996123b59e08bd489bf712e14391c4f",
-      "RemoteHost": "api.github.com",
       "Requirements": [
         "DBI",
         "R",
@@ -130,7 +130,7 @@
         "urltools",
         "utils"
       ],
-      "Hash": "7cead5de25ac93f73abd4ca9b1e8094e"
+      "Hash": "8d66bf120b0c2ffc0d8ed1809a37ea2d"
     },
     "Eunomia": {
       "Package": "Eunomia",
@@ -155,11 +155,11 @@
       "Version": "3.4.0",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteUsername": "ohdsi",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "FeatureExtraction",
       "RemoteRef": "main",
-      "RemoteSha": "8a7cb70c3d0cae4862fdf8ca286d5bc77adc74e8",
-      "RemoteHost": "api.github.com",
+      "RemoteSha": "bb0213e64198b98e8fe80c3e964d308952779515",
       "Remotes": "ohdsi/Eunomia",
       "Requirements": [
         "Andromeda",
@@ -179,7 +179,7 @@
         "readr",
         "rlang"
       ],
-      "Hash": "28d5a076958fc58316c805189c7a20b4"
+      "Hash": "78cb529bf6c38f1c74192ebc515b4ba0"
     },
     "MASS": {
       "Package": "MASS",
@@ -327,11 +327,11 @@
       "Version": "0.5.6",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteUsername": "ohdsi",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "ResultModelManager",
       "RemoteRef": "main",
       "RemoteSha": "58100690f36000bfa7f8058bc6584780b11311d5",
+      "RemoteHost": "api.github.com",
       "Requirements": [
         "DBI",
         "DatabaseConnector",
@@ -349,11 +349,11 @@
         "rlang",
         "zip"
       ],
-      "Hash": "0241ba6042820206fa03c94060861700"
+      "Hash": "04dd85f6ac8234623c66b6a64db389d6"
     },
     "SqlRender": {
       "Package": "SqlRender",
-      "Version": "1.16.1",
+      "Version": "1.17.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -361,7 +361,7 @@
         "rJava",
         "rlang"
       ],
-      "Hash": "94d9cae91bbd8aed211bea82aff7cf77"
+      "Hash": "513c5e6da774c913430561a3912c5354"
     },
     "apexcharter": {
       "Package": "apexcharter",
@@ -742,14 +742,14 @@
     },
     "digest": {
       "Package": "digest",
-      "Version": "0.6.34",
+      "Version": "0.6.35",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
       ],
-      "Hash": "7ede2ee9ea8d3edbf1ca84c1e333ad1a"
+      "Hash": "698ece7ba5a4fa4559e3d537e7ec3d31"
     },
     "downlit": {
       "Package": "downlit",
@@ -2032,7 +2032,7 @@
     },
     "tidyselect": {
       "Package": "tidyselect",
-      "Version": "1.2.0",
+      "Version": "1.2.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2044,7 +2044,7 @@
         "vctrs",
         "withr"
       ],
-      "Hash": "79540e5fcd9e0435af547d885f184fd5"
+      "Hash": "829f27b9c4919c16b593794a6344d6c0"
     },
     "timechange": {
       "Package": "timechange",
