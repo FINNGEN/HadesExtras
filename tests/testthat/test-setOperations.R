@@ -54,42 +54,42 @@ testthat::test_that("test that splitString errors", {
   })
 
 
-# operationStringToBinaryTree
+# .operationStringToBinaryTree
 
-testthat::test_that("test that operationStringToBinaryTree works", {
-  operationStringToBinaryTree("2Upd3") |>
+testthat::test_that("test that .operationStringToBinaryTreeworks", {
+  .operationStringToBinaryTree("2Upd3") |>
     expect_equal(list( left=2, operation = "Upd",right=3))
-  operationStringToBinaryTree("(2Upd3)") |>
+  .operationStringToBinaryTree("(2Upd3)") |>
     expect_equal(list( left=2, operation = "Upd",right=3))
-  operationStringToBinaryTree("2Upd(3Ip4)") |>
+  .operationStringToBinaryTree("2Upd(3Ip4)") |>
     expect_equal(list( left=2, operation = "Upd",right=list( left=3, operation = "Ip",right=4)))
-  operationStringToBinaryTree("(2Upd3)Ip4")   |>
+  .operationStringToBinaryTree("(2Upd3)Ip4")   |>
     expect_equal(list( left=list( left=2, operation = "Upd",right=3), operation = "Ip",right=4))
-  operationStringToBinaryTree("(2Upd3)Ip(4Mp5)") |>
+  .operationStringToBinaryTree("(2Upd3)Ip(4Mp5)") |>
     expect_equal(list( left=list( left=2, operation = "Upd",right=3), operation = "Ip",right=list( left=4, operation = "Mp",right=5)))
-  operationStringToBinaryTree("2Upd(3Ip(4Mp5))") |>
+  .operationStringToBinaryTree("2Upd(3Ip(4Mp5))") |>
       expect_equal(list( left=2, operation = "Upd",right=list( left=3, operation = "Ip",right=list( left=4, operation = "Mp",right=5))))
-  operationStringToBinaryTree("2Upd(3Ip(4Mp5)Ip6)") |>
+  .operationStringToBinaryTree("2Upd(3Ip(4Mp5)Ip6)") |>
     expect_equal(list( left=2, operation = "Upd",right=list( left=3, operation = "Ip",right=list( left=list( left=4, operation = "Mp",right=5), operation = "Ip",right=6))))
-  operationStringToBinaryTree("(3Ip6)Ip(4Mp5)") |>
+  .operationStringToBinaryTree("(3Ip6)Ip(4Mp5)") |>
     expect_equal(list( left=list( left=3, operation = "Ip",right=6), operation = "Ip",right=list( left=4, operation = "Mp",right=5)))
-  operationStringToBinaryTree("2Upd(3Ip6)Ip(4Mp5)") |>
+  .operationStringToBinaryTree("2Upd(3Ip6)Ip(4Mp5)") |>
     expect_equal(list(left=2, operation = "Upd",right = list( left=list( left=3, operation = "Ip",right=6), operation = "Ip",right=list( left=4, operation = "Mp",right=5))))
 
   # priority
-  operationStringToBinaryTree("2Upd3Ip4") |>
+  .operationStringToBinaryTree("2Upd3Ip4") |>
     expect_equal(list( left=2, operation = "Upd",right=list( left=3, operation = "Ip",right=4)))
-  operationStringToBinaryTree("2Ip3Upd4") |>
+  .operationStringToBinaryTree("2Ip3Upd4") |>
     expect_equal(list( left=2, operation = "Ip",right=list( left=3, operation = "Upd",right=4)))
-  operationStringToBinaryTree("2Upd3Mp4") |>
+  .operationStringToBinaryTree("2Upd3Mp4") |>
     expect_equal(list( left=2, operation = "Upd",right=list( left=3, operation = "Mp",right=4)))
-  operationStringToBinaryTree("2Mp3Upd4") |>
+  .operationStringToBinaryTree("2Mp3Upd4") |>
     expect_equal(list( left=2, operation = "Mp",right=list( left=3, operation = "Upd",right=4)))
-  operationStringToBinaryTree("2Ip3Mp4") |>
+  .operationStringToBinaryTree("2Ip3Mp4") |>
     expect_equal(list( left=2, operation = "Ip",right=list( left=3, operation = "Mp",right=4)))
-  operationStringToBinaryTree("2Mp3Ip4") |>
+  .operationStringToBinaryTree("2Mp3Ip4") |>
     expect_equal(list( left=2, operation = "Mp",right=list( left=3, operation = "Ip",right=4)))
-  operationStringToBinaryTree("2Mp3Ip4Upd5") |>
+  .operationStringToBinaryTree("2Mp3Ip4Upd5") |>
     expect_equal(list( left=2, operation = "Mp",right=list( left=3, operation = "Ip",right=list( left=4, operation = "Upd",right=5))))
 
   })

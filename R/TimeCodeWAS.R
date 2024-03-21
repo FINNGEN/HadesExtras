@@ -19,7 +19,6 @@
 #' @importFrom tidyr spread
 #' @importFrom tibble as_tibble
 #' @importFrom stringr str_c
-#' @importFrom CohortDiagnostics saveDatabaseMetaData
 #'
 #' @export
 #'

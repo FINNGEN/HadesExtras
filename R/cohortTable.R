@@ -1,5 +1,22 @@
 
-
+#' Check Existence of Cohort Definition Tables
+#'
+#' Validates the existence of the specified cohort definition and cohort tables within a given database schema.
+#' Requires either an active database connection or connection details to create one. This function is intended
+#' to assist in ensuring that the necessary tables for cohort definition are present in the database.
+#'
+#' @param connectionDetails Details required to establish a database connection (optional).
+#' @param connection An existing database connection (optional).
+#' @param cohortDatabaseSchema The database schema where the cohort definition tables are expected to be found.
+#' @param cohortDefinitionTable The name of the cohort definition table. Defaults to "cohort_definition".
+#' @param cohortTable The name of the table containing cohort data. Defaults to "cohort".
+#'
+#' @return A tibble log indicating the success or error in checking the existence of tables.
+#'
+#' @importFrom DatabaseConnector connect disconnect existsTable
+#' @importFrom checkmate assertString
+#'
+#' @export
 checkCohortDefinitionTables <- function(
     connectionDetails = NULL,
     connection = NULL,
@@ -58,7 +75,24 @@ checkCohortDefinitionTables <- function(
   return(connectionStatusLog$log)
 }
 
-
+#' Get Cohort Names from Cohort Definition Table
+#'
+#' Retrieves cohort names along with their corresponding IDs and descriptions from the specified cohort definition table
+#' within a given database schema. This function assists in querying cohort information from the database.
+#'
+#' @param connectionDetails Details required to establish a database connection (optional).
+#' @param connection An existing database connection (optional).
+#' @param cohortDatabaseSchema The database schema where the cohort definition table is expected to be found.
+#' @param cohortDefinitionTable The name of the cohort definition table. Defaults to "cohort_definition".
+#'
+#' @return A tibble containing cohort names, IDs, and descriptions.
+#'
+#' @importFrom DatabaseConnector connect disconnect dbGetQuery
+#' @importFrom SqlRender render translate
+#' @importFrom tibble as_tibble
+#' @importFrom checkmate assertString
+#'
+#' @export
 getCohortNamesFromCohortDefinitionTable <- function(
     connectionDetails = NULL,
     connection = NULL,
@@ -102,7 +136,24 @@ getCohortNamesFromCohortDefinitionTable <- function(
 
 }
 
-
+#' Convert Cohort Table to Cohort Definition Settings
+#'
+#' Converts cohort table entries into cohort definition settings for specified cohort IDs within a given database schema.
+#' This function is useful for generating cohort definition settings from existing cohort data.
+#'
+#' @param cohortDatabaseSchema The database schema where the cohort table is located.
+#' @param cohortTable The name of the cohort table. Defaults to "cohort".
+#' @param cohortDefinitionTable The name of the cohort definition table where settings will be stored.
+#' @param cohortDefinitionIds Numeric vector specifying cohort IDs to generate settings for.
+#' @param cohortIdOffset Numeric value to add to cohort IDs. Defaults to 0.
+#'
+#' @return A tibble containing cohort definition settings.
+#'
+#' @importFrom dplyr filter transmute
+#' @importFrom purrr pmap_chr
+#' @importFrom checkmate assertString assertNumeric
+#'
+#' @export
 cohortTableToCohortDefinitionSettings <- function(
     cohortDatabaseSchema,
     cohortTable = "cohort",

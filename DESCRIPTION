@@ -17,7 +17,7 @@ Imports:
     bigrquery,
     checkmate,
     DBI,
-    dbplyr,
+    dbplyr (<= 2.4.0),
     digest,
     dplyr,
     htmltools,
@@ -35,13 +35,20 @@ Imports:
     tibble,
     tidyr,
     tippy,
-    validate
+    validate,
+    DatabaseConnector,
+    FeatureExtraction,
+    CohortGenerator,
+    ResultModelManager,
+    Eunomia, 
+    CohortDiagnostics
 Remotes: 
     OHDSI/DatabaseConnector,
     OHDSI/FeatureExtraction,
     OHDSI/CohortGenerator,
     OHDSI/ResultModelManager,
-    OHDSI/Eunomia
+    OHDSI/Eunomia, 
+    javier-gracia-tabuenca-tuni/CohortDiagnostics@fix-error-with-no-conceptset-cohorts
 Suggests: 
     devtools,
     ROhdsiWebApi,
