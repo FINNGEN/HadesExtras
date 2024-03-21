@@ -40,6 +40,9 @@
     <loc>/reference/CohortGenerator_MatchingSubsetOperator.html</loc>
   </url>
   <url>
+    <loc>/reference/CohortGenerator_OperationSubsetOperator.html</loc>
+  </url>
+  <url>
     <loc>/reference/CohortGenerator_deleteCohortFromCohortTable.html</loc>
   </url>
   <url>
@@ -64,10 +67,16 @@
     <loc>/reference/checkCohortData.html</loc>
   </url>
   <url>
+    <loc>/reference/checkCohortDefinitionTables.html</loc>
+  </url>
+  <url>
     <loc>/reference/checkCohortsSummary.html</loc>
   </url>
   <url>
     <loc>/reference/cohortDataToCohortDefinitionSet.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cohortTableToCohortDefinitionSettings.html</loc>
   </url>
   <url>
     <loc>/reference/correctEmptyCohortsInCohortsSummary.html</loc>
@@ -88,7 +97,13 @@
     <loc>/reference/createMatchingSubset.html</loc>
   </url>
   <url>
+    <loc>/reference/createOperationSubset.html</loc>
+  </url>
+  <url>
     <loc>/reference/csvFilesToSqlite.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-.binaryTreeToSQL.html</loc>
   </url>
   <url>
     <loc>/reference/dot-addFisherTestToCodeCounts.html</loc>
@@ -109,6 +124,9 @@
     <loc>/reference/dot-buildInfoToTooltipStr.html</loc>
   </url>
   <url>
+    <loc>/reference/dot-operationStringToBinaryTree.html</loc>
+  </url>
+  <url>
     <loc>/reference/dot-render_apex_plot.html</loc>
   </url>
   <url>
@@ -127,7 +145,13 @@
     <loc>/reference/getCohortDataFromCohortTable.html</loc>
   </url>
   <url>
+    <loc>/reference/getCohortNamesFromCohortDefinitionTable.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/operationStringToSQL.html</loc>
   </url>
   <url>
     <loc>/reference/reactable_connectionStatus.html</loc>
@@ -137,6 +161,9 @@
   </url>
   <url>
     <loc>/reference/rectable_cohortsSummary.html</loc>
+  </url>
+  <url>
+    <loc>/reference/splitString.html</loc>
   </url>
   <url>
     <loc>/reference/tmp_ConnectionHandler.html</loc>
