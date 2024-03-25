@@ -1,4 +1,69 @@
 
+
+#' Create Temporal Source Covariate Settings
+#'
+#' This function generates settings for temporal source covariates to be used in feature extraction.
+#'
+#' @param useConditionOccurrenceSourceConcept Logical indicating whether to include condition occurrence source concepts.
+#' @param useDrugExposureSourceConcept Logical indicating whether to include drug exposure source concepts.
+#' @param useProcedureOccurrenceSourceConcept Logical indicating whether to include procedure occurrence source concepts.
+#' @param useMeasurementSourceConcept Logical indicating whether to include measurement source concepts.
+#' @param useDeviceExposureSourceConcept Logical indicating whether to include device exposure source concepts.
+#' @param useObservationSourceConcept Logical indicating whether to include observation source concepts.
+#' @param temporalStartDays Vector of integers representing the start days of the temporal window for covariate extraction.
+#' @param temporalEndDays Vector of integers representing the end days of the temporal window for covariate extraction.
+#'
+#' @return Settings for temporal source covariates suitable for feature extraction.
+#'
+#' @details This function generates settings for temporal source covariates, which can be used in subsequent feature extraction tasks. It allows specifying which types of source concepts to include and the temporal window for extraction.
+#'
+#' @importFrom FeatureExtraction createDetailedTemporalCovariateSettings
+#' @importFrom checkmate assertLogical assertNumeric assertTRUE
+#'
+#' @export
+#'
+FeatureExtraction_createTemporalSourceCovariateSettings <- function(
+    useConditionOccurrenceSourceConcept = TRUE,
+    useDrugExposureSourceConcept =  TRUE,
+    useProcedureOccurrenceSourceConcept = TRUE,
+    useMeasurementSourceConcept = TRUE,
+    useDeviceExposureSourceConcept = TRUE,
+    useObservationSourceConcept = TRUE,
+    temporalStartDays = -365:-1,
+    temporalEndDays =   -365:-1
+  ) {
+
+  checkmate::assertLogical(useConditionOccurrenceSourceConcept)
+  checkmate::assertLogical(useDrugExposureSourceConcept)
+  checkmate::assertLogical(useProcedureOccurrenceSourceConcept)
+  checkmate::assertLogical(useMeasurementSourceConcept)
+  checkmate::assertLogical(useDeviceExposureSourceConcept)
+  checkmate::assertLogical(useObservationSourceConcept)
+  checkmate::assertNumeric(temporalStartDays)
+  checkmate::assertNumeric(temporalEndDays)
+
+  checkmate::assertTRUE(useConditionOccurrenceSourceConcept | useDrugExposureSourceConcept | useProcedureOccurrenceSourceConcept | useMeasurementSourceConcept | useDeviceExposureSourceConcept | useObservationSourceConcept)
+
+  listAnalyses <- list(
+    if(useConditionOccurrenceSourceConcept) analysisDetails_ConditionOccurrenceConceptSource,
+    if(useDrugExposureSourceConcept) analysisDetails_DrugExposureConceptSource,
+    if(useProcedureOccurrenceSourceConcept) analysisDetails_ProcedureOccurrenceConceptSource,
+    if(useMeasurementSourceConcept) analysisDetails_MeasurementConceptSource,
+    if(useDeviceExposureSourceConcept) analysisDetails_DeviceExposureConceptSource,
+    if(useObservationSourceConcept) analysisDetails_ObservationConceptSource
+  )
+
+  settings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
+    analyses = listAnalyses,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays =   temporalEndDays
+  )
+
+  return(settings)
+
+}
+
+
 ############################################
 # Domain functions looking at source codes #
 ############################################

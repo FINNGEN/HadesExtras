@@ -205,19 +205,14 @@ temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
 ```
 
 
-
 ```{r}
-listAnalyses <- list(
-  analysisDetails_ConditionOccurrenceConceptSource,
-  analysisDetails_DrugExposureConceptSource,
-  analysisDetails_ProcedureOccurrenceConceptSource,
-  analysisDetails_MeasurementConceptSource,
-  analysisDetails_DeviceExposureConceptSource,
-  analysisDetails_ObservationConceptSource
-)
-
-settings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
-  analyses = listAnalyses, 
+settings <- FeatureExtraction_createTemporalSourceCovariateSettings(
+  useConditionOccurrenceSourceConcept = TRUE,
+    useDrugExposureSourceConcept =  TRUE,
+    useProcedureOccurrenceSourceConcept = TRUE,
+    useMeasurementSourceConcept = TRUE,
+    useDeviceExposureSourceConcept = TRUE,
+    useObservationSourceConcept = TRUE,
   temporalStartDays = temporalStartDays, 
   temporalEndDays =   temporalEndDays
 )
