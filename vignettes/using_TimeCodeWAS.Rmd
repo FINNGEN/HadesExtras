@@ -103,6 +103,7 @@ cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
 
 # Create a matching subset 
 
+Settings to create a new cohort with subjects from cohort 2 that match cohort 1 by sex and birth year.
 ```{r}
 # Match to sex and bday, match ratio 10
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
@@ -131,8 +132,7 @@ cohortDefinitionSetWithSubsetDef |>  tibble::as_tibble() |> dplyr::select(-sql, 
 ```
 
 
-
-Build cohorts 
+Build cohort 
 ```{r}
 cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef)
 ```
@@ -143,8 +143,9 @@ cohortTableHandler$getCohortsSummary() |>
 ```
 
 
-# calcualte table 
+# Calculate timeCodeWas table
 
+Define covariates and time windows
 ```{r}
 temporalStartDays = c(-365*5,   -365*4,   -365*3,   -365*2, -365*1, -3,   4,   365+1, 365*2+1, 365*3+1, 365*4+1)
 temporalEndDays =   c(-365*4-1, -365*3-1, -365*2-1, -365*1-1,   -4,  3, 365,   365*2, 365*3,   365*4,   365*5)
@@ -160,7 +161,8 @@ temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
 )
 
 ```
-
+  
+Execute
 ```{r}
 
 exportFolder <- file.path(tempdir(), "timeCodeWAS")
@@ -177,6 +179,74 @@ executeTimeCodeWAS(
 
 ```
 
+Save results to sqlite
+```{r}
+csvFilesToSqlite(
+  dataFolder = exportFolder,
+  sqliteDbPath = file.path(tempdir(), "timeCodeWAS.sqlite"),
+  overwrite = TRUE
+)
+```
+  
+  
+## Calculate timeCodeWas table using source codes for covariates
+
+```{r}
+temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
+  useConditionOccurrence = TRUE, 
+  useDrugExposure =  TRUE, 
+  useProcedureOccurrence = TRUE, 
+  useMeasurement = TRUE,
+  useObservation = TRUE,
+  temporalStartDays = temporalStartDays, 
+  temporalEndDays =   temporalEndDays
+)
+
+```
+
+
+
+```{r}
+listAnalyses <- list(
+  analysisDetails_ConditionOccurrenceConceptSource,
+  analysisDetails_DrugExposureConceptSource,
+  analysisDetails_ProcedureOccurrenceConceptSource,
+  analysisDetails_MeasurementConceptSource,
+  analysisDetails_DeviceExposureConceptSource,
+  analysisDetails_ObservationConceptSource
+)
+
+settings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
+  analyses = listAnalyses, 
+  temporalStartDays = temporalStartDays, 
+  temporalEndDays =   temporalEndDays
+)
+
+settings2 <- list(
+  settings,
+  temporalCovariateSettings
+)
+```
+
+
+Execute
+```{r}
+
+exportFolder <- file.path(tempdir(), "timeCodeWAS")
+dir.create(exportFolder, showWarnings = FALSE)
+
+executeTimeCodeWAS(
+    exportFolder = exportFolder,
+    cohortTableHandler = cohortTableHandler,
+    cohortIdCases = 1,
+    cohortIdControls = 2001,
+    covariateSettings = settings2,
+    minCellCount = 1
+)
+
+```
+
+Save results to sqlite
 ```{r}
 csvFilesToSqlite(
   dataFolder = exportFolder,
@@ -185,60 +255,12 @@ csvFilesToSqlite(
 )
 ```
 
-
+connectTo sqlite
 ```{r}
-
- #  connection <- cohortTableHandler$connectionHandler$getConnection()
- #  cohort <- dplyr::tbl(connection, tmp_inDatabaseSchema("main", "test_cohort_table"))
- #  person <- dplyr::tbl(connection, tmp_inDatabaseSchema("main", "person"))
- # 
- #  cohort |>  dplyr::left_join(
- #    person, 
- #    by = c("subject_id" = "person_id")
- #  ) |> 
- # dplyr::collect() |> 
- #    dplyr::left_join(
- #      cohortDefinitionSet |> dplyr::select(cohortId,cohortName), 
- #      by = c("cohort_definition_id" = "cohortId")
- #                     ) |> 
- #    dplyr::select(
- #      cohort_name = cohortName, 
- #      person_source_value,
- #      cohort_start_date,
- #      cohort_end_date
- #    ) |> 
- #    dplyr::filter(!is.na(cohort_name)) |> 
- #    dplyr::filter(!is.na(person_source_value)) |> 
- #    readr::write_csv("asthma.csv")
-    
+DatabaseConnector::createConnectionDetails(
+  dbms = "sqlite",
+  server = file.path(tempdir(), "timeCodeWAS.sqlite")
+) |> 
+  DatabaseConnector::connect() |> 
+  DatabaseConnector::dbGetQuery("SELECT * FROM temporal_analysis_ref") 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

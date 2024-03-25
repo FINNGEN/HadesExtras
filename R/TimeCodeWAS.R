@@ -121,6 +121,12 @@ executeTimeCodeWAS <- function(
   cohortTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(cohortDatabaseSchema, cohortTable))
   observationPeriodTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(cdmDatabaseSchema, "observation_period"))
 
+  # TEMP, when therea are more than one covariate settings, get the first (it should use timeWindow from server instead)
+  # if covariateSettings doent have the temporalStartDays, it means it is a list of settings
+  if (length(covariateSettings$temporalStartDays) == 0) {
+    covariateSettings <- covariateSettings[[1]]
+  }
+
   timeWindows <- tibble(
     id_window =  as.integer(1:length(covariateSettings$temporalStartDays)),
     start_day = as.integer(covariateSettings$temporalStartDays),
