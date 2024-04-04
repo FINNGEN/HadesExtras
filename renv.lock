@@ -35,9 +35,10 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
+      "RemoteUsername": "javier-gracia-tabuenca-tuni",
       "RemoteRepo": "CohortDiagnostics",
-      "RemoteUsername": "ohdsi",
-      "RemoteRef": "v3.2.5",
+      "RemoteRef": "fix-error-with-no-conceptset-cohorts",
+      "RemoteSha": "46d72aaf678307b7d3200e19aea5aa193e730697",
       "Remotes": "ohdsi/Eunomia, ohdsi/FeatureExtraction, ohdsi/ResultModelManager, ohdsi/ROhdsiWebApi, ohdsi/CirceR, ohdsi/CohortGenerator, ohdsi/OhdsiShinyModules",
       "Requirements": [
         "Andromeda",
@@ -60,7 +61,7 @@
         "stringr",
         "tidyr"
       ],
-      "Hash": "0516c5dca3c05c21ec25b6217bd2d4e4"
+      "Hash": "18cc287e167ab11f8caa0f686e3d0f0c"
     },
     "CohortGenerator": {
       "Package": "CohortGenerator",
@@ -68,9 +69,10 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "CohortGenerator",
-      "RemoteUsername": "ohdsi",
-      "RemoteRef": "v0.8.1",
+      "RemoteRef": "main",
+      "RemoteSha": "78757f1b191a395cf9dcff0d5bbe2b9fa4aa163e",
       "Remotes": "ohdsi/CirceR, ohdsi/Eunomia, ohdsi/ROhdsiWebApi",
       "Requirements": [
         "DatabaseConnector",
@@ -89,7 +91,7 @@
         "rlang",
         "stringi"
       ],
-      "Hash": "9d96e789663f7e26eed76f8d1656fbc2"
+      "Hash": "1ba14745ec29dc17a7226cd079e93d8b"
     },
     "DBI": {
       "Package": "DBI",
@@ -105,8 +107,13 @@
     "DatabaseConnector": {
       "Package": "DatabaseConnector",
       "Version": "6.3.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "OHDSI",
+      "RemoteRepo": "DatabaseConnector",
+      "RemoteRef": "main",
+      "RemoteSha": "bee58a314996123b59e08bd489bf712e14391c4f",
       "Requirements": [
         "DBI",
         "R",
@@ -123,7 +130,7 @@
         "urltools",
         "utils"
       ],
-      "Hash": "1ef65614602c6534a6c666e872c3b647"
+      "Hash": "8d66bf120b0c2ffc0d8ed1809a37ea2d"
     },
     "Eunomia": {
       "Package": "Eunomia",
@@ -148,9 +155,10 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "FeatureExtraction",
-      "RemoteUsername": "ohdsi",
-      "RemoteRef": "v3.4.1",
+      "RemoteRef": "main",
+      "RemoteSha": "5049d546621f63f3e09df34d92fa93b6bb005c92",
       "Remotes": "ohdsi/Eunomia",
       "Requirements": [
         "Andromeda",
@@ -170,7 +178,7 @@
         "readr",
         "rlang"
       ],
-      "Hash": "de69c3ff3c171b3ae87c3b9c674aae1a"
+      "Hash": "2a9bf091e98b4edc1488f048915e368e"
     },
     "MASS": {
       "Package": "MASS",
@@ -313,9 +321,10 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "ResultModelManager",
-      "RemoteUsername": "ohdsi",
-      "RemoteRef": "v0.5.6",
+      "RemoteRef": "main",
+      "RemoteSha": "58100690f36000bfa7f8058bc6584780b11311d5",
       "Requirements": [
         "DBI",
         "DatabaseConnector",
@@ -333,7 +342,7 @@
         "rlang",
         "zip"
       ],
-      "Hash": "f19381dbfd26da6f06f4be3eeda623cd"
+      "Hash": "04dd85f6ac8234623c66b6a64db389d6"
     },
     "SqlRender": {
       "Package": "SqlRender",
@@ -636,7 +645,7 @@
     },
     "dbplyr": {
       "Package": "dbplyr",
-      "Version": "2.5.0",
+      "Version": "2.4.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -660,7 +669,7 @@
         "vctrs",
         "withr"
       ],
-      "Hash": "39b2e002522bfd258039ee4e889e0fd1"
+      "Hash": "59351f28a81f0742720b85363c4fdd61"
     },
     "desc": {
       "Package": "desc",
