@@ -57,6 +57,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     here,
-    yaml
+    yaml, 
+    usethis
 Config/testthat/edition: 3
 VignetteBuilder: knitr

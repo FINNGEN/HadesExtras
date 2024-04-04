@@ -212,8 +212,8 @@ cohortDataToCohortDefinitionSet <- function(
         l$cohortData |>
           tibble::as_tibble() |>
           dplyr::mutate(
-            cohort_start_date = as.Date(cohort_start_date),
-            cohort_end_date = as.Date(cohort_end_date)
+            cohort_start_date = as.Date(cohort_start_date, origin = "1970-01-01"),
+            cohort_end_date = as.Date(cohort_end_date, origin = "1970-01-01")
           )
       })
     ) |>

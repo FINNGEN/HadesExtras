@@ -2,7 +2,7 @@
 title: "Using Matching Subset"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{test_subsetdefinitions}
+  %\VignetteIndexEntry{Using Matching Subset}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 

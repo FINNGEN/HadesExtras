@@ -2,7 +2,7 @@
 title: "Using TimeCodeWAS"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{test_subsetdefinitions}
+  %\VignetteIndexEntry{Using TimeCodeWAS}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
