@@ -2,7 +2,7 @@
 title: "Using CohortTableHandler"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{connection_tutorial}
+  %\VignetteIndexEntry{Using CohortTableHandler}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
