@@ -81,7 +81,8 @@
 
       
 
-      </header><script src="using_CDMHandler_files/core-js-2.5.3/shim.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react-dom.min.js"></script><script src="using_CDMHandler_files/reactwidget-1.0.0/react-tools.js"></script><script src="using_CDMHandler_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="using_CDMHandler_files/reactable-0.4.4/reactable.css" rel="stylesheet">
+      </header><script src="using_CDMHandler_files/core-js-2.5.3/shim.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react-dom.min.js"></script><script src="using_CDMHandler_files/reactwidget-1.0.0/react-tools.js"></script><link href="using_CDMHandler_files/htmltools-fill-0.5.8/fill.css" rel="stylesheet">
+<script src="using_CDMHandler_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="using_CDMHandler_files/reactable-0.4.4/reactable.css" rel="stylesheet">
 <script src="using_CDMHandler_files/reactable-binding-0.4.4/reactable.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
@@ -157,20 +158,17 @@ work with the tables.</p>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p>Or for convenience <code>createCDMdbHandlerFromList</code> can be
 used.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>CDMdb <span class="ot">&lt;-</span> <span class="fu">createCDMdbHandlerFromList</span>(config)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; Connecting using SQLite driver</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;  [1m [22mCreated a temporary table named #cars</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; Note: method with signature 'DBIConnection#Id#ANY' chosen for function 'dbWriteTable',</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt;  target signature 'DatabaseConnectorDbiConnection#Id#data.frame'.</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;  "DatabaseConnectorConnection#ANY#ANY" would also be valid</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; Inserting data took 0.0263 secs</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; Executing SQL took 0.00396 secs</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">CDMdb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCDMdbHandlerFromList.html">createCDMdbHandlerFromList</a></span><span class="op">(</span><span class="va">config</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Connecting using SQLite driver</span></span>
+<span><span class="co">#&gt; Created a temporary table named #cars</span></span>
+<span><span class="co">#&gt; Note: method with signature 'DBIConnection#Id#ANY' chosen for function 'dbWriteTable',</span></span>
+<span><span class="co">#&gt;  target signature 'DatabaseConnectorDbiConnection#Id#data.frame'.</span></span>
+<span><span class="co">#&gt;  "DatabaseConnectorConnection#ANY#ANY" would also be valid</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Inserting data took 0.0184 secs</span></span>
+<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00555 secs</span></span></code></pre></div>
 <p>First thing to do is to check the status of the connection.
 <code>CDMdb$connectionStatusLog</code> not only shows if the connection
 is correct, but also if the <code>tempEmulationSchema</code> works, and
@@ -189,8 +187,8 @@ interactive table with this information.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">connectionStatusLog</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/reactable_connectionStatus.html">reactable_connectionStatus</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-b9ef38ce65e50da7ff4d" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-b9ef38ce65e50da7ff4d">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"databaseId":["E1","E1","E1","E1"],"databaseName":["Eunomia","Eunomia","Eunomia","Eunomia"],"type":["✅","✅","✅","✅"],"step":["Check database connection","Check temp table creation","vocabularyDatabaseSchema connection","cdmDatabaseSchema connection"],"message":["Valid connection","can create temp tables","Connected to vocabulary: OMOP Standardized Vocabularies Version:  v5.0 18-JAN-19","Connected to cdm: Synthea synthetic health database Version:  v5.3.1"]},"columns":[{"id":"databaseId","name":"databaseId","type":"character"},{"id":"databaseName","name":"Database","type":"character"},{"id":"type","name":"Status","type":"character","aggregate":"frequency"},{"id":"step","name":"Check","type":"character"},{"id":"message","name":"Message","type":"character"}],"groupBy":["databaseName"],"dataKey":"f95d1e05e42eb269a6f73414ce24af10"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We can get information on the CDM and Vocabulary version:</p>
+<div class="reactable html-widget html-fill-item" id="htmlwidget-1b9903b455c6e129a9ab" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-1b9903b455c6e129a9ab">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"databaseId":["E1","E1","E1","E1"],"databaseName":["Eunomia","Eunomia","Eunomia","Eunomia"],"type":["✅","✅","✅","✅"],"step":["Check database connection","Check temp table creation","vocabularyDatabaseSchema connection","cdmDatabaseSchema connection"],"message":["Valid connection","can create temp tables","Connected to vocabulary: OMOP Standardized Vocabularies Version:  v5.0 18-JAN-19","Connected to cdm: Synthea synthetic health database Version:  v5.3.1"]},"columns":[{"id":"databaseId","name":"databaseId","type":"character"},{"id":"databaseName","name":"Database","type":"character"},{"id":"type","name":"Status","type":"character","aggregate":"frequency"},{"id":"step","name":"Check","type":"character"},{"id":"message","name":"Message","type":"character"}],"groupBy":["databaseName"],"dataKey":"f95d1e05e42eb269a6f73414ce24af10"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script><p>We can get information on the CDM and Vocabulary version:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span><span class="op">$</span><span class="va">CDMInfo</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
