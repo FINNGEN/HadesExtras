@@ -222,10 +222,11 @@ executeTimeCodeWAS <- function(
   )
 
   # Cohort data ------------------------------------------------
-  .writeToCsv(
-    data = cohortDefinitionSet,
-    fileName = file.path(exportFolder, "cohort.csv")
-  )
+  cohortDefinitionSet |>
+    dplyr::select(cohortId, cohortName, sql, json, subsetParent, isSubset, subsetDefinitionId) |>
+    .writeToCsv(
+      fileName = file.path(exportFolder, "cohort.csv")
+    )
 
   # cohort counts ------------------------------------------------
   cohortTableHandler$getCohortCounts() |>
