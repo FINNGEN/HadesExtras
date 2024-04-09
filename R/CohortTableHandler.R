@@ -32,7 +32,8 @@ CohortTableHandler <- R6::R6Class(
     # Internal cohorts data
     .cohortDefinitionSet = NULL,
     .cohortGeneratorResults = NULL,
-    .cohortDemograpics = NULL
+    .cohortDemograpics = NULL,
+    .cohortsOverlap = NULL
   ),
   active = list(
     # Read-only parameters
@@ -43,7 +44,8 @@ CohortTableHandler <- R6::R6Class(
     # Internal cohorts data
     cohortDefinitionSet = function(){return(private$.cohortDefinitionSet)},
     cohortGeneratorResults = function(){return(private$.cohortGeneratorResults)},
-    cohortDemograpics = function(){return(private$.cohortDemograpics)}
+    cohortDemograpics = function(){return(private$.cohortDemograpics)},
+    cohortsOverlap = function(){return(private$.cohortsOverlap)}
   ),
   public = list(
     #' @description
@@ -84,6 +86,7 @@ CohortTableHandler <- R6::R6Class(
 
       private$.cohortGeneratorResults <- tibble::tibble(cohortId=0, buildInfo=list(), .rows = 0)
       private$.cohortDemograpics <- tibble::tibble(cohortId=0, cohortEntries=0L, cohortSubjects=0L, .rows = 0)
+      private$.cohortsOverlap <- tibble::tibble(numberOfSubjects=0, .rows = 0)
 
       #self$loadConnection()
       # super$initialize is calling self$loadConnection(), self$loadConnection() is calling super$loadConnection()
@@ -229,10 +232,18 @@ CohortTableHandler <- R6::R6Class(
       ) |>
         dplyr::arrange(cohortId)
 
+      # update cohortsOverlap
+      cohortsOverlap <- CohortGenerator_getCohortsOverlaps(
+        connection= self$connectionHandler$getConnection(),
+        cohortDatabaseSchema = self$cohortDatabaseSchema,
+        cohortTable = self$cohortTableNames$cohortTable
+      )
+
       # if no errors save
       private$.cohortDefinitionSet <- cohortDefinitionSet
       private$.cohortGeneratorResults <- cohortGeneratorResults
       private$.cohortDemograpics <- cohortDemograpics
+      private$.cohortsOverlap  <- cohortsOverlap
 
     },
     #'
@@ -264,6 +275,9 @@ CohortTableHandler <- R6::R6Class(
 
       private$.cohortDemograpics <- private$.cohortDemograpics |>
         dplyr::filter(cohortId != cohortIds)
+
+      private$.cohortsOverlap <- private$.cohortsOverlap |>
+        dplyr::select(-dplyr::all_of(as.character(cohortIds)))
 
     },
     #'
@@ -314,7 +328,17 @@ CohortTableHandler <- R6::R6Class(
     #' @return A vector with the name of the cohorts
     getCohortIdAndNames  = function(){
       return(private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId, subsetDefinitionId))
+    },
+    #'
+    #' getCohortsOverlap
+    #' @description
+    #' Retrieves the number of subjects that are in more than one cohort.
+    #' @return A tibble containing one logical column for each cohort with name a cohort id,
+    #' and an additional column `numberOfSubjects` with the number of subjects in the cohorts combination.
+    getCohortsOverlap = function(){
+      return(private$.cohortsOverlap)
     }
+
 
   )
 )

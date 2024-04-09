@@ -459,3 +459,89 @@ CohortGenerator_getCohortDemograpics <- function(
   return(cohortDemograpics)
 
 }
+
+
+#' CohortGenerator_getCohortsOverlaps
+#'
+#' Description: A function to calculate overlaps between cohorts.
+#'
+#' @param connectionDetails A list containing details for connecting to the database. Default is NULL.
+#' @param connection A database connection object. Default is NULL.
+#' @param cohortDatabaseSchema The schema where the cohort table resides.
+#' @param cohortTable The name of the cohort table.
+#' @param cohortIds A vector of cohort ids for which to calculate overlaps. Default is an empty vector.
+#'
+#' @return A tibble containing the overlaps between cohorts.
+#' With one logical column for each cohort id and a column `numberOfSubjects` with the number of subjects in the combination.
+#'
+#' @importFrom DatabaseConnector connect disconnect querySql
+#' @importFrom checkmate assertCharacter assertString assertNumeric
+#' @importFrom SqlRender readSql render translate
+#' @importFrom stringr str_split
+#' @importFrom tidyr separate_wider_delim
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr pull
+#'
+#' @export
+CohortGenerator_getCohortsOverlaps <-function(
+    connectionDetails = NULL,
+    connection = NULL,
+    cohortDatabaseSchema,
+    cohortTable = "cohort",
+    cohortIds = c()
+  ){
+  #
+  # Validate parameters
+  #
+  if (is.null(connection) && is.null(connectionDetails)) {
+    stop("You must provide either a database connection or the connection details.")
+  }
+
+  if (is.null(connection)) {
+    connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
+
+  checkmate::assertCharacter(cohortDatabaseSchema, len = 1)
+  checkmate::assertString(cohortTable)
+  checkmate::assertNumeric(cohortIds, null.ok = TRUE )
+
+  #
+  # Function
+  sql <- SqlRender::readSql(system.file("sql/sql_server/CalculateCohortsOverlap.sql", package = "HadesExtras", mustWork = TRUE))
+  sql <- SqlRender::render(
+    sql = sql,
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTable,
+    cohort_ids = cohortIds,
+    warnOnMissingParameters = TRUE
+  )
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = connection@dbms
+  )
+
+  overlaps  <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE) |>
+    tibble::as_tibble()|>
+    dplyr::mutate(cohortIdCombinations = paste0('-', cohortIdCombinations, '-'))
+
+  cohortIds <- overlaps |> dplyr::pull(cohortIdCombinations)  |>
+    stringr::str_split("-") |> unlist() |> unique() |>
+    as.numeric() |> sort() |> as.character()
+
+  for (cohortId in cohortIds) {
+    overlaps <- overlaps |>
+      dplyr::mutate(!!cohortId := stringr::str_detect(cohortIdCombinations, paste0("-", cohortId, "-")))
+  }
+
+  overlaps <- overlaps |>
+    dplyr::select(-cohortIdCombinations)
+
+  return(overlaps)
+
+}
+
+
+
+
+
