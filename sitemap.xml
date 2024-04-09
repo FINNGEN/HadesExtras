@@ -52,6 +52,9 @@
     <loc>/reference/CohortGenerator_getCohortDemograpics.html</loc>
   </url>
   <url>
+    <loc>/reference/CohortGenerator_getCohortsOverlaps.html</loc>
+  </url>
+  <url>
     <loc>/reference/CohortTableHandler.html</loc>
   </url>
   <url>
