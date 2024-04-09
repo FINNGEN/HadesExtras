@@ -53,6 +53,7 @@ Inherits from CDMdbHandler.
 \item \href{#method-CohortTableHandler-getCohortCounts}{\code{CohortTableHandler$getCohortCounts()}}
 \item \href{#method-CohortTableHandler-getCohortsSummary}{\code{CohortTableHandler$getCohortsSummary()}}
 \item \href{#method-CohortTableHandler-getCohortIdAndNames}{\code{CohortTableHandler$getCohortIdAndNames()}}
+\item \href{#method-CohortTableHandler-getCohortsOverlap}{\code{CohortTableHandler$getCohortsOverlap()}}
 \item \href{#method-CohortTableHandler-clone}{\code{CohortTableHandler$clone()}}
 }
 }
@@ -205,6 +206,22 @@ Retrieves the cohort names.
 
 \subsection{Returns}{
 A vector with the name of the cohorts
+
+getCohortsOverlap
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getCohortsOverlap"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getCohortsOverlap}{}}}
+\subsection{Method \code{getCohortsOverlap()}}{
+Retrieves the number of subjects that are in more than one cohort.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getCohortsOverlap()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A tibble containing one logical column for each cohort with name a cohort id,
+and an additional column \code{numberOfSubjects} with the number of subjects in the cohorts combination.
 }
 }
 \if{html}{\out{<hr>}}

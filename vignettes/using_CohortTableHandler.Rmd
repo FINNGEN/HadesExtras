@@ -122,6 +122,10 @@ cohortsSummary <- cohortTableHandler$getCohortsSummary()
 rectable_cohortsSummary(cohortsSummary)
 ```
 
+Check Cohorts Overlap
+```{r}
+cohortTableHandler$getCohortsOverlap()
+```
 
 ## Add cohorts from cohortData file
 

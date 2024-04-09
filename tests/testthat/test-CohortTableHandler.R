@@ -200,6 +200,7 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(10,20))
   cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(10,20))
   cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$getCohortsOverlap() |> names()  |> expect_equal(c("numberOfSubjects", "10", "20"))
 
   cohortTableHandler$deleteCohorts(10L)
 
@@ -208,6 +209,7 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(20))
   cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(20))
   cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(20))
+  cohortTableHandler$getCohortsOverlap() |> names()  |> expect_equal(c("numberOfSubjects", "20"))
 
 })
 

@@ -391,3 +391,166 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
   cohortGeneratorResults$buildInfo[[2]]$logTibble |> nrow() |> expect_equal(0)
 
 })
+
+
+
+#
+# CohortGenerator_getCohortsOverlaps
+#
+test_that("CohortGenerator_getCohortsOverlaps works", {
+
+  # get test settings
+  connection <- helper_createNewConnection()
+  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+
+  # test params
+  cohort_data <- tibble::tibble(
+    cohort_definition_id = c(rep(10, 5), rep(20, 5)),
+    subject_id = c(1, 2, 3, 4, 5, 1, 2, 3, 9, 10),
+    cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 5),
+    cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
+  )
+
+ DatabaseConnector::insertTable(
+   connection = connection,
+   databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+   tableName = 'cohort',
+   data = cohort_data
+   )
+
+  # function
+  cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
+    connection = connection,
+    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    cohortTable = 'cohort'
+  )|> dplyr::arrange()
+
+  # expectations
+  cohortOverlaps |> checkmate::expect_tibble()
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+})
+
+
+test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
+
+  # get test settings
+  connection <- helper_createNewConnection()
+  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+
+  # test params
+  cohort_data <- tibble::tibble(
+    cohort_definition_id = c(rep(10, 5), rep(20, 5)),
+    subject_id = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+    cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 5),
+    cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
+  )
+
+  DatabaseConnector::insertTable(
+    connection = connection,
+    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    tableName = 'cohort',
+    data = cohort_data
+  )
+
+  # function
+  cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
+    connection = connection,
+    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    cohortTable = 'cohort'
+  )|> dplyr::arrange()
+
+  # expectations
+  cohortOverlaps |> checkmate::expect_tibble()
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(5)
+  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(5)
+})
+
+
+
+test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
+
+  # get test settings
+  connection <- helper_createNewConnection()
+  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+
+  # test params
+  cohort_data <- tibble::tibble(
+    cohort_definition_id = c(rep(10, 5), rep(20, 5)),
+    subject_id = c(11, 2, 3, 3, 3, 1, 2, 3, 9, 10),
+    cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 5),
+    cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
+  )
+
+  DatabaseConnector::insertTable(
+    connection = connection,
+    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    tableName = 'cohort',
+    data = cohort_data
+  )
+
+  # function
+  cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
+    connection = connection,
+    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    cohortTable = 'cohort'
+  )|> dplyr::arrange()
+
+  # expectations
+  cohortOverlaps |> checkmate::expect_tibble()
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+
+
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(1)
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
+})
+
+
+
+
+test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
+
+  # get test settings
+  connection <- helper_createNewConnection()
+  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+
+  # test params
+  cohort_data <- tibble::tibble(
+    cohort_definition_id = c(rep(10, 5), rep(20, 5), rep(30, 5)),
+    subject_id = c(1, 2, 3, 4, 5, 1, 2, 3, 14, 15, 1, 2, 3, 24, 25),
+    cohort_start_date = rep(as.Date(c("2020-01-01")), 15),
+    cohort_end_date = rep(as.Date(c("2020-01-03")), 15)
+  ) |> dplyr::sample_n(15)
+
+  DatabaseConnector::insertTable(
+    connection = connection,
+    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    tableName = 'cohort',
+    data = cohort_data
+  )
+
+  # function
+  cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
+    connection = connection,
+    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    cohortTable = 'cohort'
+  )|> dplyr::arrange()
+
+  # expectations
+  cohortOverlaps |> checkmate::expect_tibble()
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE, `30` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == TRUE, `30` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
+  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE, `30` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == FALSE, `30` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+
+
+})
+
