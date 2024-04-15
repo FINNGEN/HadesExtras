@@ -211,13 +211,16 @@ executeTimeCodeWAS <- function(
     )
 
   # cohort counts ------------------------------------------------
-  cohortTableHandler$getCohortCounts() |>
-    dplyr::mutate(
-      cohort_id = cohortId,
-      cohort_entries = cohortEntries,
-      cohort_subjects = cohortSubjects,
-      database_id = databaseId
-    ) |> .writeToCsv(
+  CohortGenerator::getCohortCounts(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTable,
+    cohortIds = c(cohortIdCases, cohortIdControls),
+    databaseId = databaseId
+  ) |>
+   #rename to camelcase
+    dplyr::rename_all(SqlRender::camelCaseToSnakeCase) |>
+    .writeToCsv(
       fileName = file.path(exportFolder, "cohort_counts.csv")
     )
 
