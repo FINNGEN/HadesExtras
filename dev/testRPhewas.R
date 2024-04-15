@@ -1,7 +1,7 @@
-library(tidyverse)
+
 renv::install('PheWAS/PheWAS')
 
-cohortTableHandler <- helper_createNewCohortTableHandler()
+hyycohortTableHandler <- helper_createNewCohortTableHandler()
 
 # cohorts from eunomia
 cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(

@@ -8,7 +8,8 @@ csvFilesToSqlite(
   dataFolder,
   sqliteDbPath = "timeCodeWAS.sqlite",
   overwrite = FALSE,
-  tablePrefix = ""
+  tablePrefix = "",
+  analysis = "timeCodeWAS"
 )
 }
 \arguments{

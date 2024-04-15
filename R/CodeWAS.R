@@ -55,8 +55,6 @@ executeCodeWAS <- function(
   analysisIds |> checkmate::assertNumeric()
   checkmate::assertSubset(analysisIds, getListOfAnalysis()$analysisId)
   covariatesIds |> checkmate::assertNumeric()
-  temporalStartDays |> checkmate::assertInt()
-  temporalEndDays |> checkmate::assertInt()
 
   covariatesNoAnalysis  <- setdiff(covariatesIds %% 1000, analysisIds)
   if (length(covariatesNoAnalysis) > 0) {

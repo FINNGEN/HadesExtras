@@ -45,6 +45,8 @@ getListOfAnalysis <- function() {
 #'
 #' @return A list of temporal covariate settings.
 #'
+#' @export
+#'
 FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
     analysisIds,
     temporalStartDays = c(-99999),
