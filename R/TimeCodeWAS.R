@@ -25,24 +25,24 @@
 
 executeTimeCodeWAS <- function(
     exportFolder,
-    cohortTableHandler,
+    cohortTableHandler = NULL,
     cohortIdCases,
     cohortIdControls,
     covariateSettings = FeatureExtraction::createDefaultTemporalCovariateSettings(),
-    minCellCount = 1
+    minCellCount = 1,
     # # TODO: add these parameters if cohortTableHandler is NULL
-    # cohortDefinitionSet = NULL,
-    # databaseId = NULL,
-    # databaseName = NULL,
-    # databaseDescription = NULL,
-    # connectionDetails = NULL,
-    # connection = NULL,
-    # cdmDatabaseSchema = NULL,
-    # vocabularyDatabaseSchema = cdmDatabaseSchema,
-    # cohortDatabaseSchema = NULL,
-    # cohortTable = "cohort",
-    # vocabularyVersionCdm = NULL,
-    # vocabularyVersion = NULL
+    cohortDefinitionSet = NULL,
+    databaseId = NULL,
+    databaseName = NULL,
+    databaseDescription = NULL,
+    connectionDetails = NULL,
+    connection = NULL,
+    cdmDatabaseSchema = NULL,
+    vocabularyDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = NULL,
+    cohortTable = "cohort",
+    vocabularyVersionCdm = NULL,
+    vocabularyVersion = NULL
 ) {
   #
   # Check parameters
@@ -54,42 +54,23 @@ executeTimeCodeWAS <- function(
   cohortIdControls |> checkmate::assertNumeric()
   covariateSettings |> checkmate::assertList()
 
+  if (is.null(cohortTableHandler) & any(is.null(c(cohortDefinitionSet, databaseId, databaseName, databaseDescription, connectionDetails, connection, cdmDatabaseSchema, cohortDatabaseSchema, vocabularyDatabaseSchema, vocabularyVersionCdm, vocabularyVersion)))) {
+    stop("You must provide either a CohortTableHandler object or the necessary parameters to create one.")
+  }
 
-  # cohortDefinitionSet |> checkmate::assertDataFrame()
-  # exportFolder |> checkmate::assertDirectoryExists()
-  # databaseId |> checkmate::assertString()
-  # databaseName |> checkmate::assertString(null.ok = TRUE)
-  # databaseDescription |> checkmate::assertString(null.ok = TRUE)
-  #
-  #
-  # if (is.null(connection) && is.null(connectionDetails)) {
-  #   stop("You must provide either a database connection or the connection details.")
-  # }
-  #
-  # if (is.null(connection)) {
-  #   connection <- DatabaseConnector::connect(connectionDetails)
-  #   on.exit(DatabaseConnector::disconnect(connection))
-  # }
-  #
-  # cdmDatabaseSchema |> checkmate::assertString()
-  # vocabularyDatabaseSchema |> checkmate::assertString()
-  # cohortDatabaseSchema |> checkmate::assertString()
-  # cohortTable |> checkmate::assertString()
-  # cohortIdCases |> checkmate::assertNumeric()
-  # cohortIdControls |> checkmate::assertNumeric()
-  # covariateSettings |> checkmate::assertList()
-
-  connection <- cohortTableHandler$connectionHandler$getConnection()
-  cohortTable <- cohortTableHandler$cohortTableNames$cohortTable
-  cdmDatabaseSchema <- cohortTableHandler$cdmDatabaseSchema
-  cohortDatabaseSchema <- cohortTableHandler$cohortDatabaseSchema
-  vocabularyDatabaseSchema <- cohortTableHandler$vocabularyDatabaseSchema
-  cohortDefinitionSet <- cohortTableHandler$cohortDefinitionSet
-  databaseId <- cohortTableHandler$databaseName
-  databaseName <- cohortTableHandler$CDMInfo$cdm_source_abbreviation
-  databaseDescription <- cohortTableHandler$CDMInfo$cdm_source_name
-  vocabularyVersionCdm <- cohortTableHandler$CDMInfo$cdm_version
-  vocabularyVersion <- cohortTableHandler$vocabularyInfo$vocabulary_version
+  if (!is.null(cohortTableHandler)) {
+    connection <- cohortTableHandler$connectionHandler$getConnection()
+    cohortTable <- cohortTableHandler$cohortTableNames$cohortTable
+    cdmDatabaseSchema <- cohortTableHandler$cdmDatabaseSchema
+    cohortDatabaseSchema <- cohortTableHandler$cohortDatabaseSchema
+    vocabularyDatabaseSchema <- cohortTableHandler$vocabularyDatabaseSchema
+    cohortDefinitionSet <- cohortTableHandler$cohortDefinitionSet
+    databaseId <- cohortTableHandler$databaseName
+    databaseName <- cohortTableHandler$CDMInfo$cdm_source_abbreviation
+    databaseDescription <- cohortTableHandler$CDMInfo$cdm_source_name
+    vocabularyVersionCdm <- cohortTableHandler$CDMInfo$cdm_version
+    vocabularyVersion <- cohortTableHandler$vocabularyInfo$vocabulary_version
+  }
 
 
   #
