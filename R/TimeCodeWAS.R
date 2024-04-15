@@ -347,7 +347,8 @@ csvFilesToSqlite  <- function(
     dataFolder,
     sqliteDbPath = "timeCodeWAS.sqlite",
     overwrite = FALSE,
-    tablePrefix = ""
+    tablePrefix = "",
+    analysis = "timeCodeWAS"
 ){
 
   if (file.exists(sqliteDbPath) & !overwrite) {
@@ -356,7 +357,14 @@ csvFilesToSqlite  <- function(
     unlink(sqliteDbPath)
   }
 
-  specPath <- system.file("settings", "resultsDataModelSpecifications_TimeCodeWAS.csv", package = utils::packageName())
+  if (analysis == "timeCodeWAS") {
+    specPath <- system.file("settings", "resultsDataModelSpecifications_TimeCodeWAS.csv", package = utils::packageName())
+  }
+
+  if (analysis == "codeWAS") {
+    specPath <- system.file("settings", "resultsDataModelSpecifications_CodeWAS.csv", package = utils::packageName())
+  }
+
   #specPath <- here::here("inst/settings/resultsDataModelSpecifications_TimeCodeWAS.csv")
   spec <- readr::read_csv(specPath, show_col_types = FALSE)
   colnames(spec) <- SqlRender::snakeCaseToCamelCase(colnames(spec))
