@@ -49,7 +49,6 @@ executeTimeCodeWAS <- function(
   #
 
   exportFolder |> checkmate::assertDirectoryExists()
-  cohortTableHandler |> checkmate::assertR6(class = "CohortTableHandler")
   cohortIdCases |> checkmate::assertNumeric()
   cohortIdControls |> checkmate::assertNumeric()
   covariateSettings |> checkmate::assertList()
@@ -59,6 +58,8 @@ executeTimeCodeWAS <- function(
   }
 
   if (!is.null(cohortTableHandler)) {
+    cohortTableHandler |> checkmate::assertR6(class = "CohortTableHandler")
+
     connection <- cohortTableHandler$connectionHandler$getConnection()
     cohortTable <- cohortTableHandler$cohortTableNames$cohortTable
     cdmDatabaseSchema <- cohortTableHandler$cdmDatabaseSchema
