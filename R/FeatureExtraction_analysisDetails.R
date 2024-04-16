@@ -69,10 +69,10 @@ FeatureExtraction_createTemporalSourceCovariateSettings <- function(
 ############################################
 
 analysisDetails_ConditionOccurrenceSourceConcept <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 103,
+  analysisId = 141,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 103,
+    analysisId = 141,
     analysisName = "ConditionOccurrenceSourceConcept",
     domainId = "Condition",
     domainTable = "condition_occurrence",
@@ -88,10 +88,10 @@ analysisDetails_ConditionOccurrenceSourceConcept <- FeatureExtraction::createAna
 )
 
 analysisDetails_DrugExposureSourceConcept <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 302,
+  analysisId = 341,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 302,
+    analysisId = 341,
     analysisName = "DrugExposureSourceConcept",
     domainId = "Drug",
     domainTable = "drug_exposure",
@@ -107,10 +107,10 @@ analysisDetails_DrugExposureSourceConcept <- FeatureExtraction::createAnalysisDe
 )
 
 analysisDetails_ProcedureOccurrenceSourceConcept <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 502,
+  analysisId = 541,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 502,
+    analysisId = 514,
     analysisName = "ProcedureOccurrenceSourceConcept",
     domainId = "Procedure",
     domainTable = "procedure_occurrence",
@@ -126,10 +126,10 @@ analysisDetails_ProcedureOccurrenceSourceConcept <- FeatureExtraction::createAna
 )
 
 analysisDetails_DeviceExposureSourceConcept <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 602,
+  analysisId = 641,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 602,
+    analysisId = 641,
     analysisName = "DeviceExposureSourceConcept",
     domainId = "Device",
     domainTable = "device_exposure",
@@ -145,10 +145,10 @@ analysisDetails_DeviceExposureSourceConcept <- FeatureExtraction::createAnalysis
 )
 
 analysisDetails_MeasurementSourceConcept <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 702,
+    analysisId = 741,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 702,
+    analysisId = 741,
     analysisName = "MeasurementSourceConcept",
     domainId = "Measurement",
     domainTable = "measurement",
@@ -164,10 +164,10 @@ analysisDetails_MeasurementSourceConcept <- FeatureExtraction::createAnalysisDet
 )
 
 analysisDetails_ObservationSourceConcept <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 802,
+  analysisId = 841,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 802,
+    analysisId = 841,
     analysisName = "ObservationSourceConcept",
     domainId = "Observation",
     domainTable = "observation",

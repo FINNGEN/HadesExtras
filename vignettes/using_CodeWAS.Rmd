@@ -173,3 +173,33 @@ DatabaseConnector::createConnectionDetails(
   DatabaseConnector::dbGetQuery("SELECT * FROM analysis_ref") 
 ```
 
+
+# CohortDiagnostics
+
+```{r}
+
+
+# export results
+tmp <- "/Users/javier/Downloads/tmp"
+
+csvFilesToSqlite(
+  dataFolder = exportFolder,
+  sqliteDbPath = file.path(tmp, "codeWAS.sqlite"),
+  overwrite = TRUE, 
+  analysis = "codeWAS"
+)
+
+analysisSettings <- list(
+  analysisType = "codeWAS",
+  cohortIdCases =  1,
+  cohortIdControls = 1,
+  analysisIds = analysisIds,
+  covariatesIds = 1002
+)
+
+yaml::write_yaml(analysisSettings, file.path(tmp, "analysisSettings.yaml"))
+
+analysisResultsZipCsvPath <- file.path(tmp, "test_codeWAS.zip")
+zip::zipr(zipfile = analysisResultsZipCsvPath, files = list.files(tmp, full.names = TRUE, recursive = TRUE))
+```
+

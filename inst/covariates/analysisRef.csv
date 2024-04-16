@@ -40,9 +40,9 @@ analysisId,analysisName,domainId,isBinary,isStandard,isSourceConcept
 501,ProcedureOccurrence,Procedure,TRUE,TRUE,FALSE
 926,Hfrs,Condition,FALSE,TRUE,FALSE
 703,MeasurementRangeGroup,Measurement,TRUE,TRUE,FALSE
-103,ConditionOccurrenceSourceConcept,Condition,TRUE,FALSE,TRUE
-302,DrugExposureSourceConcept,Drug,TRUE,FALSE,TRUE
-502,ProcedureOccurrenceSourceConcept,Procedure,TRUE,FALSE,TRUE
-602,DeviceExposureSourceConcept,Device,TRUE,FALSE,TRUE
-702,MeasurementSourceConcept,Measurement,TRUE,FALSE,TRUE
-802,ObservationSourceConcept,Observation,TRUE,FALSE,TRUE
+141,ConditionOccurrenceSourceConcept,Condition,TRUE,FALSE,TRUE
+341,DrugExposureSourceConcept,Drug,TRUE,FALSE,TRUE
+541,ProcedureOccurrenceSourceConcept,Procedure,TRUE,FALSE,TRUE
+641,DeviceExposureSourceConcept,Device,TRUE,FALSE,TRUE
+741,MeasurementSourceConcept,Measurement,TRUE,FALSE,TRUE
+841,ObservationSourceConcept,Observation,TRUE,FALSE,TRUE
