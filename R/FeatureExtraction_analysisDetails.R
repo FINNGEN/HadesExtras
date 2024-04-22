@@ -31,7 +31,7 @@ FeatureExtraction_createTemporalSourceCovariateSettings <- function(
     useObservationSourceConcept = TRUE,
     temporalStartDays = -365:-1,
     temporalEndDays =   -365:-1
-  ) {
+) {
 
   checkmate::assertLogical(useConditionOccurrenceSourceConcept)
   checkmate::assertLogical(useDrugExposureSourceConcept)
@@ -145,7 +145,7 @@ analysisDetails_DeviceExposureSourceConcept <- FeatureExtraction::createAnalysis
 )
 
 analysisDetails_MeasurementSourceConcept <- FeatureExtraction::createAnalysisDetails(
-    analysisId = 741,
+  analysisId = 741,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
     analysisId = 741,
@@ -181,4 +181,3 @@ analysisDetails_ObservationSourceConcept <- FeatureExtraction::createAnalysisDet
   addDescendantsToExclude = FALSE,
   includedCovariateIds = c()
 )
-

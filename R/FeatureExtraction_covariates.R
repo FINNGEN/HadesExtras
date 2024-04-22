@@ -63,10 +63,11 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
 
   selectedAnalysis <- analysisRef |> dplyr::filter(analysisId %in% analysisIds)
 
+  listOfCovariateSetings <- list()
+
   #
   # Standard feature extraction settings
   #
-  standardCovariatesSettings <- NULL
   if (selectedAnalysis |> dplyr::filter(isStandard == TRUE ) |> nrow() > 0) {
 
     standardCovariatesSettings <- FeatureExtraction::createTemporalCovariateSettings(
@@ -116,13 +117,14 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
 
     )
 
+    listOfCovariateSetings[[length(listOfCovariateSetings)+1]] <- standardCovariatesSettings
+
   }
 
 
   #
-  # Custom feature extraction settings
+  # detailed feature extraction settings
   #
-  customCovariateSettings <- NULL
   if (selectedAnalysis |> dplyr::filter(isStandard == FALSE ) |> nrow() > 0) {
 
     listAnalyses <- list()
@@ -145,36 +147,27 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
       listAnalyses[[length(listAnalyses)+1]] <- analysisDetails_ObservationSourceConcept
     }
 
+    if (length(listAnalyses) != 0) {
+      analysisDetailsCovatiateSettings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
+        analyses = listAnalyses,
+        temporalStartDays = temporalStartDays,
+        temporalEndDays =   temporalEndDays
+      )
 
-    customCovariateSettings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
-      analyses = listAnalyses,
-      temporalStartDays = temporalStartDays,
-      temporalEndDays =   temporalEndDays
-    )
+      listOfCovariateSetings[[length(listOfCovariateSetings)+1]] <- analysisDetailsCovatiateSettings
+    }
 
   }
-
 
   #
-  # Combine standard and custom feature extraction settings
+  # custom covariate settings
   #
 
-  if (is.null(standardCovariatesSettings) && is.null(customCovariateSettings)) {
-    stop("No analysis IDs provided.")
+  if ("YearOfBirth" %in% selectedAnalysis$analysisName) {
+    listOfCovariateSetings[[length(listOfCovariateSetings)+1]] <- covariateData_YearOfBirth()
   }
 
-  if (is.null(standardCovariatesSettings)) {
-    return(customCovariateSettings)
-  }
 
-  if (is.null(customCovariateSettings)) {
-    return(standardCovariatesSettings)
-  }
-
-  listOfCovariateSetings <- list(
-    standardCovariatesSettings,
-    customCovariateSettings
-  )
 
   return(listOfCovariateSetings)
 

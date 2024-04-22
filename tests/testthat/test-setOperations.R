@@ -112,7 +112,6 @@ testthat::test_that("test that operationStringToSQL works", {
 
   DatabaseConnector::insertTable(
     connection = connection,
-    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
     table = "testOperationsTable",
     data = testTable
   )
@@ -160,7 +159,6 @@ testthat::test_that("test that operationStringToSQL works", {
 
   DatabaseConnector::insertTable(
     connection = connection,
-    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
     table = "testOperationsTable",
     data = testTable
   )
@@ -210,7 +208,6 @@ testthat::test_that("test that operationStringToSQL works", {
 
   DatabaseConnector::insertTable(
     connection = connection,
-    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
     table = "testOperationsTable",
     data = testTable
   )
@@ -268,7 +265,6 @@ testthat::test_that("test that operationStringToSQL works", {
 
   DatabaseConnector::insertTable(
     connection = connection,
-    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
     table = "testOperationsTable",
     data = testTable
   )

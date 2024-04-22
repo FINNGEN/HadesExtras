@@ -122,7 +122,7 @@ analysis
 ```
 
 ```{r}
-analysisIds  <- c(2, 6, 10, 101, 301, 501, 102, 302, 502)
+analysisIds  <- c(101, 141, 1, 2, 402, 702, 41, 301)
 
 selectedAnalysis <- analysis  |> 
   dplyr::filter(analysisId %in% analysisIds)
@@ -145,7 +145,7 @@ executeCodeWAS(
     cohortIdCases = 1,
     cohortIdControls = 2,
     analysisIds = analysisIds,
-    covariatesIds = 1002,
+    covariatesIds = c(8507001, 1041),
     minCellCount = 1
     
 )

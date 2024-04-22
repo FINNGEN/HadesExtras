@@ -111,8 +111,8 @@ executeCodeWAS <- function(
 
   covariateSettings  <- FeatureExtraction_createTemporalCovariateSettingsFromList(
     analysisIds = analysisIds,
-    temporalStartDays = 99999,
-    temporalEndDays = -99999
+    temporalStartDays = -99999,
+    temporalEndDays = 99999
     )
 
   ParallelLogger::logInfo("Getting FeatureExtraction for cases")
@@ -135,7 +135,6 @@ executeCodeWAS <- function(
     cohortIds = cohortIdControls,
     aggregated = F
   )
-
 
   covarCase  <- covariate_case$covariates |>
     dplyr::left_join(covariate_case$covariateRef, by = "covariateId") |>

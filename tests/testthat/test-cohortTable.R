@@ -31,14 +31,13 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
 
   DatabaseConnector::insertTable(
     connection = connection,
-    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
     table = "cohort_definition",
     data = testCohortDefinitionTable
   )
 
   cohortNames <- getCohortNamesFromCohortDefinitionTable(
     connection = connection,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    cohortDatabaseSchema = "main",
     cohortDefinitionTable = "cohort_definition"
   )
 
