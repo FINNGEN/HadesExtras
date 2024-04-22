@@ -36,7 +36,7 @@ FeatureExtraction_createTemporalSourceCovariateSettings(
 Settings for temporal source covariates suitable for feature extraction.
 }
 \description{
-This function generates settings for temporal source covariates to be used in feature extraction.
+This function generates settings for temporal source covariates to be used in feature extraction, DEPRECATED use FeatureExtraction_createTemporalCovariateSettingsFromList.
 }
 \details{
 This function generates settings for temporal source covariates, which can be used in subsequent feature extraction tasks. It allows specifying which types of source concepts to include and the temporal window for extraction.

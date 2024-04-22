@@ -1,5 +1,5 @@
 
-helper_createNewConnection <- function(){
+helper_createNewConnection <- function(addCohorts = FALSE){
     connectionDetailsSettings <- testSelectedConfiguration$connection$connectionDetailsSettings
 
   if(connectionDetailsSettings$dbms == "eunomia"){
@@ -42,6 +42,10 @@ helper_createNewConnection <- function(){
 
   }else{
     options(useBigrqueryUpload = NULL)
+  }
+
+  if(addCohorts){
+    Eunomia::createCohorts(connectionDetails)
   }
 
   connection <- DatabaseConnector::connect(connectionDetails)

@@ -2,7 +2,7 @@
 
 #' Create Temporal Source Covariate Settings
 #'
-#' This function generates settings for temporal source covariates to be used in feature extraction.
+#' This function generates settings for temporal source covariates to be used in feature extraction, DEPRECATED use FeatureExtraction_createTemporalCovariateSettingsFromList.
 #'
 #' @param useConditionOccurrenceSourceConcept Logical indicating whether to include condition occurrence source concepts.
 #' @param useDrugExposureSourceConcept Logical indicating whether to include drug exposure source concepts.
@@ -31,7 +31,7 @@ FeatureExtraction_createTemporalSourceCovariateSettings <- function(
     useObservationSourceConcept = TRUE,
     temporalStartDays = -365:-1,
     temporalEndDays =   -365:-1
-  ) {
+) {
 
   checkmate::assertLogical(useConditionOccurrenceSourceConcept)
   checkmate::assertLogical(useDrugExposureSourceConcept)
@@ -45,12 +45,12 @@ FeatureExtraction_createTemporalSourceCovariateSettings <- function(
   checkmate::assertTRUE(useConditionOccurrenceSourceConcept | useDrugExposureSourceConcept | useProcedureOccurrenceSourceConcept | useMeasurementSourceConcept | useDeviceExposureSourceConcept | useObservationSourceConcept)
 
   listAnalyses <- list(
-    if(useConditionOccurrenceSourceConcept) analysisDetails_ConditionOccurrenceConceptSource,
-    if(useDrugExposureSourceConcept) analysisDetails_DrugExposureConceptSource,
-    if(useProcedureOccurrenceSourceConcept) analysisDetails_ProcedureOccurrenceConceptSource,
-    if(useMeasurementSourceConcept) analysisDetails_MeasurementConceptSource,
-    if(useDeviceExposureSourceConcept) analysisDetails_DeviceExposureConceptSource,
-    if(useObservationSourceConcept) analysisDetails_ObservationConceptSource
+    if(useConditionOccurrenceSourceConcept) analysisDetails_ConditionOccurrenceSourceConcept,
+    if(useDrugExposureSourceConcept) analysisDetails_DrugExposureSourceConcept,
+    if(useProcedureOccurrenceSourceConcept) analysisDetails_ProcedureOccurrenceSourceConcept,
+    if(useMeasurementSourceConcept) analysisDetails_MeasurementSourceConcept,
+    if(useDeviceExposureSourceConcept) analysisDetails_DeviceExposureSourceConcept,
+    if(useObservationSourceConcept) analysisDetails_ObservationSourceConcept
   )
 
   settings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
@@ -68,12 +68,12 @@ FeatureExtraction_createTemporalSourceCovariateSettings <- function(
 # Domain functions looking at source codes #
 ############################################
 
-analysisDetails_ConditionOccurrenceConceptSource <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 103,
+analysisDetails_ConditionOccurrenceSourceConcept <- FeatureExtraction::createAnalysisDetails(
+  analysisId = 141,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 103,
-    analysisName = "Condition Occurrence Concept Source",
+    analysisId = 141,
+    analysisName = "ConditionOccurrenceSourceConcept",
     domainId = "Condition",
     domainTable = "condition_occurrence",
     domainConceptId = "condition_source_concept_id",
@@ -87,12 +87,12 @@ analysisDetails_ConditionOccurrenceConceptSource <- FeatureExtraction::createAna
   includedCovariateIds = c()
 )
 
-analysisDetails_DrugExposureConceptSource <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 302,
+analysisDetails_DrugExposureSourceConcept <- FeatureExtraction::createAnalysisDetails(
+  analysisId = 341,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 302,
-    analysisName = "Drug Exposure Concept Source",
+    analysisId = 341,
+    analysisName = "DrugExposureSourceConcept",
     domainId = "Drug",
     domainTable = "drug_exposure",
     domainConceptId = "drug_source_concept_id",
@@ -106,12 +106,12 @@ analysisDetails_DrugExposureConceptSource <- FeatureExtraction::createAnalysisDe
   includedCovariateIds = c()
 )
 
-analysisDetails_ProcedureOccurrenceConceptSource <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 502,
+analysisDetails_ProcedureOccurrenceSourceConcept <- FeatureExtraction::createAnalysisDetails(
+  analysisId = 541,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 502,
-    analysisName = "Procedure Occurrence Concept Source",
+    analysisId = 514,
+    analysisName = "ProcedureOccurrenceSourceConcept",
     domainId = "Procedure",
     domainTable = "procedure_occurrence",
     domainConceptId = "procedure_source_concept_id",
@@ -125,12 +125,12 @@ analysisDetails_ProcedureOccurrenceConceptSource <- FeatureExtraction::createAna
   includedCovariateIds = c()
 )
 
-analysisDetails_DeviceExposureConceptSource <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 602,
+analysisDetails_DeviceExposureSourceConcept <- FeatureExtraction::createAnalysisDetails(
+  analysisId = 641,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 602,
-    analysisName = "Device Occurrence Concept Source",
+    analysisId = 641,
+    analysisName = "DeviceExposureSourceConcept",
     domainId = "Device",
     domainTable = "device_exposure",
     domainConceptId = "device_concept_id",
@@ -144,12 +144,12 @@ analysisDetails_DeviceExposureConceptSource <- FeatureExtraction::createAnalysis
   includedCovariateIds = c()
 )
 
-analysisDetails_MeasurementConceptSource <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 702,
+analysisDetails_MeasurementSourceConcept <- FeatureExtraction::createAnalysisDetails(
+  analysisId = 741,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 702,
-    analysisName = "Measurement Concept Source",
+    analysisId = 741,
+    analysisName = "MeasurementSourceConcept",
     domainId = "Measurement",
     domainTable = "measurement",
     domainConceptId = "measurement_concept_id",
@@ -163,12 +163,12 @@ analysisDetails_MeasurementConceptSource <- FeatureExtraction::createAnalysisDet
   includedCovariateIds = c()
 )
 
-analysisDetails_ObservationConceptSource <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 802,
+analysisDetails_ObservationSourceConcept <- FeatureExtraction::createAnalysisDetails(
+  analysisId = 841,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 802,
-    analysisName = "Observation Concept Source",
+    analysisId = 841,
+    analysisName = "ObservationSourceConcept",
     domainId = "Observation",
     domainTable = "observation",
     domainConceptId = "observation_source_concept_id",
@@ -181,69 +181,3 @@ analysisDetails_ObservationConceptSource <- FeatureExtraction::createAnalysisDet
   addDescendantsToExclude = FALSE,
   includedCovariateIds = c()
 )
-
-
-#############################################################
-# Standard functions repeated for the temporal covariates   #
-#############################################################
-
-useVisitConceptCount <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 911,
-  sqlFileName = "ConceptCounts.sql",
-  parameters = list(
-    analysisId = 911,
-    analysisName = "Visit Concept Count",
-    domainId = "Visit",
-    domainTable = "visit_occurrence",
-    domainConceptId = "visit_concept_id",
-    domain_start_date = "visit_start_date",
-    domain_end_date = "visit_end_date",
-    subType = "stratified",
-    temporal = TRUE
-  ),
-  includedCovariateConceptIds = c(),
-  addDescendantsToInclude = FALSE,
-  excludedCovariateConceptIds = c(),
-  addDescendantsToExclude = FALSE,
-  includedCovariateIds = c()
-)
-
-
-useConditionEraGroupStart <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 203,
-  sqlFileName = "DomainConcept.sql",
-  parameters = list(
-    analysisId = 203,
-    analysisName = "Condition Era Group Start",
-    domainId = "Condition",
-    domainTable = "condition_era",
-    domainConceptId = "condition_concept_id",
-    domain_start_date = "condition_era_start_date",
-    domain_end_date = "condition_era_end_date"
-  ),
-  includedCovariateConceptIds = c(),
-  addDescendantsToInclude = FALSE,
-  excludedCovariateConceptIds = c(),
-  addDescendantsToExclude = FALSE,
-  includedCovariateIds = c()
-)
-
-useDrugEraGroupStart <- FeatureExtraction::createAnalysisDetails(
-  analysisId = 403,
-  sqlFileName = "DomainConcept.sql",
-  parameters = list(
-    analysisId = 403,
-    analysisName = "Drug Era Group Start",
-    domainId = "Drug",
-    domainTable = "drug_era",
-    domainConceptId = "drug_concept_id",
-    domain_start_date = "drug_era_start_date",
-    domain_end_date = "drug_era_end_date"
-  ),
-  includedCovariateConceptIds = c(),
-  addDescendantsToInclude = FALSE,
-  excludedCovariateConceptIds = c(),
-  addDescendantsToExclude = FALSE,
-  includedCovariateIds = c()
-)
-
