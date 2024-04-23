@@ -7,7 +7,7 @@
 #'
 covariateData_YearOfBirth <- function() {
   covariateSettings <- list()
-  attr(covariateSettings, "fun") <- "YearOfBirth"
+  attr(covariateSettings, "fun") <- "HadesExtras::YearOfBirth"
   class(covariateSettings) <- "covariateSettings"
   return(covariateSettings)
 }
