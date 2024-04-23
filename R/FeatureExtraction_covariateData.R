@@ -12,6 +12,11 @@ covariateData_YearOfBirth <- function() {
   return(covariateSettings)
 }
 
+#' YearOfBirth
+#'
+#'
+#' @export
+#'
 YearOfBirth <- function(
     connection,
     oracleTempSchema = NULL,
