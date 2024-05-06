@@ -42,7 +42,7 @@ testthat::test_that("test that splitString works with parenthesis", {
 
 testthat::test_that("test that splitString errors", {
   splitString("2 3") |>
-    expect_error('Invalid tokens: aaa')
+    expect_error('Cohort Ids must be separated by an operator')
   splitString("2aaa3") |>
     expect_error('Invalid tokens: aaa')
   splitString("23sss(ddd222") |>
