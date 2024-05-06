@@ -180,6 +180,7 @@ executeCodeWAS <- function(
     tidyr::spread(covariateId, covariateValue) |>
     dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(is.na(.), FALSE, .) ))
 
+  ParallelLogger::logInfo("Prepare data for ", ncol(binaryCovar), " binary covariates")
 
   # continuous covariates
   continuousCovar <- dplyr::bind_rows(
@@ -191,6 +192,7 @@ executeCodeWAS <- function(
     dplyr::distinct() |>
     tidyr::spread(covariateId, covariateValue)
 
+  ParallelLogger::logInfo("Prepare data for ", ncol(continuousCovar), " continuous covariates")
 
  # calculate codewas using PheWAS::phewas
   covariatesWideTable <- caseControlCovar |>
@@ -203,7 +205,7 @@ executeCodeWAS <- function(
   covariates  <- as.character(covariatesIds)
   outcomes <- outcomes |> dplyr::setdiff(covariates)
 
-
+  ParallelLogger::logInfo("Running regresions for ", length(outcomes), " outcomes, ", length(predictors), " predictors and ", length(covariates), " covariates")
   phewasResults <- PheWAS::phewas(
     outcomes = outcomes,
     predictors = predictors,
