@@ -227,6 +227,11 @@ splitString <- function(string) {
   # valid operators
   operators <- c("Upd", "Ip", "Mp")
 
+  # detect if all the numbers are separated by a operator
+  if (grepl("\\d+(?:\\s+\\d+)+", string)) {
+    stop("Cohort Ids must be separated by an operator")
+  }
+
   # remove spaces
   string <- gsub(" ", "", string)
 
