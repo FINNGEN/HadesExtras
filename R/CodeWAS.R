@@ -30,7 +30,8 @@ executeCodeWAS <- function(
     cohortIdControls,
     analysisIds,
     covariatesIds,
-    minCellCount = 1
+    minCellCount = 1,
+    cores = 1
     # # TODO: add these parameters if cohortTableHandler is NULL
     # cohortDefinitionSet = NULL,
     # databaseId = NULL,
@@ -205,14 +206,17 @@ executeCodeWAS <- function(
   covariates  <- as.character(covariatesIds)
   outcomes <- outcomes |> dplyr::setdiff(covariates)
 
-  ParallelLogger::logInfo("Running regresions for ", length(outcomes), " outcomes, ", length(predictors), " predictors and ", length(covariates), " covariates")
+  ParallelLogger::logInfo("Running ", length(outcomes), " regresions for ", nrow(covariatesWideTable), " subjects, and ", length(covariates), " covariates")
+  ParallelLogger::logInfo("Using ", cores, " cores")
+
   phewasResults <- PheWAS::phewas(
     outcomes = outcomes,
     predictors = predictors,
     covariates = covariates,
     data = covariatesWideTable |> as.data.frame(),
     additive.genotypes = FALSE,
-    min.records = 0
+    min.records = 0,
+    cores = cores
   ) |>  tibble::as_tibble()
 
 
