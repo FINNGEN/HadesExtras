@@ -151,3 +151,83 @@ expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.
 })
 
 
+
+
+test_that("executeTimeCodeWAS works with big size", {
+
+  if(testSelectedConfiguration$database$databaseName != "bigquery500k"){
+    skip("Skip test, it is only for bigquery500k")
+  }
+
+  cohortTableHandler <- helper_createNewCohortTableHandler()
+  on.exit({rm(cohortTableHandler);gc()})
+
+  # cohorts from eunomia
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = here::here("inst/testdata/fracture/Cohorts.csv"),
+    jsonFolder = here::here("inst/testdata/fracture/cohorts"),
+    sqlFolder = here::here("inst/testdata/fracture/sql/sql_server"),
+    cohortFileNameFormat = "%s",
+    cohortFileNameValue = c("cohortId"),
+    subsetJsonFolder = here::here("inst/testdata/fracture/cohort_subset_definitions/"),
+    #packageName = "HadesExtras",
+    verbose = FALSE
+  )
+
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
+
+  # Match to sex and bday, match ratio 10
+  subsetDef <- CohortGenerator::createCohortSubsetDefinition(
+    name = "",
+    definitionId = 1,
+    subsetOperators = list(
+      createMatchingSubset(
+        matchToCohortId = 1,
+        matchRatio = 10,
+        matchSex = TRUE,
+        matchBirthYear = TRUE,
+        matchCohortStartDateWithInDuration = FALSE,
+        newCohortStartDate = "asMatch",
+        newCohortEndDate = "keep"
+      )
+    )
+  )
+
+  cohortDefinitionSetWithSubsetDef <- cohortDefinitionSet |>
+    CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
+
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef)
+
+
+  temporalStartDays = c(   -365*2, -365*1, 0,     1,   365+1 )
+  temporalEndDays =   c( -365*1-1,     -1, 0, 365*1,   365*2)
+
+  temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
+    useConditionOccurrence = TRUE,
+    useDrugExposure =  TRUE,
+    useProcedureOccurrence = TRUE,
+    useMeasurement = TRUE,
+    useObservation = TRUE,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays =   temporalEndDays
+  )
+
+
+  exportFolder <- file.path(tempdir(), "timeCodeWAS")
+  dir.create(exportFolder, showWarnings = FALSE)
+  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+
+  executeTimeCodeWAS(
+    exportFolder = exportFolder,
+    cohortTableHandler = cohortTableHandler,
+    cohortIdCases = 1,
+    cohortIdControls = 2001,
+    covariateSettings = temporalCovariateSettings,
+    minCellCount = 1
+  )
+
+  expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
+})
+
+
+

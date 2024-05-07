@@ -31,6 +31,7 @@ executeCodeWAS <- function(
     analysisIds,
     covariatesIds,
     minCellCount = 1,
+    chunksSizeNOutcomes = NULL,
     cores = 1
     # # TODO: add these parameters if cohortTableHandler is NULL
     # cohortDefinitionSet = NULL,
@@ -56,6 +57,12 @@ executeCodeWAS <- function(
   analysisIds |> checkmate::assertNumeric()
   checkmate::assertSubset(analysisIds, getListOfAnalysis()$analysisId)
   covariatesIds |> checkmate::assertNumeric()
+  minCellCount |> checkmate::assertNumeric()
+  if (is.null(chunksSizeNOutcomes)) {
+    chunksSizeNOutcomes <- 1000000000000
+  }
+  chunksSizeNOutcomes |> checkmate::assertNumeric()
+  cores |> checkmate::assertNumeric()
 
   covariatesNoAnalysis  <- setdiff(covariatesIds %% 1000, analysisIds)
   if (length(covariatesNoAnalysis) > 0) {
@@ -137,89 +144,109 @@ executeCodeWAS <- function(
     aggregated = F
   )
 
-  covarCase  <- covariate_case$covariates |>
-    dplyr::left_join(covariate_case$covariateRef, by = "covariateId") |>
-    dplyr::left_join(covariate_case$analysisRef, by = "analysisId")  |>
-    dplyr::transmute(
-      personId = rowId,
-      covariateId = covariateId,
-      covariateValue = covariateValue,
-      isBinary = isBinary
-    ) |> tibble::as_tibble()
-
-  covarControl  <- covariate_control$covariates |>
-    dplyr::left_join(covariate_control$covariateRef, by = "covariateId") |>
-    dplyr::left_join(covariate_control$analysisRef, by = "analysisId")  |>
-    dplyr::transmute(
-      personId = rowId,
-      covariateId = covariateId,
-      covariateValue = covariateValue,
-      isBinary = isBinary
-    ) |>
-    tibble::as_tibble() |>
-    dplyr::anti_join(covarCase, by = "personId")
-
   # case control covariates
-  caseControlCovar <- dplyr::bind_rows(
-    covarCase |>dplyr::mutate(personId=personId, covariateId="caseControl", covariateValue=TRUE) ,
-    covarControl |> dplyr::mutate(personId=personId, covariateId="caseControl", covariateValue=FALSE)
-  )  |>
-    dplyr::select(-isBinary) |>
-    dplyr::distinct() |>
+  covarCase <- covariate_case$covariates |>
+    dplyr::distinct(rowId)  |>
+    dplyr::collect() |>
+    dplyr::transmute(personId=rowId, covariateId="caseControl", covariateValue=TRUE)
+
+  covarControl <- covariate_control$covariates |>
+    dplyr::distinct(rowId) |>
+    dplyr::collect() |>
+    dplyr::transmute(personId=rowId, covariateId="caseControl", covariateValue=FALSE)
+
+  # error if no patients in cases
+  if (nrow(covarCase) == 0) {
+    stop("Cases dont have any covarite to compare")
+  }
+  # error if no patients in controls
+  if (nrow(covarControl) == 0) {
+    stop("Controls dont have any covarite to compare")
+  }
+
+  # warning if patient ids overlap
+  nOverlap <- length(intersect(covarCase$personId, covarControl$personId))
+  if (nOverlap > 0) {
+    warning("There are ", nOverlap, " patients that are in both cases and controls, cases were removed from controls.")
+    covarControl <- covarControl |> dplyr::filter(!personId %in% covarCase$personId)
+  }
+
+  caseControlCovariateWide <- dplyr::bind_rows(covarCase,covarControl)  |>
     tidyr::spread(covariateId, covariateValue)
 
 
-  # binary covariates
-  binaryCovar <- dplyr::bind_rows(
-    covarCase ,
-    covarControl
-  )  |>
-    dplyr::filter(isBinary=='Y') |>
-    dplyr::select(personId, covariateId, covariateValue) |>
-    dplyr::distinct() |>
-    dplyr::mutate(covariateValue = ifelse(covariateValue == 1, TRUE, FALSE)) |>
-    tidyr::spread(covariateId, covariateValue) |>
-    dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(is.na(.), FALSE, .) ))
+  #
+  # break analysis into chunks of covariates
+  #
+  allCovariates <- dplyr::bind_rows(
+    covariate_case$covariates |>
+      dplyr::left_join(covariate_case$covariateRef, by = "covariateId") |>
+      dplyr::left_join(covariate_case$analysisRef, by = "analysisId")  |>
+      dplyr::distinct(covariateId, isBinary) |>
+      dplyr::collect(),
+    covariate_control$covariates |>
+      dplyr::left_join(covariate_control$covariateRef, by = "covariateId") |>
+      dplyr::left_join(covariate_control$analysisRef, by = "analysisId")  |>
+      dplyr::distinct(covariateId, isBinary) |>
+      dplyr::collect()
+  ) |> dplyr::distinct()
 
-  ParallelLogger::logInfo("Prepare data for ", ncol(binaryCovar), " binary covariates")
+  phewasResults  <- NULL
 
-  # continuous covariates
-  continuousCovar <- dplyr::bind_rows(
-    covarCase ,
-    covarControl
-  )  |>
-    dplyr::filter(isBinary!='Y') |>
-    dplyr::select(personId, covariateId, covariateValue) |>
-    dplyr::distinct() |>
-    tidyr::spread(covariateId, covariateValue)
+  ParallelLogger::logInfo("Running ", nrow(allCovariates), " covariates in ", length(seq(1, nrow(allCovariates), chunksSizeNOutcomes)), " chunks of ", chunksSizeNOutcomes, " covariates")
+  for (i in seq(1, nrow(allCovariates), chunksSizeNOutcomes)) {
+    ParallelLogger::logInfo("Running chunk ", i, " to ", min(i + chunksSizeNOutcomes - 1, nrow(allCovariates)) )
+    covariateIdsChunk <- allCovariates  |> dplyr::slice(i:min(i + chunksSizeNOutcomes - 1, nrow(allCovariates)))  |> dplyr::pull(covariateId)
+    # add controling covariates
+    covariateIdsChunk <- union(covariateIdsChunk, covariatesIds)
 
-  ParallelLogger::logInfo("Prepare data for ", ncol(continuousCovar), " continuous covariates")
+    BinaryCovariateNames <- covariateIdsChunk |> intersect(allCovariates$covariateId[allCovariates$isBinary=='Y']) |> as.character()
 
- # calculate codewas using PheWAS::phewas
-  covariatesWideTable <- caseControlCovar |>
-    dplyr::left_join(binaryCovar, by = "personId") |>
-    dplyr::left_join(continuousCovar, by = "personId")
+    ParallelLogger::logInfo("Prepare data for ", length(covariateIdsChunk), " covariates")
 
+    # covariates
+    covariatesWideTable <- dplyr::bind_rows(
+      covariate_case$covariates |>
+        dplyr::filter(covariateId %in% covariateIdsChunk) |>
+        dplyr::distinct(rowId, covariateId, covariateValue) |>
+        dplyr::collect(),
+      covariate_control$covariates |>
+        dplyr::filter(covariateId %in% covariateIdsChunk) |>
+        dplyr::distinct(rowId, covariateId, covariateValue) |>
+        dplyr::collect() |>
+          dplyr::anti_join(covarCase, by = c("rowId" = "personId"))
+    )  |>
+      dplyr::distinct() |>
+      tidyr::spread(covariateId, covariateValue)
 
-  outcomes  <- covariatesWideTable  |> select(3:ncol(covariatesWideTable))  |> colnames()
-  predictors <- covariatesWideTable  |> select(2)  |> colnames()
-  covariates  <- as.character(covariatesIds)
-  outcomes <- outcomes |> dplyr::setdiff(covariates)
+    covariatesWideTable <- caseControlCovariateWide |>
+      dplyr::left_join(covariatesWideTable, by = c("personId"="rowId")) |>
+      dplyr::mutate(dplyr::across(BinaryCovariateNames, ~dplyr::if_else(is.na(.), FALSE, TRUE) ))
 
-  ParallelLogger::logInfo("Running ", length(outcomes), " regresions for ", nrow(covariatesWideTable), " subjects, and ", length(covariates), " covariates")
-  ParallelLogger::logInfo("Using ", cores, " cores")
+    # calculate phewas using PheWAS::phewas
+    outcomes  <- covariatesWideTable  |> select(3:ncol(covariatesWideTable))  |> colnames()
+    predictors <- covariatesWideTable  |> select(2)  |> colnames()
+    covariates  <- as.character(covariatesIds)
+    outcomes <- outcomes |> dplyr::setdiff(covariates)
 
-  phewasResults <- PheWAS::phewas(
-    outcomes = outcomes,
-    predictors = predictors,
-    covariates = covariates,
-    data = covariatesWideTable |> as.data.frame(),
-    additive.genotypes = FALSE,
-    min.records = 0,
-    cores = cores
-  ) |>  tibble::as_tibble()
+    ParallelLogger::logInfo("Running ", length(outcomes), " regresions for ", nrow(covariatesWideTable), " subjects, and ", length(covariates), " covariates")
+    ParallelLogger::logInfo("Using ", cores, " cores")
 
+    res <- PheWAS::phewas(
+      outcomes = outcomes,
+      predictors = predictors,
+      covariates = NA,
+      data = covariatesWideTable |> as.data.frame(),
+      additive.genotypes = FALSE,
+      min.records = 0,
+      cores = 1,
+      unadjusted = TRUE,
+      adjustments = NA
+    ) |>  tibble::as_tibble()
 
+    phewasResults <- dplyr::bind_rows(phewasResults, res)
+
+  }
 
 
   #
@@ -293,27 +320,6 @@ executeCodeWAS <- function(
     .writeToCsv(
       fileName = file.path(exportFolder, "covariate_ref.csv")
     )
-
-
-  # tmp tables ------------------------------------------------
-  covariatesWideTable |>
-    dplyr::transmute(idd = personId, snp = dplyr::if_else(caseControl, 2L, 0L)) |>
-    dplyr::distinct() |>
-    .writeToCsv(
-      fileName = file.path(exportFolder, "tmp_id_snp.csv")
-    )
-
-  dplyr::bind_rows(
-    covarCase ,
-    covarControl
-  ) |>
-    dplyr::select(idd = personId, code = covariateId) |>
-    dplyr::distinct() |>
-    .writeToCsv(
-      fileName = file.path(exportFolder, "tmp_id_code.csv")
-    )
-
-
 
   ParallelLogger::logInfo("Results exported")
   return(TRUE)
