@@ -235,13 +235,11 @@ executeCodeWAS <- function(
     res <- PheWAS::phewas(
       outcomes = outcomes,
       predictors = predictors,
-      covariates = NA,
+      covariates = covariates,
       data = covariatesWideTable |> as.data.frame(),
       additive.genotypes = FALSE,
       min.records = 0,
-      cores = 1,
-      unadjusted = TRUE,
-      adjustments = NA
+      cores = cores
     ) |>  tibble::as_tibble()
 
     phewasResults <- dplyr::bind_rows(phewasResults, res)
