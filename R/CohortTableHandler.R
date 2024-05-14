@@ -277,16 +277,7 @@ CohortTableHandler <- R6::R6Class(
         dplyr::filter(cohortId != cohortIds)
 
       private$.cohortsOverlap <- private$.cohortsOverlap |>
-        dplyr::mutate(
-          cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~{
-            a <- stringr::str_split(.x, '-')[[1]]   |>
-              setdiff(c('', as.character(cohortIds)))  |>
-              paste0(collapse = '-')
-            a  <- paste0('-', a, '-')
-          }),
-        ) |>
-        dplyr::group_by(cohortIdCombinations) |>
-        dplyr::summarize(numberOfSubjects = sum(numberOfSubjects), .groups = "drop")
+        removeCohortIdsFromCohortOverlapsTable(cohortIds)
 
     },
     #'

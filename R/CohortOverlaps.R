@@ -1,5 +1,5 @@
 
-#' CohortDiagnostics_runCohortOverlaps
+#' executeCohortOverlaps
 #'
 #' This function calculates the number of subjects with observation case and controls in each time window for a given cohort. It returns a data frame with the counts of cases and controls for each time window and covariate, as well as the results of a Fisher's exact test comparing the counts of cases and controls.
 #'
@@ -96,11 +96,11 @@ executeCohortOverlaps <- function(
   #
   # function
   #
-  columnNames <- c("numberOfSubjects", as.integer(cohortIds))
+  cohortIdsToRemove <- cohortTableHandler$getCohortCounts()$cohortId |> setdiff(cohortIds)
 
   cohortOverlaps <- cohortTableHandler$getCohortsOverlap() |>
-    dplyr::select(dplyr::all_of(columnNames)) |>
-    dplyr::filter(numberOfSubjects > minCellCount)
+    removeCohortIdsFromCohortOverlapsTable(cohortIdsToRemove)  |>
+    dplyr::filter(numberOfSubjects >= minCellCount)
 
   #
   # Export
@@ -146,5 +146,53 @@ executeCohortOverlaps <- function(
   ParallelLogger::logInfo("Results exported")
   return(TRUE)
 
+}
+
+
+
+
+
+#' Remove specified cohort IDs from cohort overlaps table
+#'
+#' This function removes specified cohort IDs from a cohort overlaps table.
+#'
+#' @param cohortOverlaps A data frame containing cohort overlaps.
+#' @param cohortIds A numeric vector of cohort IDs to be removed.
+#' @return A data frame with cohort overlaps after removing specified IDs.
+#' @export
+#' @importFrom dplyr mutate group_by summarize filter
+#' @importFrom checkmate assertDataFrame assertSubset assertNumeric
+#' @importFrom purrr map_chr
+#' @importFrom stringr str_split str_detect
+#' @examples
+#' cohortOverlaps <- data.frame(cohortIdCombinations = c("-1-2-", "-2-3-", "-3-4-"),
+#'                             numberOfSubjects = c(10, 15, 20))
+#' cohortIds <- c(2, 3)
+#' removeCohortIdsFromCohortOverlapsTable(cohortOverlaps, cohortIds)
+#' @export
+removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
+
+  if (length(cohortIds) == 0) {
+    return(cohortOverlaps)
+  }
+
+  cohortOverlaps |> checkmate::assertDataFrame()
+  cohortOverlaps  |> names()  |> checkmate::assertSubset(c('cohortIdCombinations', 'numberOfSubjects'))
+  cohortIds |> checkmate::assertNumeric()
+
+  cohortOverlaps <- cohortOverlaps |>
+    dplyr::mutate(
+      cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~{
+        a <- stringr::str_split(.x, '-')[[1]]   |>
+          setdiff(c('', as.character(cohortIds)))  |>
+          paste0(collapse = '-')
+        a  <- paste0('-', a, '-')
+      }),
+    ) |>
+    dplyr::filter(!stringr::str_detect(cohortIdCombinations, '--')) |>
+    dplyr::group_by(cohortIdCombinations) |>
+    dplyr::summarize(numberOfSubjects = sum(numberOfSubjects), .groups = "drop")
+
+  return(cohortOverlaps)
 }
 

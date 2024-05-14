@@ -25,7 +25,7 @@ CohortGenerator_getCohortsOverlaps(
 }
 \value{
 A tibble containing the overlaps between cohorts.
-With one logical column for each cohort id and a column \code{numberOfSubjects} with the number of subjects in the combination.
+Column \code{cohortIdCombinations} indicates the cohort ids separated by - in the combination \code{numberOfSubjects} with the number of subjects in the combination.
 }
 \description{
 Description: A function to calculate overlaps between cohorts.

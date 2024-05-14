@@ -92,7 +92,7 @@ Additionally, `HadesExtras` includes a way to produce `cohortDefinitionSet` base
 ## Add cohorts from Atlas
 
 Get `cohortDefinitionSet` form 3 cohort definitions in Atlas demo. 
-```{r}
+```{r, eval=FALSE}
 # webAPI url for the Atlas demo
 baseUrl <- "https://api.ohdsi.org/WebAPI"
 # A list of cohort IDs for use in this vignette
@@ -103,6 +103,19 @@ cohortDefinitionSet <- ROhdsiWebApi::exportCohortDefinitionSet(
   cohortIds = cohortIds
 )
 ```
+
+```{r}
+cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = here::here("inst/testdata/atlasCohortsSaved/Cohorts.csv"),
+    jsonFolder = here::here("inst/testdata/atlasCohortsSaved/cohorts"),
+    sqlFolder = here::here("inst/testdata/atlasCohortsSaved/sql/sql_server"),
+    cohortFileNameFormat = "%s",
+    cohortFileNameValue = c("cohortId"),
+    #packageName = "HadesExtras",
+    verbose = FALSE
+  )
+```
+
 
 Build cohorts 
 ```{r}

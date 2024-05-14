@@ -13,7 +13,8 @@ YearOfBirth(
   cohortIds = c(-1),
   rowIdField = "subject_id",
   covariateSettings,
-  aggregated = FALSE
+  aggregated = FALSE,
+  minCharacterizationMean = 0
 )
 }
 \description{
