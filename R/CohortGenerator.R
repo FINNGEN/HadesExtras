@@ -472,7 +472,7 @@ CohortGenerator_getCohortDemograpics <- function(
 #' @param cohortIds A vector of cohort ids for which to calculate overlaps. Default is an empty vector.
 #'
 #' @return A tibble containing the overlaps between cohorts.
-#' With one logical column for each cohort id and a column `numberOfSubjects` with the number of subjects in the combination.
+#' Column `cohortIdCombinations` indicates the cohort ids separated by - in the combination `numberOfSubjects` with the number of subjects in the combination.
 #'
 #' @importFrom DatabaseConnector connect disconnect querySql
 #' @importFrom checkmate assertCharacter assertString assertNumeric
@@ -524,18 +524,6 @@ CohortGenerator_getCohortsOverlaps <-function(
   overlaps  <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE) |>
     tibble::as_tibble()|>
     dplyr::mutate(cohortIdCombinations = paste0('-', cohortIdCombinations, '-'))
-
-  cohortIds <- overlaps |> dplyr::pull(cohortIdCombinations)  |>
-    stringr::str_split("-") |> unlist() |> unique() |>
-    as.numeric() |> sort() |> as.character()
-
-  for (cohortId in cohortIds) {
-    overlaps <- overlaps |>
-      dplyr::mutate(!!cohortId := stringr::str_detect(cohortIdCombinations, paste0("-", cohortId, "-")))
-  }
-
-  overlaps <- overlaps |>
-    dplyr::select(-cohortIdCombinations)
 
   return(overlaps)
 

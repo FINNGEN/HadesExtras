@@ -411,12 +411,12 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
     cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
   )
 
- DatabaseConnector::insertTable(
-   connection = connection,
-   databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-   tableName = 'cohort',
-   data = cohort_data
-   )
+  DatabaseConnector::insertTable(
+    connection = connection,
+    databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    tableName = 'cohort',
+    data = cohort_data
+  )
 
   # function
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
@@ -427,11 +427,22 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |> nrow() |> expect_equal(3)
 
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
-  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '10') &
+    stringr::str_detect(cohortIdCombinations, '20')
+  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
+  cohortOverlaps |> dplyr::filter(
+    !stringr::str_detect(cohortIdCombinations, '10') &
+    stringr::str_detect(cohortIdCombinations, '20')
+  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(2)
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '10') &
+    !stringr::str_detect(cohortIdCombinations, '20')
+  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(2)
+
 })
 
 
@@ -465,10 +476,19 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |> nrow() |> expect_equal(2)
 
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(5)
-  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(5)
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '-10-') &
+    !stringr::str_detect(cohortIdCombinations, '-20-')
+  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(5)
+  cohortOverlaps |> dplyr::filter(
+    !stringr::str_detect(cohortIdCombinations, '-10-') &
+    stringr::str_detect(cohortIdCombinations, '-20-')
+  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(5)
+
+
 })
 
 
@@ -503,12 +523,22 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |> nrow() |> expect_equal(3)
 
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '-10-') &
+    stringr::str_detect(cohortIdCombinations, '-20-')
+  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(
+    !stringr::str_detect(cohortIdCombinations, '-10-') &
+    stringr::str_detect(cohortIdCombinations, '-20-')
+  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(3)
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '-10-') &
+    !stringr::str_detect(cohortIdCombinations, '-20-')
+  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(1)
 
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(1)
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
-  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
 })
 
 
@@ -544,13 +574,32 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("10", "20", "numberOfSubjects"))
+  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |> nrow() |> expect_equal(4)
 
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == FALSE, `30` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
-  cohortOverlaps |> dplyr::filter(`10` == TRUE, `20` == TRUE, `30` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
-  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == TRUE, `30` == FALSE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
-  cohortOverlaps |> dplyr::filter(`10` == FALSE, `20` == FALSE, `30` == TRUE) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '-10-') &
+    !stringr::str_detect(cohortIdCombinations, '-20-')&
+    !stringr::str_detect(cohortIdCombinations, '-30-')
+  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
 
+  cohortOverlaps |> dplyr::filter(
+    stringr::str_detect(cohortIdCombinations, '-10-') &
+    stringr::str_detect(cohortIdCombinations, '-20-')&
+    stringr::str_detect(cohortIdCombinations, '-30-')
+  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
+
+  cohortOverlaps |> dplyr::filter(
+    !stringr::str_detect(cohortIdCombinations, '-10-') &
+    stringr::str_detect(cohortIdCombinations, '-20-')&
+    !stringr::str_detect(cohortIdCombinations, '-30-')
+  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+
+  cohortOverlaps |> dplyr::filter(
+    !stringr::str_detect(cohortIdCombinations, '-10-') &
+    !stringr::str_detect(cohortIdCombinations, '-20-')&
+    stringr::str_detect(cohortIdCombinations, '-30-')
+  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
 
 })
 
