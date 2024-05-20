@@ -354,6 +354,10 @@ csvFilesToSqlite  <- function(
     specPath <- system.file("settings", "resultsDataModelSpecifications_CohortOverlaps.csv", package = utils::packageName())
   }
 
+  if (analysis == "cohortDemographics") {
+    specPath <- system.file("settings", "resultsDataModelSpecifications_CohortDemographics.csv", package = utils::packageName())
+  }
+
   #specPath <- here::here("inst/settings/resultsDataModelSpecifications_TimeCodeWAS.csv")
   spec <- readr::read_csv(specPath, show_col_types = FALSE)
   colnames(spec) <- SqlRender::snakeCaseToCamelCase(colnames(spec))
