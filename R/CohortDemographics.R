@@ -103,9 +103,9 @@ executeCohortDemographicsCounts <- function(
   #
   demographicsCounts  <- getCohortDemographicsCounts(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTable,
     cohortIds = cohortIds,
     referenceYears = referenceYears
   )
