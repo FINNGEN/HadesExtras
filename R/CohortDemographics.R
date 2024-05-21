@@ -1,5 +1,5 @@
 
-#' executeCohortOverlaps
+#' executedemographicsCounts
 #'
 #' This function calculates the number of subjects with observation case and controls in each time window for a given cohort. It returns a data frame with the counts of cases and controls for each time window and covariate, as well as the results of a Fisher's exact test comparing the counts of cases and controls.
 #'
@@ -23,10 +23,11 @@
 #' @export
 #'
 
-executeCohortOverlaps <- function(
+executeCohortDemographicsCounts <- function(
     exportFolder,
     cohortTableHandler = NULL,
     cohortIds,
+    groupBy = c("calendarYear", "ageGroup", "gender"),
     minCellCount = 0
     # # TODO: add these parameters if cohortTableHandler is NULL
     # cohortDefinitionSet = NULL,
@@ -45,10 +46,13 @@ executeCohortOverlaps <- function(
   #
   # Check parameters
   #
+  groups <- c("calendarYear", "ageGroup", "gender")
 
   exportFolder |> checkmate::assertDirectoryExists()
   cohortIds |> checkmate::assertNumeric()
   minCellCount |> checkmate::assertNumeric()
+  groupBy |> checkmate::assertCharacter()
+  groupBy |> checkmate::assertSubset(groups)
 
   cohortTableHandler |> checkmate::assertR6(class = "CohortTableHandler")
 
@@ -96,11 +100,46 @@ executeCohortOverlaps <- function(
   #
   # function
   #
-  cohortIdsToRemove <- cohortTableHandler$getCohortCounts()$cohortId |> setdiff(cohortIds)
+  demographicsCounts  <- getCohortDemographicsCounts(
+    connection = connection,
+    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
+    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
+    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName,
+    cohortIds = cohortIds
+  )
 
-  cohortOverlaps <- cohortTableHandler$getCohortsOverlap() |>
-    removeCohortIdsFromCohortOverlapsTable(cohortIdsToRemove)  |>
-    dplyr::filter(numberOfSubjects >= minCellCount)
+  if (length(groupBy) < length(groups)) {
+    demographicsCounts <- demographicsCounts |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(c("cohortId", groupBy)))) |>
+      dplyr::summarize(count = sum(count)) |>
+      dplyr::ungroup()
+
+    demographicsCounts <- demographicsCounts |>
+      dplyr::bind_cols(
+       tibble::tibble(
+         calendarYear = NA_real_,
+         ageGroup = NA_character_,
+         gender = NA_character_
+       ) |>
+         dplyr::select(dplyr::all_of(setdiff(groups, groupBy)))
+      )
+  }
+
+  if (minCellCount > 0) {
+    demographicsCounts <- demographicsCounts |>
+      dplyr::filter(count >= minCellCount)
+  }
+
+  demographicsCounts  <-  demographicsCounts  |>
+    dplyr::ungroup() |>
+    dplyr::transmute(
+      database_id = databaseId,
+      cohort_id = cohortId,
+      calendar_year = calendarYear,
+      age_group = ageGroup,
+      gender = gender,
+      count = count
+    )
 
   #
   # Export
@@ -127,19 +166,19 @@ executeCohortOverlaps <- function(
 
   # cohort counts ------------------------------------------------
   cohortTableHandler$getCohortCounts() |>
-    dplyr::mutate(
+    dplyr::transmute(
       cohort_id = cohortId,
       cohort_entries = cohortEntries,
       cohort_subjects = cohortSubjects,
       database_id = databaseId
     ) |> .writeToCsv(
-      fileName = file.path(exportFolder, "cohort_counts.csv")
+      fileName = file.path(exportFolder, "cohort_count.csv")
     )
 
-  # CohortOverlapsCounts ------------------------------------------------
-  cohortOverlaps |>
+  # demographicsCountsCounts ------------------------------------------------
+  demographicsCounts |>
     .writeToCsv(
-        fileName = file.path(exportFolder, "CohortOverlaps_results.csv")
+        fileName = file.path(exportFolder, "demographics_counts.csv")
     )
 
 
@@ -149,50 +188,94 @@ executeCohortOverlaps <- function(
 }
 
 
-
-
-
-#' Remove specified cohort IDs from cohort overlaps table
-#'
-#' This function removes specified cohort IDs from a cohort overlaps table.
-#'
-#' @param cohortOverlaps A data frame containing cohort overlaps.
-#' @param cohortIds A numeric vector of cohort IDs to be removed.
-#' @return A data frame with cohort overlaps after removing specified IDs.
-#' @export
-#' @importFrom dplyr mutate group_by summarize filter
-#' @importFrom checkmate assertDataFrame assertSubset assertNumeric
-#' @importFrom purrr map_chr
-#' @importFrom stringr str_split str_detect
-#' @examples
-#' cohortOverlaps <- data.frame(cohortIdCombinations = c("-1-2-", "-2-3-", "-3-4-"),
-#'                             numberOfSubjects = c(10, 15, 20))
-#' cohortIds <- c(2, 3)
-#' removeCohortIdsFromCohortOverlapsTable(cohortOverlaps, cohortIds)
-#' @export
-removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
-
-  if (length(cohortIds) == 0) {
-    return(cohortOverlaps)
+getCohortDemographicsCounts <- function(
+    connectionDetails = NULL,
+    connection = NULL,
+    cdmDatabaseSchema,
+    vocabularyDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema,
+    cohortTable = "cohort",
+    cohortIds = c()
+) {
+  #
+  # Validate parameters
+  #
+  if (is.null(connection) && is.null(connectionDetails)) {
+    stop("You must provide either a database connection or the connection details.")
   }
 
-  cohortOverlaps |> checkmate::assertDataFrame()
-  cohortOverlaps  |> names()  |> checkmate::assertSubset(c('cohortIdCombinations', 'numberOfSubjects'))
-  cohortIds |> checkmate::assertNumeric()
+  if (is.null(connection)) {
+    connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
 
-  cohortOverlaps <- cohortOverlaps |>
+  checkmate::assertCharacter(cohortDatabaseSchema, len = 1)
+  checkmate::assertString(cohortTable)
+  checkmate::assertNumeric(cohortIds, null.ok = TRUE )
+
+
+  #
+  # Function
+  sql <- SqlRender::readSql(system.file("sql/sql_server/CalculateCohortDemographics.sql", package = "HadesExtras", mustWork = TRUE))
+  sql <- SqlRender::render(
+    sql = sql,
+    cdm_database_schema = cdmDatabaseSchema,
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTable,
+    cohort_ids = cohortIds,
+    warnOnMissingParameters = TRUE
+  )
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = connection@dbms
+  )
+
+  demographicsCounts  <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE)
+
+
+  demographicsCounts  <- demographicsCounts |>
+    tibble::as_tibble() |>
     dplyr::mutate(
-      cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~{
-        a <- stringr::str_split(.x, '-')[[1]]   |>
-          setdiff(c('', as.character(cohortIds)))  |>
-          paste0(collapse = '-')
-        a  <- paste0('-', a, '-')
-      }),
+      ageGroup = case_when(
+        ageGroup <= 0 ~ "0-9",
+        ageGroup <= 1 ~ "10-19",
+        ageGroup <= 2 ~ "20-29",
+        ageGroup <= 3 ~ "30-39",
+        ageGroup <= 4 ~ "40-49",
+        ageGroup <= 5 ~ "50-59",
+        ageGroup <= 6 ~ "60-69",
+        ageGroup <= 7 ~ "70-79",
+        ageGroup <= 8 ~ "80-89",
+        ageGroup <= 9 ~ "90-99",
+        TRUE ~ "100+"
+      ),
+      gender = case_when(
+        genderConceptId == 8507 ~ "Male",
+        genderConceptId == 8532 ~ "Female",
+        TRUE ~ "Unknown"
+      )
     ) |>
-    dplyr::filter(!stringr::str_detect(cohortIdCombinations, '--')) |>
-    dplyr::group_by(cohortIdCombinations) |>
-    dplyr::summarize(numberOfSubjects = sum(numberOfSubjects), .groups = "drop")
+    dplyr::select(-genderConceptId) |>
+    dplyr::group_by(cohortId, calendarYear, ageGroup, gender) |>
+    dplyr::summarize( count = sum(cohortCount) )
 
-  return(cohortOverlaps)
+
+  return(demographicsCounts)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
