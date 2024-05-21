@@ -3,8 +3,8 @@
 
 SELECT
   cohort_definition_id AS cohort_id,
-  YEAR(cohort_start_date) AS calendar_year,
-	FLOOR((YEAR(cohort_start_date) - year_of_birth) / 10) AS age_group,
+  YEAR(@reference_year) AS calendar_year,
+	FLOOR((YEAR(@reference_year) - year_of_birth) / 10) AS age_group,
 	gender_concept_id,
 	COUNT(*) AS cohort_count
 FROM (
@@ -16,8 +16,8 @@ INNER JOIN @cdm_database_schema.person
 	ON subject_id = person.person_id
 GROUP BY
   cohort_definition_id,
-  YEAR(cohort_start_date),
-	FLOOR((YEAR(cohort_start_date) - year_of_birth) / 10),
+  YEAR(@reference_year),
+	FLOOR((YEAR(@reference_year) - year_of_birth) / 10),
 	gender_concept_id;
 
 

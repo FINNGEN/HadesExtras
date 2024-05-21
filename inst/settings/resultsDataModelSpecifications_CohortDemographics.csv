@@ -19,6 +19,7 @@ database,vocabulary_version,varchar,No,No,Yes,Yes,No,No,No
 database,vocabulary_version_cdm,varchar,No,No,Yes,Yes,No,No,No
 demographics_counts,database_id,varchar,Yes,Yes,No,Yes,No,No,No
 demographics_counts,cohort_id,bigint,Yes,Yes,No,Yes,No,No,No
+demographics_counts,reference_year,varchar,Yes,Yes,No,Yes,No,No,No
 demographics_counts,calendar_year,int,No,Yes,Yes,Yes,No,No,No
 demographics_counts,age_group,varchar,No,Yes,Yes,Yes,No,No,No
 demographics_counts,gender,varchar,No,Yes,Yes,Yes,No,No,No

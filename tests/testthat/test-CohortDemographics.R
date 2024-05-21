@@ -27,7 +27,8 @@ test_that("executeCohortOverlaps works", {
   executeCohortDemographicsCounts(
     exportFolder = exportFolder,
     cohortTableHandler = cohortTableHandler,
-    cohortIds = c(1,2)
+    cohortIds = c(1,2),
+    referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth")
   )
 
   expect_true(file.exists(file.path(exportFolder, "demographics_counts.csv")))
@@ -94,7 +95,7 @@ test_that("getCohortDemographics works", {
   # 10 F born in 1971
   # 10 F born in 1972
 
-  demographics  <- getCohortDemographics(
+  demographics  <- getCohortDemographicsCounts(
     connection = connection,
     cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,

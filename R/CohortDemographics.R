@@ -27,6 +27,7 @@ executeCohortDemographicsCounts <- function(
     exportFolder,
     cohortTableHandler = NULL,
     cohortIds,
+    referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth"),
     groupBy = c("calendarYear", "ageGroup", "gender"),
     minCellCount = 0
     # # TODO: add these parameters if cohortTableHandler is NULL
@@ -105,8 +106,10 @@ executeCohortDemographicsCounts <- function(
     cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
     cohortTable = testSelectedConfiguration$cohortTable$cohortTableName,
-    cohortIds = cohortIds
+    cohortIds = cohortIds,
+    referenceYears = referenceYears
   )
+
 
   if (length(groupBy) < length(groups)) {
     demographicsCounts <- demographicsCounts |>
@@ -135,6 +138,7 @@ executeCohortDemographicsCounts <- function(
     dplyr::transmute(
       database_id = databaseId,
       cohort_id = cohortId,
+      reference_year = referenceYear,
       calendar_year = calendarYear,
       age_group = ageGroup,
       gender = gender,
@@ -195,11 +199,14 @@ getCohortDemographicsCounts <- function(
     vocabularyDatabaseSchema = cdmDatabaseSchema,
     cohortDatabaseSchema,
     cohortTable = "cohort",
-    cohortIds = c()
+    cohortIds = c(),
+    referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth")
 ) {
   #
   # Validate parameters
   #
+  validReferenceYears <- c("cohort_start_date", "cohort_end_date", "year_of_birth")
+
   if (is.null(connection) && is.null(connectionDetails)) {
     stop("You must provide either a database connection or the connection details.")
   }
@@ -212,26 +219,36 @@ getCohortDemographicsCounts <- function(
   checkmate::assertCharacter(cohortDatabaseSchema, len = 1)
   checkmate::assertString(cohortTable)
   checkmate::assertNumeric(cohortIds, null.ok = TRUE )
+  referenceYears |> checkmate::assertCharacter(min.len = 1)
+  referenceYears |> checkmate::assertSubset(validReferenceYears)
 
 
   #
   # Function
-  sql <- SqlRender::readSql(system.file("sql/sql_server/CalculateCohortDemographics.sql", package = "HadesExtras", mustWork = TRUE))
-  sql <- SqlRender::render(
-    sql = sql,
-    cdm_database_schema = cdmDatabaseSchema,
-    cohort_database_schema = cohortDatabaseSchema,
-    cohort_table = cohortTable,
-    cohort_ids = cohortIds,
-    warnOnMissingParameters = TRUE
-  )
-  sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = connection@dbms
-  )
+  demographicsCounts <- tibble()
+  for (referenceYear in referenceYears) {
+    sql <- SqlRender::readSql(system.file("sql/sql_server/CalculateCohortDemographics.sql", package = "HadesExtras", mustWork = TRUE))
 
-  demographicsCounts  <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE)
+    sql <- SqlRender::render(
+      sql = sql,
+      cdm_database_schema = cdmDatabaseSchema,
+      cohort_database_schema = cohortDatabaseSchema,
+      cohort_table = cohortTable,
+      cohort_ids = cohortIds,
+      reference_year = referenceYear,
+      warnOnMissingParameters = TRUE
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = connection@dbms
+    )
 
+    demographicsCounts  <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE) |>
+      tibble::as_tibble() |>
+      dplyr::mutate(referenceYear = referenceYear ) |>
+      dplyr::select(referenceYear, everything()) |>
+      dplyr::bind_rows(demographicsCounts)
+  }
 
   demographicsCounts  <- demographicsCounts |>
     tibble::as_tibble() |>
@@ -249,14 +266,14 @@ getCohortDemographicsCounts <- function(
         ageGroup <= 9 ~ "90-99",
         TRUE ~ "100+"
       ),
-      gender = case_when(
+      gender = dplyr::case_when(
         genderConceptId == 8507 ~ "Male",
         genderConceptId == 8532 ~ "Female",
         TRUE ~ "Unknown"
       )
     ) |>
     dplyr::select(-genderConceptId) |>
-    dplyr::group_by(cohortId, calendarYear, ageGroup, gender) |>
+    dplyr::group_by(referenceYear, cohortId, calendarYear, ageGroup, gender) |>
     dplyr::summarize( count = sum(cohortCount) )
 
 
