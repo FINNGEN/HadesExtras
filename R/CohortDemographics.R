@@ -160,10 +160,10 @@ executeCohortDemographicsCounts <- function(
     vocabularyVersionCdm = vocabularyVersionCdm,
     vocabularyVersion = vocabularyVersion
   )
-
   # Cohort data ------------------------------------------------
   cohortDefinitionSet |>
-    dplyr::select(cohortId, cohortName, sql, json, subsetParent, isSubset, subsetDefinitionId) |>
+  dplyr::mutate(databaseId = databaseId) |>
+    dplyr::select(databaseId, cohortId, cohortName, sql, json, subsetParent, isSubset, subsetDefinitionId) |>
     .writeToCsv(
       fileName = file.path(exportFolder, "cohort.csv")
     )
