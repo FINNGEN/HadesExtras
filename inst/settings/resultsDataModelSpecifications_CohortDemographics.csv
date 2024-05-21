@@ -19,7 +19,7 @@ database,vocabulary_version,varchar,No,No,Yes,Yes,No,No,No
 database,vocabulary_version_cdm,varchar,No,No,Yes,Yes,No,No,No
 incidence_rate,cohort_count,float,Yes,No,No,Yes,Yes,No,No
 incidence_rate,person_years,float,Yes,No,No,Yes,Yes,No,No
-incidence_rate,gender,varchar,No,Yes,No,Yes,Yes,No,No
+incidence_rate,gender,varchar,No,No,No,Yes,Yes,No,No
 incidence_rate,age_group,varchar,No,Yes,No,No,No,No,No
 incidence_rate,calendar_year,varchar(4),No,Yes,No,No,No,No,No
 incidence_rate,incidence_rate,float,Yes,No,No,Yes,No,No,No
