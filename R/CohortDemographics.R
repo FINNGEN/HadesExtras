@@ -27,7 +27,7 @@ executeCohortDemographicsCounts <- function(
     exportFolder,
     cohortTableHandler = NULL,
     cohortIds,
-    referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth"),
+    referenceYears = c("cohort_start_date", "cohort_end_date", "birth_datetime"),
     groupBy = c("calendarYear", "ageGroup", "gender"),
     minCellCount = 0
     # # TODO: add these parameters if cohortTableHandler is NULL
@@ -48,12 +48,15 @@ executeCohortDemographicsCounts <- function(
   # Check parameters
   #
   groups <- c("calendarYear", "ageGroup", "gender")
+  validReferenceYears <- c("cohort_start_date", "cohort_end_date", "birth_datetime")
 
   exportFolder |> checkmate::assertDirectoryExists()
   cohortIds |> checkmate::assertNumeric()
   minCellCount |> checkmate::assertNumeric()
-  groupBy |> checkmate::assertCharacter()
+  groupBy |> checkmate::assertCharacter(min.len = 1)
   groupBy |> checkmate::assertSubset(groups)
+  referenceYears |> checkmate::assertCharacter(min.len = 1)
+  referenceYears |> checkmate::assertSubset(validReferenceYears)
 
   cohortTableHandler |> checkmate::assertR6(class = "CohortTableHandler")
 
@@ -200,12 +203,12 @@ getCohortDemographicsCounts <- function(
     cohortDatabaseSchema,
     cohortTable = "cohort",
     cohortIds = c(),
-    referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth")
+    referenceYears = c("cohort_start_date", "cohort_end_date", "birth_datetime")
 ) {
   #
   # Validate parameters
   #
-  validReferenceYears <- c("cohort_start_date", "cohort_end_date", "year_of_birth")
+  validReferenceYears <- c("cohort_start_date", "cohort_end_date", "birth_datetime")
 
   if (is.null(connection) && is.null(connectionDetails)) {
     stop("You must provide either a database connection or the connection details.")

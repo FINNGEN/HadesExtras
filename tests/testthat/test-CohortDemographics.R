@@ -19,7 +19,7 @@ test_that("executeCohortOverlaps works", {
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
 
-  exportFolder <- file.path(tempdir(), "cohortDemographics")
+   exportFolder <- file.path(tempdir(), "cohortDemographics")
   dir.create(exportFolder, showWarnings = FALSE)
   on.exit({unlink(exportFolder, recursive = TRUE);gc()})
 
@@ -28,7 +28,7 @@ test_that("executeCohortOverlaps works", {
     exportFolder = exportFolder,
     cohortTableHandler = cohortTableHandler,
     cohortIds = c(1,2),
-    referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth")
+    referenceYears = c("cohort_start_date", "cohort_end_date", "birth_datetime")
   )
 
   expect_true(file.exists(file.path(exportFolder, "demographics_counts.csv")))
