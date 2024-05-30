@@ -80,7 +80,9 @@ CohortTableHandler <- R6::R6Class(
       private$.incrementalFolder <- file.path(tempdir(),stringr::str_remove_all(Sys.time(),"-|:|\\.|\\s"))
 
       private$.cohortDefinitionSet <- tibble::tibble(
-        cohortId=0,   cohortName="", sql="",        json="",
+        cohortId=0,
+        cohortName="", shortName="",
+        sql="",        json="",
         subsetParent=0, isSubset=TRUE, subsetDefinitionId=0,
         .rows = 0 )
 
@@ -164,6 +166,11 @@ CohortTableHandler <- R6::R6Class(
       #
       if(!CohortGenerator::isCohortDefinitionSet(cohortDefinitionSet)){
        stop("Provided table is not of cohortDefinitionSet format")
+      }
+
+      # if not shortName, create it
+      if(!"shortName" %in% names(cohortDefinitionSet)){
+        cohortDefinitionSet$shortName <- paste0("C", cohortDefinitionSet$cohortId)
       }
 
       cohortIdsExists <- intersect( private$.cohortDefinitionSet$cohortId,  cohortDefinitionSet$cohortId  )
@@ -305,8 +312,7 @@ CohortTableHandler <- R6::R6Class(
       cohortsSummaryWithNames <- private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId) |>
         dplyr::mutate(
           databaseId = super$databaseId,
-          databaseName = super$databaseName,
-          shortName = paste0("C", cohortId)
+          databaseName = super$databaseName
         ) |>
         dplyr::left_join(
           private$.cohortDemograpics,
@@ -327,7 +333,28 @@ CohortTableHandler <- R6::R6Class(
     #'
     #' @return A vector with the name of the cohorts
     getCohortIdAndNames  = function(){
-      return(private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId, subsetDefinitionId))
+      return(private$.cohortDefinitionSet |> dplyr::select(cohortName, shortName, cohortId, subsetDefinitionId))
+    },
+    #'
+    #' updateCohortNames
+    #' @description
+    #' Updates the cohort name and short name.
+    #' @param cohortId The cohort id to update.
+    #' @param cohortName The new cohort name.
+    #' @param shortName The new short name.
+    #'
+    updateCohortNames = function(cohortId, newCohortName, newShortName){
+      # check parameters
+      if(!cohortId %in% private$.cohortDefinitionSet$cohortId){
+        stop("Cohort id ", cohortId, " does not exist in the cohort table")
+      }
+
+      # function
+      private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
+        dplyr::mutate(
+          cohortName = dplyr::if_else(cohortId == cohortId, newCohortName, cohortName),
+          shortName = dplyr::if_else(cohortId == cohortId, newShortName, shortName)
+        )
     },
     #'
     #' getCohortsOverlap
@@ -338,8 +365,6 @@ CohortTableHandler <- R6::R6Class(
     getCohortsOverlap = function(){
       return(private$.cohortsOverlap)
     }
-
-
   )
 )
 

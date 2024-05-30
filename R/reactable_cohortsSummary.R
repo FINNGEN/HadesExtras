@@ -16,13 +16,15 @@
 #' @export
 rectable_cohortsSummary <- function(
     cohortsSummary,
-    deleteButtonsShinyId = NULL
+    deleteButtonsShinyId = NULL,
+    editButtonsShinyId = NULL
 ) {
 
   cohortNameNcharLimit = 15L
 
   cohortsSummary |>  HadesExtras::assertCohortsSummary()
   deleteButtonsShinyId |> checkmate::assertString(null.ok = TRUE)
+  editButtonsShinyId |> checkmate::assertString(null.ok = TRUE)
 
   cohortsSummaryToPlot <- cohortsSummary  |>
     dplyr::mutate(
@@ -123,14 +125,34 @@ rectable_cohortsSummary <- function(
           if (column.id !== 'deleteButton') {
             return
           }
-
-          // Display an alert dialog with details for the row
-          //window.alert('Details for row ' + rowInfo.index)
-
           // Send the click event to Shiny, which will be available in input$show_details
           // Note that the row index starts at 0 in JavaScript, so we add 1
           if (window.Shiny) {
             Shiny.setInputValue('", deleteButtonsShinyId, "', { index: rowInfo.index + 1 }, { priority: 'event' })
+          }
+        }
+      ")
+
+  }
+
+  if(!is.null(editButtonsShinyId)){
+    columns[["editButton"]] <-  reactable::colDef(
+      name = "",
+      sortable = FALSE,
+      cell = function() htmltools::tags$button(shiny::icon("edit"))
+    )
+
+    onClick <- paste0(
+      onClick,
+        "function(rowInfo, column) {
+          // Only handle click events on the 'details' column
+          if (column.id !== 'editButton') {
+            return
+          }
+          // Send the click event to Shiny, which will be available in input$show_details
+          // Note that the row index starts at 0 in JavaScript, so we add 1
+          if (window.Shiny) {
+            Shiny.setInputValue('", editButtonsShinyId, "', { index: rowInfo.index + 1 }, { priority: 'event' })
           }
         }
       ")
