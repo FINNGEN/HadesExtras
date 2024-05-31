@@ -62,4 +62,10 @@ test_that("rectable_cohortsSummary works", {
   reactableResult |> checkmate::expect_class(classes = c("reactable", "htmlwidget"))
   reactableResult$x$tag$attribs$columns |> length() |> expect_equal(8)
 
+  #
+  reactableResult <- rectable_cohortsSummary(cohortsSummary,  deleteButtonsShinyId = "test", editButtonsShinyId = "test2")
+
+  reactableResult |> checkmate::expect_class(classes = c("reactable", "htmlwidget"))
+  reactableResult$x$tag$attribs$columns |> length() |> expect_equal(9)
+
 })

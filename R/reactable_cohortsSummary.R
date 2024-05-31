@@ -65,12 +65,11 @@ rectable_cohortsSummary <- function(
       countSexStrTooltip = purrr::map_chr(sexCounts, .sexTibbleToTooltipStr),
       buildInfoStr = purrr::map_chr(buildInfo, .buildInfoStr),
       buildInfoTooltip = purrr::map_chr(buildInfo, .buildInfoToTooltipStr),
-      deleteButton = NA
+      deleteButton = NA,
+      editButton = NA
     )
 
   # add columns and onClick
-  onClick = ""
-
   columns <- list(
     database = reactable::colDef(
       name = "Database",
@@ -117,22 +116,6 @@ rectable_cohortsSummary <- function(
       sortable = FALSE,
       cell = function() htmltools::tags$button(shiny::icon("trash"))
     )
-
-    onClick <- paste0(
-      onClick,
-        "function(rowInfo, column) {
-          // Only handle click events on the 'details' column
-          if (column.id !== 'deleteButton') {
-            return
-          }
-          // Send the click event to Shiny, which will be available in input$show_details
-          // Note that the row index starts at 0 in JavaScript, so we add 1
-          if (window.Shiny) {
-            Shiny.setInputValue('", deleteButtonsShinyId, "', { index: rowInfo.index + 1 }, { priority: 'event' })
-          }
-        }
-      ")
-
   }
 
   if(!is.null(editButtonsShinyId)){
@@ -141,19 +124,26 @@ rectable_cohortsSummary <- function(
       sortable = FALSE,
       cell = function() htmltools::tags$button(shiny::icon("edit"))
     )
+  }
+
+  onClick = ""
+  if (!is.null(deleteButtonsShinyId) | !is.null(editButtonsShinyId)) {
 
     onClick <- paste0(
       onClick,
         "function(rowInfo, column) {
           // Only handle click events on the 'details' column
-          if (column.id !== 'editButton') {
-            return
-          }
-          // Send the click event to Shiny, which will be available in input$show_details
-          // Note that the row index starts at 0 in JavaScript, so we add 1
-          if (window.Shiny) {
+          if (column.id == 'editButton') {
+            if (window.Shiny) {
             Shiny.setInputValue('", editButtonsShinyId, "', { index: rowInfo.index + 1 }, { priority: 'event' })
+            }
           }
+          if (column.id == 'deleteButton') {
+            if (window.Shiny) {
+            Shiny.setInputValue('", deleteButtonsShinyId, "', { index: rowInfo.index + 1 }, { priority: 'event' })
+            }
+          }
+          return false
         }
       ")
 

@@ -309,7 +309,7 @@ CohortTableHandler <- R6::R6Class(
     #' @return A tibble containing cohort summary.
     getCohortsSummary  = function(){
 
-      cohortsSummaryWithNames <- private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId) |>
+      cohortsSummaryWithNames <- private$.cohortDefinitionSet |> dplyr::select(cohortName, shortName, cohortId) |>
         dplyr::mutate(
           databaseId = super$databaseId,
           databaseName = super$databaseName
