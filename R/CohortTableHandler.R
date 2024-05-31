@@ -352,8 +352,8 @@ CohortTableHandler <- R6::R6Class(
       # function
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
         dplyr::mutate(
-          cohortName = dplyr::if_else(cohortId == cohortId, newCohortName, cohortName),
-          shortName = dplyr::if_else(cohortId == cohortId, newShortName, shortName)
+          cohortName = dplyr::if_else(cohortId == {{cohortId}}, newCohortName, cohortName),
+          shortName = dplyr::if_else(cohortId == {{cohortId}}, newShortName, shortName)
         )
     },
     #'

@@ -262,5 +262,7 @@ test_that("CohortTableHandler$updateCohortNames updates cohort names", {
   cohortTableHandler$getCohortIdAndNames() |> checkmate::expect_tibble(nrows = 2)
   cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 10) |> pull(cohortName) |> expect_equal("New Name")
   cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 10) |> pull(shortName) |> expect_equal("NEWNAME")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 20) |> pull(cohortName) |> expect_equal("cohort2")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 20) |> pull(shortName) |> expect_equal("C20")
 
 })
