@@ -171,6 +171,8 @@ CohortTableHandler <- R6::R6Class(
       # if not shortName, create it
       if(!"shortName" %in% names(cohortDefinitionSet)){
         cohortDefinitionSet$shortName <- paste0("C", cohortDefinitionSet$cohortId)
+      }else{
+        cohortDefinitionSet$shortName <- dplyr::if_else(is.na(cohortDefinitionSet$shortName), paste0("C", cohortDefinitionSet$cohortId), cohortDefinitionSet$shortName)
       }
 
       cohortIdsExists <- intersect( private$.cohortDefinitionSet$cohortId,  cohortDefinitionSet$cohortId  )
