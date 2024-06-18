@@ -366,21 +366,6 @@ executeCodeWAS <- function(
             } else {
               note=paste(note,"[Error: The model did not converge]")
             }
-
-          }
-
-          else if (model$converged
-
-
-
-             && model$convergence) {
-            gen_list=grep(predictors,row.names(modsum$coefficients))
-            or=exp(modsum$coefficients[gen_list,1])
-            beta=modsum$coefficients[gen_list,1]
-            se=modsum$coefficients[gen_list,2]
-            p=modsum$coefficients[gen_list,4]
-          } else {
-            note=paste(note,"[Error: The model did not converge]")
           }
 
           if (family$family == "binomial") {
