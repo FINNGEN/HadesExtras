@@ -319,7 +319,7 @@ executeCodeWAS <- function(
         dplyr::mutate(dplyr::across(BinaryCovariateNames, ~dplyr::if_else(is.na(.), FALSE, TRUE) )) |>
         as.data.frame()
 
-      # calculate phewas using PheWAS::phewas
+      # calculate using speedglm
       outcomes  <- covariatesWideTable  |> select(3:ncol(covariatesWideTable))  |> colnames()
       predictors <- covariatesWideTable  |> select(2)  |> colnames()
       covariates  <- as.character(covariatesIds)
