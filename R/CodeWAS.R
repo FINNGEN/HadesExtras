@@ -342,7 +342,6 @@ executeCodeWAS <- function(
 
         results <- tibble::tibble()
         for (outcome in outcomes){
-          or=NA; beta=NA; se=NA; p=NA; note=""
 
           formula  <-  as.formula( paste( paste0('`',outcome,'`'), ' ~ ', paste(paste0('`',c(predictors, covariates),'`'), collapse = ' + ')) )
           family  <- if(data[[outcome]] |> is.logical()){binomial()}else{gaussian()}
@@ -350,13 +349,31 @@ executeCodeWAS <- function(
           tryCatch({
             model = speedglm::speedglm(formula, data, family)
           }, error = function(e){
-            note =  paste0("[Error in speedglm: ", e$message, "]")
+            error =  paste0("[Error in speedglm: ", e$message, "]")
           })
 
-          modsum= summary(model)
-          #If the models did not converge, report NA values instead.
+          #If the models did not converge or error, report NA values instead.
           or=NA; beta=NA; se=NA; p=NA; note=""
-          if(!is.null(modsum) && model$convergence) {
+          if ( is.null(model) ){
+            note = error
+          } else {
+            if(model$convergence) {
+              gen_list=grep(predictors,row.names(modsum$coefficients))
+              or=exp(modsum$coefficients[gen_list,1])
+              beta=modsum$coefficients[gen_list,1]
+              se=modsum$coefficients[gen_list,2]
+              p=modsum$coefficients[gen_list,4]
+            } else {
+              note=paste(note,"[Error: The model did not converge]")
+            }
+
+          }
+
+          else if (model$converged
+
+
+
+             && model$convergence) {
             gen_list=grep(predictors,row.names(modsum$coefficients))
             or=exp(modsum$coefficients[gen_list,1])
             beta=modsum$coefficients[gen_list,1]
