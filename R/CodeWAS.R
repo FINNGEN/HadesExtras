@@ -346,10 +346,11 @@ executeCodeWAS <- function(
           formula  <-  as.formula( paste( paste0('`',outcome,'`'), ' ~ ', paste(paste0('`',c(predictors, covariates),'`'), collapse = ' + ')) )
           family  <- if(data[[outcome]] |> is.logical()){binomial()}else{gaussian()}
           model <- NULL
+          error <- ""
           tryCatch({
             model = speedglm::speedglm(formula, data, family)
           }, error = function(e){
-            error =  paste0("[Error in speedglm: ", e$message, "]")
+            error <<- paste0("[Error in speedglm: ", e$message, "]")
           })
 
           #If the models did not converge or error, report NA values instead.
