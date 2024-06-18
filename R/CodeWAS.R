@@ -357,6 +357,7 @@ executeCodeWAS <- function(
           if ( is.null(model) ){
             note = error
           } else {
+            modsum=summary(model)
             if(model$convergence) {
               gen_list=grep(predictors,row.names(modsum$coefficients))
               or=exp(modsum$coefficients[gen_list,1])
