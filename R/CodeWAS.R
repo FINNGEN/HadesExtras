@@ -356,7 +356,7 @@ executeCodeWAS <- function(
           modsum= summary(model)
           #If the models did not converge, report NA values instead.
           or=NA; beta=NA; se=NA; p=NA; note=""
-          if(!is.null(modsum$coefficients) && model$convergence) {
+          if(!is.null(modsum) && model$convergence) {
             gen_list=grep(predictors,row.names(modsum$coefficients))
             or=exp(modsum$coefficients[gen_list,1])
             beta=modsum$coefficients[gen_list,1]
