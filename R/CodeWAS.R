@@ -116,34 +116,11 @@ executeCodeWAS <- function(
   # function
   #
   noCovariatesMode <- is.null(covariatesIds) || length(covariatesIds) == 0
-  # if there is covariates we need to take all the events, if not we take the aggragate
-  aggregated <- noCovariatesMode
 
   covariateSettings  <- FeatureExtraction_createTemporalCovariateSettingsFromList(
     analysisIds = analysisIds,
     temporalStartDays = -99999,
     temporalEndDays = 99999
-  )
-
-  ParallelLogger::logInfo("Getting FeatureExtraction for cases, aggregated=", aggregated)
-  covariate_case <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    cohortTable = cohortTable,
-    cohortDatabaseSchema = cohortDatabaseSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    covariateSettings = covariateSettings,
-    cohortIds = cohortIdCases,
-    aggregated = aggregated
-  )
-  ParallelLogger::logInfo("Getting FeatureExtraction for controls aggregated=", aggregated)
-  covariate_control <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    cohortTable = cohortTable,
-    cohortDatabaseSchema = cohortDatabaseSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    covariateSettings = covariateSettings,
-    cohortIds = cohortIdControls,
-    aggregated = aggregated
   )
 
   cohortCounts <- cohortTableHandler$getCohortCounts()
@@ -156,27 +133,43 @@ executeCodeWAS <- function(
   #
   if (noCovariatesMode){
 
+    ParallelLogger::logInfo("Running regresions without covariates")
+
+    ParallelLogger::logInfo("Getting FeatureExtraction for cases and controls")
+    covariateCasesControls <- FeatureExtraction::getDbCovariateData(
+      connection = connection,
+      cohortTable = cohortTable,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cdmDatabaseSchema = cdmDatabaseSchema,
+      covariateSettings = covariateSettings,
+      cohortIds = c(cohortIdCases, cohortIdControls),
+      aggregated = T
+    )
+
     # binary
     covariateCountsBinary <- tibble::tibble()
-    if (covariate_case$covariates |> dplyr::count()  |> dplyr::pull(n) != 0 & covariate_control$covariates |> dplyr::count()  |> dplyr::pull(n) != 0) {
+    if (covariateCasesControls$covariates |> dplyr::count()  |> dplyr::pull(n) != 0 ) {
 
       ParallelLogger::logInfo("Running Fisher's Exact Test for binary covariates")
 
-      covariateCases <- covariate_case$covariates  |>
-        dplyr::select(covariateId, n_cases_yes = sumValue)  |> dplyr::collect()
-
-      covariateControls <- covariate_control$covariates  |>
-        dplyr::select(covariateId, n_controls_yes = sumValue)  |> dplyr::collect()
-
-      covariateCountsBinary <- dplyr::full_join(covariateCases, covariateControls, by = "covariateId")  |>
-        dplyr::mutate(
+      covariateCountsBinary <- dplyr::full_join(
+        covariateCasesControls$covariates  |>
+          dplyr::filter(cohortDefinitionId == {{cohortIdCases}})  |>
+          dplyr::select(covariateId, n_cases_yes = sumValue),
+        covariateCasesControls$covariates  |>
+          dplyr::filter(cohortDefinitionId == {{cohortIdControls}})  |>
+          dplyr::select(covariateId, n_controls_yes = sumValue),
+        by = "covariateId"
+      )  |>
+      dplyr::mutate(
           n_cases_yes = ifelse(is.na(n_cases_yes), 0, n_cases_yes),
           n_controls_yes = ifelse(is.na(n_controls_yes), 0, n_controls_yes),
           n_cases_total = {{n_cases_total}},
           n_controls_total = {{n_controls_total}},
           n_cases_no = n_cases_total - n_cases_yes,
           n_controls_no = n_controls_total - n_controls_yes
-        )
+        )  |>
+        dplyr::collect()
 
       covariateCountsBinary <- .addFisherTestToCodeCounts(covariateCountsBinary) |>
         dplyr::transmute(
@@ -199,19 +192,20 @@ executeCodeWAS <- function(
 
     # continuous
     covariateCountsContinuous <- tibble::tibble()
-    if (covariate_case$covariatesContinuous |> dplyr::count()  |> dplyr::pull(n) != 0 & covariate_control$covariatesContinuous |> dplyr::count()  |> dplyr::pull(n) != 0) {
+    if (covariateCasesControls$covariatesContinuous |> dplyr::count()  |> dplyr::pull(n) != 0) {
 
       ParallelLogger::logInfo("Running Welch's t-test for continuous covariates")
 
-      covariateCases <- covariate_case$covariatesContinuous  |>
-        dplyr::select(covariateId, n_cases_yes = countValue, mean_cases = averageValue, sd_cases = standardDeviation)  |>
+      covariateCountsContinuous <- dplyr::full_join(
+        covariateCasesControls$covariatesContinuous |>
+          dplyr::filter(cohortDefinitionId == {{cohortIdCases}})  |>
+          dplyr::select(covariateId, n_cases_yes = countValue, mean_cases = averageValue, sd_cases = standardDeviation),
+        covariateCasesControls$covariatesContinuous |>
+          dplyr::filter(cohortDefinitionId == {{cohortIdControls}})  |>
+          dplyr::select(covariateId, n_controls_yes = countValue, mean_controls = averageValue, sd_controls = standardDeviation),
+        by = "covariateId"
+      ) |>
         dplyr::collect()
-
-      covariateControls <- covariate_control$covariatesContinuous  |>
-        dplyr::select(covariateId, n_controls_yes = countValue, mean_controls = averageValue, sd_controls = standardDeviation)  |>
-        dplyr::collect()
-
-      covariateCountsContinuous <- dplyr::full_join(covariateCases, covariateControls, by = "covariateId")
 
       covariateCountsContinuous <- .addTTestToCodeCounts(covariateCountsContinuous) |>
         dplyr::transmute(
@@ -231,13 +225,41 @@ executeCodeWAS <- function(
           run_notes = ""
         )
     }
+
     codewasResults <- dplyr::bind_rows(covariateCountsBinary, covariateCountsContinuous)
+
+    analysisRef  <-  covariateCasesControls$analysisRef  |> dplyr::collect()
+
+    covariateRef  <- covariateCasesControls$covariateRef  |> dplyr::collect()
+
+
 
   }else{
     #
     # CovariatesMode
     #
     ParallelLogger::logInfo("Running regresions with covariates")
+
+    ParallelLogger::logInfo("Getting FeatureExtraction for cases")
+    covariate_case <- FeatureExtraction::getDbCovariateData(
+      connection = connection,
+      cohortTable = cohortTable,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cdmDatabaseSchema = cdmDatabaseSchema,
+      covariateSettings = covariateSettings,
+      cohortIds = cohortIdCases,
+      aggregated = F
+    )
+    ParallelLogger::logInfo("Getting FeatureExtraction for controls")
+    covariate_control <- FeatureExtraction::getDbCovariateData(
+      connection = connection,
+      cohortTable = cohortTable,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cdmDatabaseSchema = cdmDatabaseSchema,
+      covariateSettings = covariateSettings,
+      cohortIds = cohortIdControls,
+      aggregated = F
+    )
 
     # case control covariates
     covarCase <- covariate_case$covariates |>
@@ -409,6 +431,20 @@ executeCodeWAS <- function(
       ParallelLogger::stopCluster(cluster)
 
       codewasResults <- dplyr::bind_rows(codewasResults, chunkResults)
+
+      analysisRef  <-  dplyr::bind_rows(
+        covariate_case$analysisRef |> tibble::as_tibble(),
+        covariate_control$analysisRef |> tibble::as_tibble()
+      ) |>
+        dplyr::distinct()
+
+      covariateRef  <-  dplyr::bind_rows(
+        covariate_case$covariateRef |> tibble::as_tibble(),
+        covariate_control$covariateRef |> tibble::as_tibble()
+      ) |>
+        dplyr::distinct()
+
+
     }
   }
 
@@ -455,20 +491,12 @@ executeCodeWAS <- function(
       fileName = file.path(exportFolder, "codewas_results.csv")
     )
 
-  dplyr::bind_rows(
-    covariate_case$analysisRef |> tibble::as_tibble(),
-    covariate_control$analysisRef |> tibble::as_tibble()
-  ) |>
-    dplyr::distinct() |>
+  analysisRef  |>
     .writeToCsv(
       fileName = file.path(exportFolder, "analysis_ref.csv")
     )
 
-  dplyr::bind_rows(
-    covariate_case$covariateRef |> tibble::as_tibble(),
-    covariate_control$covariateRef |> tibble::as_tibble()
-  ) |>
-    dplyr::distinct() |>
+  covariateRef |>
     .writeToCsv(
       fileName = file.path(exportFolder, "covariate_ref.csv")
     )
