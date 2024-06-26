@@ -59,7 +59,7 @@ test_that("CohortTableHandler$insertOrUpdateCohorts adds a cohort", {
 
   cohortCounts |> checkmate::expect_tibble(nrows = 1)
   cohortCounts$cohortName |> expect_equal("cohort1")
-  cohortCounts$cohortId |> expect_equal(10)
+  cohortCounts$cohortId |> expect_equal(1)
   cohortCounts$cohortEntries |> expect_equal(1)
   cohortCounts$cohortSubjects |> expect_equal(1)
 
@@ -84,17 +84,18 @@ test_that("CohortTableHandler$insertOrUpdateCohorts warns when cohortId exists a
 
   cohortCounts |> checkmate::expect_tibble(nrows = 1)
   cohortCounts$cohortName |> expect_equal("cohort1")
-  cohortCounts$cohortId |> expect_equal(10)
+  cohortCounts$cohortId |> expect_equal(1)
   cohortCounts$cohortEntries |> expect_equal(1)
   cohortCounts$cohortSubjects |> expect_equal(1)
 
   cohortDefinitionSet$cohortName <- "cohort1 Updated"
+  cohortDefinitionSet$cohortId <- 1
   expect_warning( cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet) )
   cohortCounts <- cohortTableHandler$getCohortCounts()
 
   cohortCounts |> checkmate::expect_tibble(nrows = 1)
   cohortCounts$cohortName |> expect_equal("cohort1 Updated")
-  cohortCounts$cohortId |> expect_equal(10)
+  cohortCounts$cohortId |> expect_equal(1)
   cohortCounts$cohortEntries |> expect_equal(1)
   cohortCounts$cohortSubjects |> expect_equal(1)
 
@@ -118,16 +119,16 @@ test_that("CohortTableHandler$insertOrUpdateCohorts keeps data when update an un
   cohortGeneratorResults <- cohortTableHandler$cohortGeneratorResults
 
   cohortGeneratorResults |> checkmate::expect_tibble(nrows = 1)
-  cohortGeneratorResults$cohortId |> expect_equal(10)
+  cohortGeneratorResults$cohortId |> expect_equal(1)
   cohortGeneratorResults$generationStatus |> expect_equal("COMPLETE")
 
-
+  cohortDefinitionSet$cohortId <- 1
   expect_warning( cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet) )
 
   cohortGeneratorResults <- cohortTableHandler$cohortGeneratorResults
 
   cohortGeneratorResults |> checkmate::expect_tibble(nrows = 1)
-  cohortGeneratorResults$cohortId |> expect_equal(10)
+  cohortGeneratorResults$cohortId |> expect_equal(1)
   cohortGeneratorResults$generationStatus |> expect_equal("COMPLETE")
 
 })
@@ -196,20 +197,20 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
   cohortTableHandler$getCohortsSummary() |> checkCohortsSummary() |> expect_true()
-  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(10,20))
-  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(10,20))
-  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(10,20))
-  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(10,20))
-  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-10-20-"))
+  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(1,2))
+  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(1,2))
+  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(1,2))
+  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(1,2))
+  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-1-2-"))
 
-  cohortTableHandler$deleteCohorts(10L)
+  cohortTableHandler$deleteCohorts(1L)
 
   cohortTableHandler$getCohortsSummary() |> checkCohortsSummary() |> expect_true()
-  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(20))
-  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(20))
-  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(20))
-  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(20))
-  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-20-"))
+  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(2))
+  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(2))
+  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(2))
+  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(2))
+  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-2-"))
 
 })
 
@@ -257,13 +258,13 @@ test_that("CohortTableHandler$updateCohortNames updates cohort names", {
   )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
-  cohortTableHandler$updateCohortNames(10, "New Name", 'NEWNAME')
+  cohortTableHandler$updateCohortNames(1, "New Name", 'NEWNAME')
 
   cohortTableHandler$getCohortIdAndNames() |> checkmate::expect_tibble(nrows = 2)
-  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 10) |> pull(cohortName) |> expect_equal("New Name")
-  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 10) |> pull(shortName) |> expect_equal("NEWNAME")
-  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 20) |> pull(cohortName) |> expect_equal("cohort2")
-  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 20) |> pull(shortName) |> expect_equal("C20")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 1) |> pull(cohortName) |> expect_equal("New Name")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 1) |> pull(shortName) |> expect_equal("NEWNAME")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 2) |> pull(cohortName) |> expect_equal("cohort2")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 2) |> pull(shortName) |> expect_equal("C2")
 
 })
 
@@ -288,7 +289,7 @@ test_that("CohortTableHandler$updateCohortNames crates shortName one is NA", {
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
-  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 10) |> pull(shortName) |> expect_equal("aa")
-  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 20) |> pull(shortName) |> expect_equal("C20")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 1) |> pull(shortName) |> expect_equal("aa")
+  cohortTableHandler$getCohortIdAndNames() |> dplyr::filter(cohortId == 2) |> pull(shortName) |> expect_equal("C2")
 
 })

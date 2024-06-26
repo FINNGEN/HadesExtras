@@ -155,7 +155,7 @@ CohortTableHandler <- R6::R6Class(
     #'
     #' insertOrUpdateCohorts
     #' @description
-    #' If there is no cohort with the same cohortId it is added to the cohortDefinitionSet,
+    #' If there is no cohort with the same cohortId it is added to the cohortDefinitionSet, and cohortId is updated to the next available cohortId
     #' If there is a cohort with the same cohortId, the cohort is updated in the cohortDefinitionSet
     #' CohortDefinitionSet is generated and demographics is updated for only the cohorts that have changed
     #'
@@ -168,6 +168,16 @@ CohortTableHandler <- R6::R6Class(
        stop("Provided table is not of cohortDefinitionSet format")
       }
 
+      cohortIdsExists <- intersect( private$.cohortDefinitionSet$cohortId,  cohortDefinitionSet$cohortId  )
+      if(length(cohortIdsExists)!=0){
+        warning("Following cohort ids already exists on the cohort table and will be updated: ", paste(cohortIdsExists, collapse = ", "))
+      }
+
+      # update cohortId to non existing
+      lastCohortId <- max(ifelse(length(private$.cohortDefinitionSet$cohortId) == 0, 0, private$.cohortDefinitionSet$cohortId), na.rm = TRUE)
+      cohortDefinitionSet <- cohortDefinitionSet |>
+        dplyr::mutate(cohortId = dplyr::if_else(cohortId %in% cohortIdsExists, cohortId, lastCohortId + row_number()))
+
       # if not shortName, create it
       if(!"shortName" %in% names(cohortDefinitionSet)){
         cohortDefinitionSet$shortName <- paste0("C", cohortDefinitionSet$cohortId)
@@ -175,10 +185,6 @@ CohortTableHandler <- R6::R6Class(
         cohortDefinitionSet$shortName <- dplyr::if_else(is.na(cohortDefinitionSet$shortName), paste0("C", cohortDefinitionSet$cohortId), cohortDefinitionSet$shortName)
       }
 
-      cohortIdsExists <- intersect( private$.cohortDefinitionSet$cohortId,  cohortDefinitionSet$cohortId  )
-      if(length(cohortIdsExists)!=0){
-        warning("Following cohort ids already exists on the cohort table and will be updated: ", paste(cohortIdsExists, collapse = ", "))
-      }
 
       #
       # Function
