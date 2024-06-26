@@ -159,7 +159,7 @@ cohortTableToCohortDefinitionSettings <- function(
     cohortTable = "cohort",
     cohortDefinitionTable,
     cohortDefinitionIds,
-    cohortIdOffset = 0L
+    newCohortDefinitionIds = cohortDefinitionIds
 ){
 
   #
@@ -168,7 +168,7 @@ cohortTableToCohortDefinitionSettings <- function(
   cohortDatabaseSchema |> checkmate::assertString()
   cohortTable |> checkmate::assertString()
   cohortDefinitionIds |> checkmate::assertNumeric()
-  cohortIdOffset |> checkmate::assertNumeric()
+  newCohortDefinitionIds |> checkmate::assertNumeric(len = length(cohortDefinitionIds))
 
   #
   # Function
@@ -176,7 +176,7 @@ cohortTableToCohortDefinitionSettings <- function(
   cohortDefinitionTable  |>
     dplyr::filter(cohort_definition_id %in% cohortDefinitionIds) |>
     dplyr::transmute(
-      cohortId = as.double(cohort_definition_id+cohortIdOffset),
+      cohortId = as.double(cohort_definition_id),
       cohortName = cohort_definition_name,
       json =  paste0(
         "{\"cohortDefinitionId\":", cohort_definition_id,
@@ -184,6 +184,9 @@ cohortTableToCohortDefinitionSettings <- function(
         "\",\"cohortDefinitionDescription\":\"", cohort_definition_description, "\"}"
       ),
       sql = purrr::pmap_chr(.l = list(cohortDatabaseSchema, cohortTable, cohortId), .f=.cohortTableToSql)
+    )  |>
+    dplyr::mutate(
+      cohortId = newCohortDefinitionIds
     )
 
 }
