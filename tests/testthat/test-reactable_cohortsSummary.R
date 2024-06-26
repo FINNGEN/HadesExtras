@@ -35,7 +35,7 @@ test_that("rectable_cohortsSummary works", {
 
   cohortDefinitionSet <- cohortDataToCohortDefinitionSet(
     cohortData = cohort_data,
-    cohortIdOffset = 10
+    newCohortIds = c(10, 11),
   )
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
