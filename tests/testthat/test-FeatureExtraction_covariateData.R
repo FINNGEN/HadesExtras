@@ -46,7 +46,7 @@ test_that("covariateData_YearOfBirth works", {
 
   covariate_control$covariates  |> dplyr::pull(covariateValue) |> expect_equal(c(1970, 1971))
   covariate_control$covariates  |> dplyr::collect()  |> names()  |>
-    expect_equal(c( "rowId", "covariateId", "covariateValue"))
+    expect_equal(c("cohortDefinitionId", "rowId", "covariateId", "covariateValue"))
 })
 
 

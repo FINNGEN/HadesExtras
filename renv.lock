@@ -68,11 +68,11 @@
       "Version": "0.8.1",
       "Source": "GitHub",
       "RemoteType": "github",
+      "RemoteHost": "api.github.com",
       "RemoteUsername": "OHDSI",
       "RemoteRepo": "CohortGenerator",
       "RemoteRef": "main",
       "RemoteSha": "78757f1b191a395cf9dcff0d5bbe2b9fa4aa163e",
-      "RemoteHost": "api.github.com",
       "Remotes": "ohdsi/CirceR, ohdsi/Eunomia, ohdsi/ROhdsiWebApi",
       "Requirements": [
         "DatabaseConnector",
@@ -102,14 +102,14 @@
     },
     "DBI": {
       "Package": "DBI",
-      "Version": "1.2.3",
+      "Version": "1.2.2",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
       ],
-      "Hash": "065ae649b05f1ff66bb0c793107508f5"
+      "Hash": "164809cd72e1d5160b4cb3aa57f510fe"
     },
     "DT": {
       "Package": "DT",
@@ -175,14 +175,15 @@
     },
     "FeatureExtraction": {
       "Package": "FeatureExtraction",
-      "Version": "3.5.2",
+      "Version": "3.4.1",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "OHDSI",
       "RemoteRepo": "FeatureExtraction",
       "RemoteRef": "main",
-      "RemoteSha": "f4536fb75e5c32399c91270f6b6e35c8e95fdf1e",
+      "RemoteSha": "5049d546621f63f3e09df34d92fa93b6bb005c92",
+      "Remotes": "ohdsi/Eunomia",
       "Requirements": [
         "Andromeda",
         "DBI",
@@ -201,7 +202,7 @@
         "readr",
         "rlang"
       ],
-      "Hash": "e686d93264359802fdccd41989c51386"
+      "Hash": "2a9bf091e98b4edc1488f048915e368e"
     },
     "MASS": {
       "Package": "MASS",
@@ -407,7 +408,7 @@
     },
     "SqlRender": {
       "Package": "SqlRender",
-      "Version": "1.18.0",
+      "Version": "1.17.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -415,7 +416,7 @@
         "rJava",
         "rlang"
       ],
-      "Hash": "e1762de0f08b14658d74989c10e2f265"
+      "Hash": "513c5e6da774c913430561a3912c5354"
     },
     "apexcharter": {
       "Package": "apexcharter",
@@ -463,17 +464,6 @@
         "R"
       ],
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
-    },
-    "biglm": {
-      "Package": "biglm",
-      "Version": "0.9-3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "DBI",
-        "methods"
-      ],
-      "Hash": "730f17c10844a54235031c78fdc20f81"
     },
     "bigrquery": {
       "Package": "bigrquery",
@@ -2201,14 +2191,14 @@
     },
     "rlang": {
       "Package": "rlang",
-      "Version": "1.1.4",
+      "Version": "1.1.3",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
       ],
-      "Hash": "3eec01f8b1dee337674b2e34ab1f9bc1"
+      "Hash": "42548638fae05fd9a9b5f3f437fbbbe2"
     },
     "rmarkdown": {
       "Package": "rmarkdown",
@@ -2426,20 +2416,6 @@
       ],
       "Hash": "5f5a7629f956619d519205ec475fe647"
     },
-    "speedglm": {
-      "Package": "speedglm",
-      "Version": "0.3-5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "MASS",
-        "Matrix",
-        "biglm",
-        "methods",
-        "stats"
-      ],
-      "Hash": "6cffbce4f0fdc4b20a189939bab4ec89"
-    },
     "stringi": {
       "Package": "stringi",
       "Version": "1.8.3",
@@ -2495,15 +2471,14 @@
     },
     "systemfonts": {
       "Package": "systemfonts",
-      "Version": "1.1.0",
+      "Version": "1.0.6",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
-        "cpp11",
-        "lifecycle"
+        "cpp11"
       ],
-      "Hash": "213b6b8ed5afbf934843e6c3b090d418"
+      "Hash": "6d538cff441f0f1f36db2209ac7495ac"
     },
     "testthat": {
       "Package": "testthat",
