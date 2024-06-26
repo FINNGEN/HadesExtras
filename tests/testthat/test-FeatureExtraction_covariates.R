@@ -22,7 +22,7 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works", {
 
   result[[2]]$analyses[[1]]$analysisId |> expect_equal(141)
 
-  result[[3]] |> attr("fun") |> expect_equal("YearOfBirth")
+  result[[3]] |> attr("fun") |> expect_equal("HadesExtras::YearOfBirth")
 })
 
 
@@ -52,7 +52,7 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
   result  |> length() |> expect_equal(1)
 
 
-  result[[1]] |> attr("fun") |> expect_equal("YearOfBirth")
+  result[[1]] |> attr("fun") |> expect_equal("HadesExtras::YearOfBirth")
 })
 
 test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with atribute", {
