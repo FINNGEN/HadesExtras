@@ -8,7 +8,7 @@ executeCohortDemographicsCounts(
   exportFolder,
   cohortTableHandler = NULL,
   cohortIds,
-  referenceYears = c("cohort_start_date", "cohort_end_date", "year_of_birth"),
+  referenceYears = c("cohort_start_date", "cohort_end_date", "birth_datetime"),
   groupBy = c("calendarYear", "ageGroup", "gender"),
   minCellCount = 0
 )

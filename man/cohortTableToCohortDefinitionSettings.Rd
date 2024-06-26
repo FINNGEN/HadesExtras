@@ -9,7 +9,7 @@ cohortTableToCohortDefinitionSettings(
   cohortTable = "cohort",
   cohortDefinitionTable,
   cohortDefinitionIds,
-  cohortIdOffset = 0L
+  newCohortDefinitionIds = cohortDefinitionIds
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ cohortTableToCohortDefinitionSettings(
 
 \item{cohortDefinitionIds}{Numeric vector specifying cohort IDs to generate settings for.}
 
-\item{cohortIdOffset}{Numeric value to add to cohort IDs. Defaults to 0.}
+\item{newCohortDefinitionIds}{Numeric vector specifying new cohort IDs to assign to the settings.}
 }
 \value{
 A tibble containing cohort definition settings.

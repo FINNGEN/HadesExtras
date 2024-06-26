@@ -53,6 +53,7 @@ Inherits from CDMdbHandler.
 \item \href{#method-CohortTableHandler-getCohortCounts}{\code{CohortTableHandler$getCohortCounts()}}
 \item \href{#method-CohortTableHandler-getCohortsSummary}{\code{CohortTableHandler$getCohortsSummary()}}
 \item \href{#method-CohortTableHandler-getCohortIdAndNames}{\code{CohortTableHandler$getCohortIdAndNames()}}
+\item \href{#method-CohortTableHandler-updateCohortNames}{\code{CohortTableHandler$updateCohortNames()}}
 \item \href{#method-CohortTableHandler-getCohortsOverlap}{\code{CohortTableHandler$getCohortsOverlap()}}
 \item \href{#method-CohortTableHandler-clone}{\code{CohortTableHandler$clone()}}
 }
@@ -207,7 +208,30 @@ Retrieves the cohort names.
 \subsection{Returns}{
 A vector with the name of the cohorts
 
-getCohortsOverlap
+updateCohortNames
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-updateCohortNames"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-updateCohortNames}{}}}
+\subsection{Method \code{updateCohortNames()}}{
+Updates the cohort name and short name.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$updateCohortNames(cohortId, newCohortName, newShortName)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{cohortId}}{The cohort id to update.}
+
+\item{\code{cohortName}}{The new cohort name.}
+
+\item{\code{shortName}}{The new short name.
+
+getCohortsOverlap}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

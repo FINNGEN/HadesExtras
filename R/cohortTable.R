@@ -145,7 +145,7 @@ getCohortNamesFromCohortDefinitionTable <- function(
 #' @param cohortTable The name of the cohort table. Defaults to "cohort".
 #' @param cohortDefinitionTable The name of the cohort definition table where settings will be stored.
 #' @param cohortDefinitionIds Numeric vector specifying cohort IDs to generate settings for.
-#' @param cohortIdOffset Numeric value to add to cohort IDs. Defaults to 0.
+#' @param newCohortDefinitionIds Numeric vector specifying new cohort IDs to assign to the settings.
 #'
 #' @return A tibble containing cohort definition settings.
 #'

@@ -137,7 +137,7 @@ assertCohortData  <- function(tibble) {
 #' Convert a cohortData tibble into a cohortDefinitionSet
 #'
 #' @param cohortData The tibble in cohortData format.
-#' @param cohortIdOffset An integer offset for cohort IDs (default is 0L).
+#' @param newCohortIds A vector of new cohort IDs to be assigned to the cohort data.
 #' @param skipCohortDataCheck Logical value indicating whether to skip cohort data validation (default is FALSE).
 #'
 #' @importFrom checkmate assertInt assertLogical

@@ -10,7 +10,7 @@ executeCodeWAS(
   cohortIdCases,
   cohortIdControls,
   analysisIds,
-  covariatesIds,
+  covariatesIds = NULL,
   minCellCount = 1,
   chunksSizeNOutcomes = NULL,
   cores = 1

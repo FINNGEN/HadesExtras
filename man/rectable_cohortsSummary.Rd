@@ -4,7 +4,11 @@
 \alias{rectable_cohortsSummary}
 \title{Cohorts Summary Table}
 \usage{
-rectable_cohortsSummary(cohortsSummary, deleteButtonsShinyId = NULL)
+rectable_cohortsSummary(
+  cohortsSummary,
+  deleteButtonsShinyId = NULL,
+  editButtonsShinyId = NULL
+)
 }
 \arguments{
 \item{cohortsSummary}{A tibble in  cohortsSummary format.}
