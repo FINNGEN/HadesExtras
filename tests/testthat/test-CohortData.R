@@ -99,6 +99,28 @@ test_that(" cohortDataToCohortDefinitionSet works", {
 })
 
 
+test_that(" cohortDataToCohortDefinitionSet works with ", {
+
+  cohortData <- tibble::tibble(
+    cohort_name = rep(c("Cohort A", "Cohort B"), 5),
+    person_source_value = letters[1:10],
+    cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 5),
+    cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
+  )
+
+  cohortDefinitionSet <- cohortDataToCohortDefinitionSet(cohortData, newCohortIds = c(33, 44) )
+
+  cohortDefinitionSet |> checkmate::expect_tibble()
+  cohortDefinitionSet |> names() |> checkmate::expect_names(must.include = c("cohortId", "cohortName", "json", "sql" ))
+  cohortDefinitionSet |> pull(json) |> stringr::str_detect('cohortType\": \"FromCohortData\"') |> all() |> expect_true()
+  (cohortDefinitionSet |> pull(sql) |> unique() |> length() == cohortDefinitionSet |> nrow()) |> expect_true()
+  cohortDefinitionSet$sql[[1]] |> stringr::str_detect("WHERE cohort_definition_id = 33") |> expect_true()
+  cohortDefinitionSet$sql[[2]] |> stringr::str_detect("WHERE cohort_definition_id = 44") |> expect_true()
+
+})
+
+
+
 
 #
 # getCohortDataFromCohortTable

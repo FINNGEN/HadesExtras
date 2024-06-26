@@ -152,19 +152,22 @@ assertCohortData  <- function(tibble) {
 #' @export
 cohortDataToCohortDefinitionSet <- function(
     cohortData,
-    cohortIdOffset = 0L,
+    newCohortIds = NULL,
     skipCohortDataCheck = FALSE
     ){
 
   #
   # Validate parameters
   #
-  checkmate::assertInt(cohortIdOffset)
-  checkmate::assertLogical(skipCohortDataCheck)
 
   if(skipCohortDataCheck == TRUE){
     assertCohortData(cohortData)
   }
+
+  numberCohorts <- cohortData |> distinct(cohort_name) |> nrow()
+  if(is.null(newCohortIds)){newCohortIds <- 1:numberCohorts}
+  checkmate::assertIntegerish(newCohortIds, len = numberCohorts)
+  checkmate::assertLogical(skipCohortDataCheck)
 
   #
   # Function
@@ -174,7 +177,7 @@ cohortDataToCohortDefinitionSet <- function(
   cohortDefinitionSet <- cohortData |>
     tidyr::nest(.key = "cohort", .by = c("cohort_name")) |>
     dplyr::transmute(
-      cohortId = as.double(dplyr::row_number()+cohortIdOffset),
+      cohortId = as.double(newCohortIds),
       cohortName = cohort_name,
       json = purrr::map_chr(.x = cohort, .f=.cohortDataToJson),
       sql = purrr::map2_chr(
