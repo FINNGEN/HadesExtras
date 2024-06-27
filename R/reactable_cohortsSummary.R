@@ -40,7 +40,7 @@ rectable_cohortsSummary <- function(
       cohort = paste0(
         shortName,
         "<br>",
-        dplyr::if_else(nchar(fullName)>cohortNameNcharLimit, paste0(substr(fullName, 1, 15), "..."), fullName)
+        dplyr::if_else(nchar(fullName)>cohortNameNcharLimit, paste0(substr(fullName, 1, 35), "..."), fullName)
       ),
       databaseTooltip = paste0(
         "Database Id: ", databaseId, "<br>",
@@ -74,7 +74,8 @@ rectable_cohortsSummary <- function(
     database = reactable::colDef(
       name = "Database",
       cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$databaseTooltip[[index]])},
-      html = TRUE
+      html = TRUE,
+      maxWidth = 200
     ),
     cohort = reactable::colDef(
       name = "Cohort",
@@ -84,7 +85,8 @@ rectable_cohortsSummary <- function(
     cohortCountsStr = reactable::colDef(
       name = "N Subjects <br> (N Entries)",
       cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$cohortCountsStrTooltip[[index]])},
-      html = TRUE
+      html = TRUE,
+      maxWidth = 100
     ),
     histogramCohortStartYear = reactable::colDef(
       name = "Cohort Start Date",
@@ -101,12 +103,14 @@ rectable_cohortsSummary <- function(
       },
       cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$countSexStrTooltip[[index]])},
       align = "left",
+      maxWidth = 160
     ),
     buildInfoStr = reactable::colDef(
       name = "Build Info",
       cell =  function(value, index){.tippyText(value, cohortsSummaryToPlot$buildInfoTooltip[[index]])},
       html = TRUE,
-      align = "center"
+      align = "center",
+      maxWidth = 80
     )
   )
 
@@ -114,7 +118,8 @@ rectable_cohortsSummary <- function(
     columns[["deleteButton"]] <-  reactable::colDef(
       name = "",
       sortable = FALSE,
-      cell = function() htmltools::tags$button(shiny::icon("trash"))
+      cell = function() htmltools::tags$button(shiny::icon("trash")),
+      maxWidth = 40
     )
   }
 
@@ -122,7 +127,8 @@ rectable_cohortsSummary <- function(
     columns[["editButton"]] <-  reactable::colDef(
       name = "",
       sortable = FALSE,
-      cell = function() htmltools::tags$button(shiny::icon("edit"))
+      cell = function() htmltools::tags$button(shiny::icon("edit")),
+      maxWidth = 40
     )
   }
 
