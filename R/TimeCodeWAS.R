@@ -7,7 +7,9 @@
 #' @param cohortTableHandler An object of class 'CohortTableHandler' representing the cohort table handler.
 #' @param cohortIdCases The ID of the cohort representing cases.
 #' @param cohortIdControls The ID of the cohort representing controls.
-#' @param covariateSettings A list of settings for extracting temporal covariates.
+#' @param analysisIds Numeric vector specifying the IDs of the analyses to be performed.
+#' @param temporalStartDays Numeric vector specifying the start days for each time window.
+#' @param temporalEndDays Numeric vector specifying the end days for each time window.
 #' @param minCellCount An integer specifying the minimum cell count for Fisher's exact test.
 #'
 #' @return A logical value indicating if the function was executed successfully.
@@ -28,7 +30,9 @@ executeTimeCodeWAS <- function(
     cohortTableHandler = NULL,
     cohortIdCases,
     cohortIdControls,
-    covariateSettings = FeatureExtraction::createDefaultTemporalCovariateSettings(),
+    analysisIds,
+    temporalStartDays,
+    temporalEndDays,
     minCellCount = 1,
     # # TODO: add these parameters if cohortTableHandler is NULL
     cohortDefinitionSet = NULL,
@@ -51,7 +55,11 @@ executeTimeCodeWAS <- function(
   exportFolder |> checkmate::assertDirectoryExists()
   cohortIdCases |> checkmate::assertNumeric()
   cohortIdControls |> checkmate::assertNumeric()
-  covariateSettings |> checkmate::assertList()
+  analysisIds |> checkmate::assertNumeric()
+  temporalStartDays |> checkmate::assertNumeric()
+  temporalEndDays |> checkmate::assertNumeric()
+  minCellCount |> checkmate::assertNumeric()
+
 
   if (is.null(cohortTableHandler) & any(is.null(c(cohortDefinitionSet, databaseId, databaseName, databaseDescription, connectionDetails, connection, cdmDatabaseSchema, cohortDatabaseSchema, vocabularyDatabaseSchema, vocabularyVersionCdm, vocabularyVersion)))) {
     stop("You must provide either a CohortTableHandler object or the necessary parameters to create one.")
@@ -77,24 +85,20 @@ executeTimeCodeWAS <- function(
   #
   # function
   #
-  ParallelLogger::logInfo("Getting FeatureExtraction for cases")
-  covariate_case <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    cohortTable = cohortTable,
-    cohortDatabaseSchema = cohortDatabaseSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    covariateSettings = covariateSettings,
-    cohortId = cohortIdCases,
-    aggregated = T
+  covariateSettings  <- FeatureExtraction_createTemporalCovariateSettingsFromList(
+    analysisIds = analysisIds,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays = temporalEndDays
   )
-  ParallelLogger::logInfo("Getting FeatureExtraction for controls")
-  covariate_control <- FeatureExtraction::getDbCovariateData(
+
+  ParallelLogger::logInfo("Getting FeatureExtraction for cases and controls")
+  covariateCasesControls <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     cohortTable = cohortTable,
     cohortDatabaseSchema = cohortDatabaseSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
     covariateSettings = covariateSettings,
-    cohortId = cohortIdControls,
+    cohortIds = c(cohortIdCases, cohortIdControls),
     aggregated = T
   )
 
@@ -138,8 +142,6 @@ executeTimeCodeWAS <- function(
     dplyr::count() |>
     dplyr::collect()
 
-
-
   windowCounts <-  windowCounts |>
     dplyr::mutate(cohort_definition_id = dplyr::case_when(
       cohort_definition_id == cohortIdCases ~ "n_cases",
@@ -154,10 +156,12 @@ executeTimeCodeWAS <- function(
 
   timeCodeWasCounts <-
     dplyr::full_join(
-      covariate_case$covariates |> tibble::as_tibble() |>
-        select(covariateId, timeId, n_cases_yes=sumValue),
-      covariate_control$covariates |> tibble::as_tibble() |>
-        select( covariateId, timeId, n_controls_yes=sumValue),
+      covariateCasesControls$covariates |> tibble::as_tibble() |>
+        dplyr::filter(cohortDefinitionId == cohortIdCases) |>
+        dplyr::select(covariateId, timeId, n_cases_yes=sumValue),
+      covariateCasesControls$covariates |> tibble::as_tibble() |>
+        dplyr::filter(cohortDefinitionId == cohortIdControls) |>
+        dplyr::select( covariateId, timeId, n_controls_yes=sumValue),
       by = c("covariateId", "timeId")
     )  |>
     dplyr::left_join(
@@ -232,20 +236,13 @@ executeTimeCodeWAS <- function(
       fileName = file.path(exportFolder, "temporal_covariate_timecodewas.csv")
     )
 
-  dplyr::bind_rows(
-    covariate_case$covariateRef |> tibble::as_tibble(),
-    covariate_control$covariateRef |> tibble::as_tibble()
-  ) |>
-    dplyr::distinct() |>
+
+  covariateCasesControls$covariateRef |> tibble::as_tibble() |>
     .writeToCsv(
       fileName = file.path(exportFolder, "temporal_covariate_ref.csv")
     )
 
-  dplyr::bind_rows(
-    covariate_case$analysisRef |> tibble::as_tibble(),
-    covariate_control$analysisRef |> tibble::as_tibble()
-  ) |>
-    dplyr::distinct() |>
+  covariateCasesControls$analysisRef |> tibble::as_tibble() |>
     .writeToCsv(
       fileName = file.path(exportFolder, "temporal_analysis_ref.csv")
     )

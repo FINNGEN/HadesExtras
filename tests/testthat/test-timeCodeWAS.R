@@ -38,37 +38,52 @@ test_that("executeTimeCodeWAS works", {
   cohortDefinitionSetWithSubsetDef <- cohortDefinitionSet |>
     CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
 
+  suppressWarnings(
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef)
+  )
 
-
+  analysisIds = c(101, 102, 141, 204, 601, 641, 301, 341, 404, 906, 701, 741, 801, 841, 501, 541)
   temporalStartDays = c(   -365*2, -365*1, 0,     1,   365+1 )
   temporalEndDays =   c( -365*1-1,     -1, 0, 365*1,   365*2)
-
-  temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
-    useConditionOccurrence = TRUE,
-    useDrugExposure =  TRUE,
-    useProcedureOccurrence = TRUE,
-    useMeasurement = TRUE,
-    useObservation = TRUE,
-    temporalStartDays = temporalStartDays,
-    temporalEndDays =   temporalEndDays
-  )
 
 
   exportFolder <- file.path(tempdir(), "timeCodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
   on.exit({unlink(exportFolder, recursive = TRUE);gc()})
 
+  suppressWarnings(
   executeTimeCodeWAS(
     exportFolder = exportFolder,
     cohortTableHandler = cohortTableHandler,
     cohortIdCases = 1,
     cohortIdControls = 2001,
-    covariateSettings = temporalCovariateSettings,
+    analysisIds = analysisIds,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays = temporalEndDays,
     minCellCount = 1
+  )
   )
 
   expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
+
+  suppressWarnings(
+    HadesExtras::csvFilesToSqlite(
+      dataFolder = exportFolder,
+      sqliteDbPath = file.path(exportFolder, "analysisResults.sqlite"),
+      overwrite = TRUE,
+      analysis = "timeCodeWAS"
+    )
+  )
+
+  analysisResultsHandler  <- ResultModelManager::ConnectionHandler$new(
+    connectionDetails = DatabaseConnector::createConnectionDetails(
+      dbms = "sqlite",
+      server = file.path(exportFolder, "analysisResults.sqlite")
+    )
+  )
+  timeCodeWASResults  <- analysisResultsHandler$tbl("temporal_covariate_timecodewas") |> dplyr::collect()
+  # last 3 digits of covariate_it are 101
+  timeCodeWASResults |> dplyr::filter(covariate_id %% 1000 == 101)   |> nrow() |> expect_gt(0)
 })
 
 
@@ -113,41 +128,56 @@ test_that("executeTimeCodeWAS works for cohort start date outside of observation
   cohortDefinitionSetWithSubsetDef <- cohortDefinitionSet |>
     CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
 
+  suppressWarnings(
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef)
+  )
 
   # change one person
-    DatabaseConnector::executeSql(
-      connection= cohortTableHandler$connectionHandler$getConnection(),
-      sql = "UPDATE main.observation_period SET observation_period_start_date = '1984-07-26' WHERE person_id = 9" )
+  DatabaseConnector::executeSql(
+    connection= cohortTableHandler$connectionHandler$getConnection(),
+    sql = "UPDATE main.observation_period SET observation_period_start_date = '1984-07-26' WHERE person_id = 9" )
 
+  analysisIds = c(101, 102, 141, 204, 601, 641, 301, 341, 404, 906, 701, 741, 801, 841, 501, 541)
   temporalStartDays = c(   -365*2, -365*1, 0,     1,   365+1 )
   temporalEndDays =   c( -365*1-1,     -1, 0, 365*1,   365*2)
-
-  temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
-    useConditionOccurrence = TRUE,
-    useDrugExposure =  TRUE,
-    useProcedureOccurrence = TRUE,
-    useMeasurement = TRUE,
-    useObservation = TRUE,
-    temporalStartDays = temporalStartDays,
-    temporalEndDays =   temporalEndDays
-  )
 
 
   exportFolder <- file.path(tempdir(), "timeCodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
   on.exit({unlink(exportFolder, recursive = TRUE);gc()})
 
+  suppressWarnings(
   executeTimeCodeWAS(
     exportFolder = exportFolder,
     cohortTableHandler = cohortTableHandler,
     cohortIdCases = 1,
     cohortIdControls = 2001,
-    covariateSettings = temporalCovariateSettings,
+    analysisIds = analysisIds,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays = temporalEndDays,
     minCellCount = 1
   )
+  )
 
-expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
+  expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
+
+  suppressWarnings(
+    HadesExtras::csvFilesToSqlite(
+      dataFolder = exportFolder,
+      sqliteDbPath = file.path(exportFolder, "analysisResults.sqlite"),
+      overwrite = TRUE,
+      analysis = "timeCodeWAS"
+    )
+  )
+
+  analysisResultsHandler  <- ResultModelManager::ConnectionHandler$new(
+    connectionDetails = DatabaseConnector::createConnectionDetails(
+      dbms = "sqlite",
+      server = file.path(exportFolder, "analysisResults.sqlite")
+    )
+  )
+
+  expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
 })
 
 
@@ -174,7 +204,9 @@ test_that("executeTimeCodeWAS works with big size", {
     verbose = FALSE
   )
 
+  suppressWarnings(
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
+  )
 
   # Match to sex and bday, match ratio 10
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
@@ -199,32 +231,46 @@ test_that("executeTimeCodeWAS works with big size", {
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef)
 
 
+  analysisIds = c(101, 102, 141, 204, 601, 641, 301, 341, 404, 906, 701, 741, 801, 841, 501, 541)
   temporalStartDays = c(   -365*2, -365*1, 0,     1,   365+1 )
   temporalEndDays =   c( -365*1-1,     -1, 0, 365*1,   365*2)
-
-  temporalCovariateSettings = FeatureExtraction::createTemporalCovariateSettings(
-    useConditionOccurrence = TRUE,
-    useDrugExposure =  TRUE,
-    useProcedureOccurrence = TRUE,
-    useMeasurement = TRUE,
-    useObservation = TRUE,
-    temporalStartDays = temporalStartDays,
-    temporalEndDays =   temporalEndDays
-  )
 
 
   exportFolder <- file.path(tempdir(), "timeCodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
   on.exit({unlink(exportFolder, recursive = TRUE);gc()})
 
-  executeTimeCodeWAS(
-    exportFolder = exportFolder,
-    cohortTableHandler = cohortTableHandler,
-    cohortIdCases = 1,
-    cohortIdControls = 2001,
-    covariateSettings = temporalCovariateSettings,
-    minCellCount = 1
+  suppressWarnings(
+    executeTimeCodeWAS(
+      exportFolder = exportFolder,
+      cohortTableHandler = cohortTableHandler,
+      cohortIdCases = 1,
+      cohortIdControls = 2001,
+      analysisIds = analysisIds,
+      temporalStartDays = temporalStartDays,
+      temporalEndDays = temporalEndDays,
+      minCellCount = 1
+    )
   )
+
+  expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
+
+  suppressWarnings(
+    HadesExtras::csvFilesToSqlite(
+      dataFolder = exportFolder,
+      sqliteDbPath = file.path(exportFolder, "analysisResults.sqlite"),
+      overwrite = TRUE,
+      analysis = "timeCodeWAS"
+    )
+  )
+
+  analysisResultsHandler  <- ResultModelManager::ConnectionHandler$new(
+    connectionDetails = DatabaseConnector::createConnectionDetails(
+      dbms = "sqlite",
+      server = file.path(exportFolder, "analysisResults.sqlite")
+    )
+  )
+
 
   expect_true(file.exists(file.path(exportFolder, "temporal_covariate_timecodewas.csv")))
 })
