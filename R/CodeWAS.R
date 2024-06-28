@@ -126,7 +126,42 @@ executeCodeWAS <- function(
   cohortCounts <- cohortTableHandler$getCohortCounts()
   n_cases_total <- cohortCounts$cohortSubjects[cohortCounts$cohortId == cohortIdCases]
   n_controls_total <- cohortCounts$cohortSubjects[cohortCounts$cohortId == cohortIdControls]
+  n_case_entries <- cohortCounts$cohortEntries[cohortCounts$cohortId == cohortIdCases]
+  n_control_entries <- cohortCounts$cohortEntries[cohortCounts$cohortId == cohortIdControls]
 
+  # if the number of entries is different that the number of subjects, cohort needs to be distinct
+  if (n_case_entries != n_cases_total | n_control_entries != n_controls_total) {
+    ParallelLogger::logInfo("Number of entries is different than number of subjects, cohort needs to be distinct in a temp table")
+
+    newCohortTable <- str_c(cohortTable, "_distinct")
+
+    sql <- "
+    DROP TABLE IF EXISTS @cohort_database_schema.@newCohortTable;
+    CREATE TABLE @cohort_database_schema.@newCohortTable AS
+    SELECT *
+    FROM (
+        SELECT *,
+               ROW_NUMBER() OVER (PARTITION BY cohort_definition_id, subject_id ORDER BY cohort_start_date) AS rn
+        FROM @cohort_database_schema.@cohortTable
+    ) sub
+    WHERE rn = 1;
+    "
+    sql <- SqlRender::render(
+      sql = sql,
+      cohort_database_schema = cohortDatabaseSchema,
+      cohortTable = cohortTable,
+      newCohortTable = newCohortTable,
+      warnOnMissingParameters = TRUE
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = connection@dbms
+    )
+    DatabaseConnector::dbExecute(connection, sql)
+
+    cohortTable <- newCohortTable
+
+  }
 
   #
   # noCovariatesMode
