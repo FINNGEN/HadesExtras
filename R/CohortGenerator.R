@@ -43,6 +43,8 @@ CohortGenerator_generateCohortSet <- function(
     incremental = FALSE,
     incrementalFolder = NULL) {
 
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Starting CohortGenerator_generateCohortSet")
+
   #
   # Validate parameters
   #
@@ -64,6 +66,8 @@ CohortGenerator_generateCohortSet <- function(
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Checked / established connection")
+
   #
   # Pre calculate tmp_cohortdata settings. This needs to be here so that incremental mode detects the cohort not to copy to cohortData
   #
@@ -77,6 +81,8 @@ CohortGenerator_generateCohortSet <- function(
     cohortDefinitionSet <- cohortDefinitionSet |>
       dplyr::mutate(sql = stringr::str_replace(sql, cohortDataImportTmpTableName, cohortDataImportTmpTableNameFull))
   }
+
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Pre-calculated tmp_cohortdata settings")
 
   #
   # start function before generateCohortSet
@@ -94,8 +100,12 @@ CohortGenerator_generateCohortSet <- function(
       return(as.character(NA))
     }))
 
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] dplyr::mutate cohortDefinitionSet object")
+
   cohortDefinitionSetCohortDataType <- cohortDefinitionSet |>
     dplyr::filter(cohortType == "FromCohortData")
+
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] dplyr::filter cohortDefinitionSet object. incremental:", incremental)
 
   if(incremental == TRUE){
     recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
@@ -113,16 +123,23 @@ CohortGenerator_generateCohortSet <- function(
             )
           })
       )
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] incremental is TRUE - dplyr::filter and apply .f CohortGenerator::isTaskRequired")
   }
+
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Transform the data")
 
   if(nrow(cohortDefinitionSetCohortDataType)!=0){
     # separate sql from cohortData
     cohortData <- .jsonToCohortData(cohortDefinitionSetCohortDataType)
 
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Performed .jsonToCohortData, obtained cohortData, start copying of cohortData to db")
+
     # Connect to tables and copy cohortData to database
     personTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(cdmDatabaseSchema, "person"))
     observationPeriodTable <- dplyr::tbl(connection, tmp_inDatabaseSchema(cdmDatabaseSchema, "observation_period"))
     cohortDataTable <- tmp_dplyr_copy_to(connection, cohortData, overwrite = TRUE)
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finisged copying of cohortData to db. Created personTbl, observationPeriodTable, and cohortDataTable")
 
     # join to cohort_data_table cohort_names_table.cohort_name; person.person_id; observation_period period dates
     toAppend <- cohortDataTable |>
@@ -141,6 +158,8 @@ CohortGenerator_generateCohortSet <- function(
         by = "person_id"
       )
 
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished dplyr::left_join cohortDataTable AND observationPeriodTable into 'toAppend' obj")
+
     # collect check cohortData to add
     checkOnCohortData <- toAppend |>
       dplyr::group_by(cohort_definition_id) |>
@@ -153,6 +172,8 @@ CohortGenerator_generateCohortSet <- function(
       ) |>
       dplyr::collect()
 
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished dplyr::group_by, dplyr::summarise, dplyr::collect() of toAppend obj")
+
     # compute changes in toAppend
     toAppend <- toAppend |>
       dplyr::filter(!is.na(person_id)) |>
@@ -162,13 +183,21 @@ CohortGenerator_generateCohortSet <- function(
         cohort_end_date = dplyr::if_else(is.na(cohort_end_date), observation_period_end_date, cohort_end_date)
       ) |>
       dplyr::select(cohort_definition_id, subject_id=person_id, cohort_start_date, cohort_end_date) #|>
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished dplyr::filter, dplyr::mutate and dplyr::select of toAppend obj. Try DatabaseConnector::dbRemoveTable")
+
     #dplyr::compute()
     # instead of compute, we create a temporal table, so the same stays the same in the sql, this is necesary for incremental mode
     # overwrite not working
     #browser()
     try(DatabaseConnector::dbRemoveTable(connection, cohortDataImportTmpTableNameFull), silent = TRUE)
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished dplyr::filter, dplyr::mutate and dplyr::select of toAppend obj. Finished DatabaseConnector::dbRemoveTable")
+
     #browser()
     toAppend <- dplyr::copy_to(connection, toAppend, cohortDataImportTmpTableName, temporary = TRUE, overwrite = TRUE)
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished dplyr::copy_to of toAppend")
 
     # replace recalculated cohortDefinitionSets
     cohortDefinitionSet <- dplyr::bind_rows(
@@ -176,7 +205,13 @@ CohortGenerator_generateCohortSet <- function(
       cohortDefinitionSetCohortDataType
     ) |>
       dplyr::arrange(cohortId)
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished dplyr::bind_rows, dplyr::filter, and dplyr::arrange of cohortDefinitionSet (replace recalculated cohortDefinitionSets)")
+
   }
+
+  start <- Sys.time()
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Starting CohortGenerator::generateCohortSet ", start)
 
   #
   # end function before generateCohortSet
@@ -194,6 +229,9 @@ CohortGenerator_generateCohortSet <- function(
     incrementalFolder = incrementalFolder
   )
 
+  end <- Sys.time()
+
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished CohortGenerator::generateCohortSet, time diff: ", end - start)
 
   cohortGeneratorResults <- results |>
     dplyr::select(-cohortName) |>
@@ -203,11 +241,16 @@ CohortGenerator_generateCohortSet <- function(
       buildInfo = map(.x = cohortId, .f = ~{LogTibble$new()})
     )
 
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Results transformed using dplyr::select and dplyr::mutate")
+
   #browser()
   #
   # start function after generateCohortSet
   #
   if(nrow(cohortDefinitionSetCohortDataType)!=0){
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Starting left_join of cohortGeneratorResults AND checkOnCohortData")
+
     #
     cohortGeneratorResults <- cohortGeneratorResults |>
       dplyr::left_join(
@@ -219,12 +262,18 @@ CohortGenerator_generateCohortSet <- function(
       ) |>
       dplyr::select(-cohortDataInfo)
 
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished left_join of cohortGeneratorResults AND checkOnCohortData - DatabaseConnector::dropEmulatedTempTables(connection) ")
+
     DatabaseConnector::dropEmulatedTempTables(connection)
+
+    ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Finished DatabaseConnector::dropEmulatedTempTables(connection)")
   }
 
   #
   # end function after generateCohortSet
   #
+
+  ParallelLogger::logInfo("[HadesExtras(CohortGenerator.R)] Returning cohortGeneratorResults - End Of Function")
 
   return(cohortGeneratorResults |> tibble::as_tibble())
 }

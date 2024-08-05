@@ -168,6 +168,8 @@ CohortTableHandler <- R6::R6Class(
        stop("Provided table is not of cohortDefinitionSet format")
       }
 
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Started insertOrUpdateCohorts")
+
       # if not shortName, create it
       if(!"shortName" %in% names(cohortDefinitionSet)){
         cohortDefinitionSet$shortName <- paste0("C", cohortDefinitionSet$cohortId)
@@ -180,6 +182,8 @@ CohortTableHandler <- R6::R6Class(
         warning("Following cohort ids already exists on the cohort table and will be updated: ", paste(cohortIdsExists, collapse = ", "))
       }
 
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Checked if cohortIdsExists")
+
       #
       # Function
       #
@@ -191,10 +195,14 @@ CohortTableHandler <- R6::R6Class(
       )|>
         dplyr::arrange(cohortId)
 
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Checked if hasSubSets")
+
       # fix cohortDefinitionSet for subsets using
       cohortDefinitionSet <- cohortDefinitionSet |>
         dplyr::mutate(subsetParent = dplyr::if_else( is.na(isSubset) | isSubset==FALSE, cohortId, subsetParent))
       attr(cohortDefinitionSet, "hasSubsetDefinitions") <- hasSubSets
+
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Performed dplyr::mutate on cohortDefinitionSet")
 
       # generate cohorts in incremental mode
       cohortGeneratorResults <- CohortGenerator_generateCohortSet(
@@ -208,9 +216,13 @@ CohortTableHandler <- R6::R6Class(
       )|>
         dplyr::arrange(cohortId)
 
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Obtained cohortGeneratorResults from HadesExtras R/CohortTableHandler.R :: generateCohortSet")
+
       # keep only these that have changed
       cohortGeneratorResultsToUpdate <- cohortGeneratorResults |>
         dplyr::filter(generationStatus == "COMPLETE")
+
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Performed dplyr::filter on cohortGeneratorResults object")
 
       # Update cohortDemograpics
       cohortDemograpicsToUpdate <- tibble::tibble(cohortId=0, .rows = 0)
@@ -224,6 +236,8 @@ CohortTableHandler <- R6::R6Class(
           cohortIds = cohortGeneratorResultsToUpdate$cohortId
         )
       }
+
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Performed CohortGenerator_getCohortDemograpics")
 
       # update changes
       #browser()
@@ -247,6 +261,8 @@ CohortTableHandler <- R6::R6Class(
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTable = self$cohortTableNames$cohortTable
       )
+
+      ParallelLogger::logInfo("[HadesExtras(CohortTableHAndler.R)] Perfomed dplyr::filter on cohortGeneratorResults & Collected cohortDemograpics, cohortsOverlap")
 
       # if no errors save
       private$.cohortDefinitionSet <- cohortDefinitionSet
