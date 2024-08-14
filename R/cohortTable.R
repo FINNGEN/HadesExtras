@@ -171,7 +171,6 @@ cohortTableToCohortDefinitionSettings <- function(
   newCohortDefinitionIds |> checkmate::assertNumeric(len = length(cohortDefinitionIds))
 
   ParallelLogger::logInfo("[HadesExtras] cohortDefinitionIds:", str(cohortDefinitionIds))
-  ParallelLogger::logInfo("[HadesExtras] cohort_definition_name:", str(cohort_definition_name))
   ParallelLogger::logInfo("[HadesExtras] str(cohortDefinitionTable):", str(cohortDefinitionTable))
   ParallelLogger::logInfo("[HadesExtras] cohortDatabaseSchema:", str(cohortDatabaseSchema))
 
