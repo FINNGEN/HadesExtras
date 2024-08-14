@@ -211,6 +211,8 @@ cohortTableToCohortDefinitionSettings <- function(
     warnOnMissingParameters = FALSE
   )
 
+  ParallelLogger::logInfo("[HadesExtras] created sql when importing cohort from the Endpoints")
+
   return(sql)
 }
 
