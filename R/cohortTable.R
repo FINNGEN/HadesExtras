@@ -193,6 +193,8 @@ cohortTableToCohortDefinitionSettings <- function(
       cohortId = newCohortDefinitionIds
     )
 
+  ParallelLogger::logInfo("[HadesExtras] cohortTable : final cohortDefinitionTable ", str(cohortDefinitionTable))
+
 }
 
 
