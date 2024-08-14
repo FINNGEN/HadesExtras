@@ -170,6 +170,11 @@ cohortTableToCohortDefinitionSettings <- function(
   cohortDefinitionIds |> checkmate::assertNumeric()
   newCohortDefinitionIds |> checkmate::assertNumeric(len = length(cohortDefinitionIds))
 
+  ParallelLogger::logInfo("[HadesExtras] cohortDefinitionIds:", str(cohortDefinitionIds))
+  ParallelLogger::logInfo("[HadesExtras] cohort_definition_name:", str(cohort_definition_name))
+  ParallelLogger::logInfo("[HadesExtras] str(cohortDefinitionTable):", str(cohortDefinitionTable))
+  ParallelLogger::logInfo("[HadesExtras] cohortDatabaseSchema:", str(cohortDatabaseSchema))
+
   #
   # Function
   #
@@ -211,7 +216,7 @@ cohortTableToCohortDefinitionSettings <- function(
     warnOnMissingParameters = FALSE
   )
 
-  ParallelLogger::logInfo("[HadesExtras] created sql when importing cohort from the Endpoints")
+  ParallelLogger::logInfo("[HadesExtras] created sql when importing cohort from the Endpoints:", sql)
 
   return(sql)
 }
