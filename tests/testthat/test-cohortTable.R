@@ -96,7 +96,7 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
 })
 
 
-test_that("getCohortNamesFromCohortDefinitionTable change cohort ids", {
+test_that(" change cohort ids", {
 
   cohortTableHandler <- helper_createNewCohortTableHandler()
   on.exit({rm(cohortTableHandler);gc()})

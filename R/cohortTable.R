@@ -154,7 +154,7 @@ getCohortNamesFromCohortDefinitionTable <- function(
 #' @importFrom checkmate assertString assertNumeric
 #'
 #' @export
-cohortTableToCohortDefinitionSettings <- function(
+  cohortTableToCohortDefinitionSettings <- function(
     cohortDatabaseSchema,
     cohortTable = "cohort",
     cohortDefinitionTable,

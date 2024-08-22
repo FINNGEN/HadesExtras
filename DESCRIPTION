@@ -43,13 +43,6 @@ Imports:
     Eunomia, 
     CohortDiagnostics,
     speedglm
-Remotes: 
-    OHDSI/DatabaseConnector,
-    OHDSI/FeatureExtraction,
-    OHDSI/CohortGenerator,
-    OHDSI/ResultModelManager,
-    OHDSI/Eunomia,  
-    javier-gracia-tabuenca-tuni/CohortDiagnostics@fix-error-with-no-conceptset-cohorts
 Suggests: 
     devtools,
     ROhdsiWebApi,
