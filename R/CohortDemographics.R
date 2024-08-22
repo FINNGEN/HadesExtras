@@ -194,6 +194,37 @@ executeCohortDemographicsCounts <- function(
 
 }
 
+#' @title Retrieve Cohort Demographics Counts
+#' @description This function retrieves and aggregates demographic counts for specified cohorts based on reference years. It connects to the database, executes SQL queries to calculate demographic statistics such as age group and gender distribution, and returns the results as a tibble.
+#'
+#' @param connectionDetails An object of class `DatabaseConnector::connectionDetails`. This provides the details required to connect to the database. Either `connectionDetails` or `connection` must be provided.
+#' @param connection A database connection object. If not provided, the function will establish a connection using `connectionDetails`.
+#' @param cdmDatabaseSchema The schema name where the Common Data Model (CDM) data resides. This is used to locate the necessary tables in the database.
+#' @param vocabularyDatabaseSchema The schema name where the vocabulary tables reside. Defaults to the value of `cdmDatabaseSchema` if not specified.
+#' @param cohortDatabaseSchema The schema name where the cohort tables reside. This schema contains the cohort data to be analyzed.
+#' @param cohortTable The name of the cohort table. Defaults to `"cohort"`.
+#' @param cohortIds A numeric vector of cohort IDs for which the demographic counts will be retrieved. If empty, no cohorts will be analyzed.
+#' @param referenceYears A character vector specifying the reference year columns to be used for the demographic counts. Must be one or more of `"cohort_start_date"`, `"cohort_end_date"`, or `"birth_datetime"`.
+#'
+#' @return A tibble containing the aggregated demographic counts, including columns for `referenceYear`, `cohortId`, `calendarYear`, `ageGroup`, `gender`, and `count`.
+#'
+#' @details
+#' The function performs the following steps:
+#' \enumerate{
+#'   \item Validates the input parameters.
+#'   \item Establishes a database connection if one is not already provided.
+#'   \item Iterates over the `referenceYears` to calculate demographic counts for each cohort.
+#'   \item Translates the SQL script according to the target database dialect and executes it.
+#'   \item Aggregates the results by age group, gender, and calendar year.
+#' }
+#'
+#' @importFrom DatabaseConnector connect disconnect querySql
+#' @importFrom SqlRender readSql render translate
+#' @importFrom checkmate assertCharacter assertString assertNumeric assertSubset
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr mutate select bind_rows case_when group_by summarize everything
+#'
+#' @export
 
 getCohortDemographicsCounts <- function(
     connectionDetails = NULL,

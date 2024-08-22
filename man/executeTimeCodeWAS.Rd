@@ -9,7 +9,9 @@ executeTimeCodeWAS(
   cohortTableHandler = NULL,
   cohortIdCases,
   cohortIdControls,
-  covariateSettings = FeatureExtraction::createDefaultTemporalCovariateSettings(),
+  analysisIds,
+  temporalStartDays,
+  temporalEndDays,
   minCellCount = 1,
   cohortDefinitionSet = NULL,
   databaseId = NULL,
@@ -34,7 +36,11 @@ executeTimeCodeWAS(
 
 \item{cohortIdControls}{The ID of the cohort representing controls.}
 
-\item{covariateSettings}{A list of settings for extracting temporal covariates.}
+\item{analysisIds}{Numeric vector specifying the IDs of the analyses to be performed.}
+
+\item{temporalStartDays}{Numeric vector specifying the start days for each time window.}
+
+\item{temporalEndDays}{Numeric vector specifying the end days for each time window.}
 
 \item{minCellCount}{An integer specifying the minimum cell count for Fisher's exact test.}
 }
