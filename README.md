@@ -12,7 +12,7 @@ You can install the development version of HadesExtras from [GitHub](https://git
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("javier-gracia-tabuenca-tuni/HadesExtras")
+devtools::install_github("FINNGEN/HadesExtras")
 ```
 
 ## Example
