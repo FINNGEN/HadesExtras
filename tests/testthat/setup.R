@@ -1,20 +1,11 @@
 # settings
-if( Sys.getenv("EUNOMIA_DATA_FOLDER") == "" ){
-  message("EUNOMIA_DATA_FOLDER not set. Please set this environment variable to the path of the Eunomia data folder.")
-  stop()
-}
+configurationName  <- getOption("configurationName", default = "E1")
+configurationName  <- getOption("configurationName", default = "BQ1")
+#
+configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
 
-testConfigFile <- "eunomia_cohortTableHandlerConfig.yml"
-cohortTableHandlerConfig <- yaml::read_yaml(testthat::test_path("config", testConfigFile))$cohortTableHandler
+testSelectedConfiguration <- configurations[[configurationName]]
 
-# if using eunomia database create the file
-if(cohortTableHandlerConfig$connection$connectionDetailsSettings$server == "Eunomia"){
-  databaseName <- cohortTableHandlerConfig$connection$connectionDetailsSettings$databaseName
-  eunomiaDatabaseFile  <- Eunomia::getDatabaseFile(databaseName, overwrite = FALSE)
-  cohortTableHandlerConfig$connection$connectionDetailsSettings$server <- eunomiaDatabaseFile
-  cohortTableHandlerConfig$connection$connectionDetailsSettings$databaseName <- NULL
-}
+message("************* Testing on ", configurationName, " *************")
 
-# inform user
-message("************* Testing on ", testConfigFile, " *************")
 

@@ -8,7 +8,7 @@ Class for handling cohort tables in a CDM database.
 Inherits from CDMdbHandler.
 }
 \section{Super class}{
-\code{\link[HadesExtras:CDMdbHandler]{HadesExtras::CDMdbHandler}} -> \code{CohortTableHandler}
+\code{HadesExtras::CDMdbHandler} -> \code{CohortTableHandler}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

@@ -34,10 +34,7 @@ test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks",
   cohortTableHandler$getCohortIdAndNames() |> checkmate::expect_tibble(max.rows = 0)
   cohortTableHandler$getCohortCounts() |> checkmate::expect_tibble(max.rows = 0)
   cohortTableHandler$getCohortsSummary() |> assertCohortsSummary()
-})
-
-
-#
+})#
 # insertOrUpdateCohorts
 #
 test_that("CohortTableHandler$insertOrUpdateCohorts adds a cohort", {
