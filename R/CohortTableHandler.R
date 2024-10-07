@@ -287,7 +287,7 @@ CohortTableHandler <- R6::R6Class(
         dplyr::filter(cohortId != cohortIds)
 
       private$.cohortsOverlap <- private$.cohortsOverlap |>
-        .removeCohortIdsFromCohortOverlapsTable(cohortIds)
+        removeCohortIdsFromCohortOverlapsTable(cohortIds)
 
     },
     #'
@@ -431,7 +431,8 @@ createCohortTableHandlerFromList <- function(
 #' @importFrom purrr map_chr
 #' @importFrom stringr str_split str_detect
 #'
-.removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
+#' @export
+removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 
   if (length(cohortIds) == 0) {
     return(cohortOverlaps)
