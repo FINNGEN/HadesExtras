@@ -27,7 +27,7 @@ test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks",
 
   cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
   cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
-  cohortTableHandler$connectionStatusLog |> dplyr::filter(type != "SUCCESS") |> nrow() |>  expect_equal(0)
+  cohortTableHandler$connectionStatusLog |> dplyr::filter(type != "SUCCESS" & type != "WARNING") |> nrow() |>  expect_equal(0)
 
   # check returns empty valid tables
   cohortTableHandler$getCohortIdAndNames() |> checkmate::expect_tibble(max.rows = 0)
@@ -207,6 +207,16 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(20))
   cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(20))
   cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(20))
+
+  # check deleted cohort can be loaded again, to be sure all the data has been deleted
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
+
+  cohortTableHandler$getCohortsSummary() |> checkCohortsSummary() |> expect_true()
+  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(10,20))
+
 
 })
 

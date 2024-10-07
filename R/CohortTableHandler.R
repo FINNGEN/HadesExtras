@@ -253,7 +253,8 @@ CohortTableHandler <- R6::R6Class(
         connection= self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
-        cohortIds = cohortIds
+        cohortIds = cohortIds,
+        incrementalFolder = private$.incrementalFolder
       )
 
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
