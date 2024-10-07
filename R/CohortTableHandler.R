@@ -273,7 +273,8 @@ CohortTableHandler <- R6::R6Class(
         connection= self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
-        cohortIds = cohortIds
+        cohortIds = cohortIds,
+        incrementalFolder = private$.incrementalFolder
       )
 
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
@@ -286,7 +287,7 @@ CohortTableHandler <- R6::R6Class(
         dplyr::filter(cohortId != cohortIds)
 
       private$.cohortsOverlap <- private$.cohortsOverlap |>
-        removeCohortIdsFromCohortOverlapsTable(cohortIds)
+        .removeCohortIdsFromCohortOverlapsTable(cohortIds)
 
     },
     #'
@@ -417,10 +418,49 @@ createCohortTableHandlerFromList <- function(
 }
 
 
+#' Remove specified cohort IDs from cohort overlaps table
+#'
+#' This function removes specified cohort IDs from a cohort overlaps table.
+#'
+#' @param cohortOverlaps A data frame containing cohort overlaps.
+#' @param cohortIds A numeric vector of cohort IDs to be removed.
+#' @return A data frame with cohort overlaps after removing specified IDs.
+#' @export
+#' @importFrom dplyr mutate group_by summarize filter
+#' @importFrom checkmate assertDataFrame assertSubset assertNumeric
+#' @importFrom purrr map_chr
+#' @importFrom stringr str_split str_detect
+#' @examples
+#' cohortOverlaps <- data.frame(cohortIdCombinations = c("-1-2-", "-2-3-", "-3-4-"),
+#'                             numberOfSubjects = c(10, 15, 20))
+#' cohortIds <- c(2, 3)
+#' removeCohortIdsFromCohortOverlapsTable(cohortOverlaps, cohortIds)
+#'
+.removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 
+  if (length(cohortIds) == 0) {
+    return(cohortOverlaps)
+  }
 
+  cohortOverlaps |> checkmate::assertDataFrame()
+  cohortOverlaps  |> names()  |> checkmate::assertSubset(c('cohortIdCombinations', 'numberOfSubjects'))
+  cohortIds |> checkmate::assertNumeric()
 
+  cohortOverlaps <- cohortOverlaps |>
+    dplyr::mutate(
+      cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~{
+        a <- stringr::str_split(.x, '-')[[1]]   |>
+          setdiff(c('', as.character(cohortIds)))  |>
+          paste0(collapse = '-')
+        a  <- paste0('-', a, '-')
+      }),
+    ) |>
+    dplyr::filter(!stringr::str_detect(cohortIdCombinations, '--')) |>
+    dplyr::group_by(cohortIdCombinations) |>
+    dplyr::summarize(numberOfSubjects = sum(numberOfSubjects), .groups = "drop")
 
+  return(cohortOverlaps)
+}
 
 
 

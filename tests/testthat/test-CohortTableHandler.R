@@ -180,6 +180,9 @@ test_that("CohortTableHandler$insertOrUpdateCohorts can insert a cohort with no 
 #
 # Delete cohorts
 #
+#
+# Delete cohorts
+#
 test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary", {
 
   cohortTableHandler <- helper_createNewCohortTableHandler()
@@ -200,7 +203,6 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(10,20))
   cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(10,20))
   cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(10,20))
-  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-10-20-"))
 
   cohortTableHandler$deleteCohorts(10L)
 
@@ -209,9 +211,19 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(20))
   cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(20))
   cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(20))
-  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-20-"))
+
+  # check deleted cohort can be loaded again, to be sure all the data has been deleted
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
+
+  cohortTableHandler$getCohortsSummary() |> checkCohortsSummary() |> expect_true()
+  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(10,20))
+  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(10,20))
+
 
 })
+
 
 
 #
