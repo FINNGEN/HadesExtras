@@ -430,11 +430,6 @@ createCohortTableHandlerFromList <- function(
 #' @importFrom checkmate assertDataFrame assertSubset assertNumeric
 #' @importFrom purrr map_chr
 #' @importFrom stringr str_split str_detect
-#' @examples
-#' cohortOverlaps <- data.frame(cohortIdCombinations = c("-1-2-", "-2-3-", "-3-4-"),
-#'                             numberOfSubjects = c(10, 15, 20))
-#' cohortIds <- c(2, 3)
-#' removeCohortIdsFromCohortOverlapsTable(cohortOverlaps, cohortIds)
 #'
 .removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 
