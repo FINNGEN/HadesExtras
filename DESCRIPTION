@@ -17,7 +17,7 @@ Imports:
     bigrquery,
     checkmate,
     DBI,
-    dbplyr (<= 2.4.0),
+    dbplyr,
     digest,
     dplyr,
     htmltools,

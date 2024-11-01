@@ -41,6 +41,6 @@ readAndParseYalm <- function(pathToYalmFile, ...) {
   }
 
   # parse the yaml file
-  yalmFile <- yaml::yaml.load(yaml::as.yaml(yalmFile))
+  yalmFile <- yaml::yaml.load(yalmFile)
   return(yalmFile)
 }

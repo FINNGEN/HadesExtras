@@ -18,17 +18,17 @@ covariateData_YearOfBirth <- function() {
 #' @export
 #'
 YearOfBirth <- function(
-    connection,
-    oracleTempSchema = NULL,
-    cdmDatabaseSchema,
-    cdmVersion = "5",
-    cohortTable = "#cohort_person",
-    cohortIds = c(-1),
-    rowIdField = "subject_id",
+  connection,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+  cdmDatabaseSchema,
+  cdmVersion = "5",
+  cohortTable = "#cohort_person",
+  cohortIds = c(-1),
+  rowIdField = "subject_id",
     covariateSettings,
     aggregated = FALSE,
     minCharacterizationMean = 0
-    ) {
+  ) {
 
   writeLines("Constructing YearOfBirth covariate")
 

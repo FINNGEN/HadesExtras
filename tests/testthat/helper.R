@@ -1,48 +1,11 @@
-
 helper_createNewConnection <- function(addCohorts = FALSE){
-    connectionDetailsSettings <- testSelectedConfiguration$connection$connectionDetailsSettings
 
-  if(connectionDetailsSettings$dbms == "eunomia"){
-    connectionDetails <- Eunomia::getEunomiaConnectionDetails()
-  }else{
-    connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
-  }
+  checkmate::assertLogical(addCohorts, len = 1, null.ok = FALSE)
 
-  # set tempEmulationSchema if in config
-  if(!is.null(testSelectedConfiguration$connection$tempEmulationSchema)){
-    options(sqlRenderTempEmulationSchema = testSelectedConfiguration$connection$tempEmulationSchema)
-  }else{
-    options(sqlRenderTempEmulationSchema = NULL)
-  }
+  # by default use the one from setup.R
+  connectionDetailsSettings <- test_cohortTableHandlerConfig$connection$connectionDetailsSettings
 
-  # set useBigrqueryUpload if in config
-  if(!is.null(testSelectedConfiguration$connection$useBigrqueryUpload)){
-    options(useBigrqueryUpload = testSelectedConfiguration$connection$useBigrqueryUpload)
-
-    # bq authentication
-    if(testSelectedConfiguration$connection$useBigrqueryUpload==TRUE){
-      checkmate::assertTRUE(connectionDetails$dbms=="bigquery")
-
-      options(gargle_oauth_cache=FALSE) #to avoid the question that freezes the app
-      connectionString <- connectionDetails$connectionString()
-      if( connectionString |> stringr::str_detect(";OAuthType=0;")){
-        OAuthPvtKeyPath <- connectionString |>
-          stringr::str_extract("OAuthPvtKeyPath=([:graph:][^;]+);") |>
-          stringr::str_remove("OAuthPvtKeyPath=") |> stringr::str_remove(";")
-
-        checkmate::assertFileExists(OAuthPvtKeyPath)
-        bigrquery::bq_auth(path = OAuthPvtKeyPath)
-
-      }else{
-        bigrquery::bq_auth(scopes = "https://www.googleapis.com/auth/bigquery")
-      }
-
-      connectionDetails$connectionString
-    }
-
-  }else{
-    options(useBigrqueryUpload = NULL)
-  }
+  connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
 
   if(addCohorts){
     Eunomia::createCohorts(connectionDetails)
@@ -54,36 +17,30 @@ helper_createNewConnection <- function(addCohorts = FALSE){
 }
 
 
-helper_getParedSourcePersonAndPersonIds  <- function(
-    connection,
-    cohortDatabaseSchema,
-    numberPersons){
-
-  # Connect, collect tables
-  personTable <- dplyr::tbl(connection, tmp_inDatabaseSchema(cohortDatabaseSchema, "person"))
-
-  # get first n persons
-  pairedSourcePersonAndPersonIds  <- personTable  |>
-    dplyr::arrange(person_id) |>
-    dplyr::select(person_id, person_source_value) |>
-    dplyr::collect(n=numberPersons)
-
-
-  return(pairedSourcePersonAndPersonIds)
-}
-
-
-
-
 helper_createNewCohortTableHandler <- function(addCohorts = NULL){
 
   addCohorts |> checkmate::assertCharacter(len = 1, null.ok = TRUE)
-  addCohorts |> checkmate::assertSubset(c("EunomiaDefaultCohorts", "HadesExtrasFractureCohorts"), empty.ok = TRUE)
+  addCohorts |> checkmate::assertSubset(c(
+    "EunomiaDefaultCohorts", "HadesExtrasFractureCohorts","HadesExtrasAsthmaCohorts",
+    "HadesExtrasFractureCohortsMatched","HadesExtrasAsthmaCohortsMatched"
+  ), empty.ok = TRUE)
 
-  cohortTableHandlerConfig <- cohortTableHandlerConfig # set by setup.R
+  # by default use the one from setup.R
+  cohortTableHandlerConfig <- test_cohortTableHandlerConfig # set by setup.R
+
   loadConnectionChecksLevel = "basicChecks"
 
-  cohortTableHandler <- HadesExtras::createCohortTableHandlerFromList(cohortTableHandlerConfig, loadConnectionChecksLevel)
+  # TEMP, create a timestaped table
+  timestamp <- as.character(as.numeric(format(Sys.time(), "%d%m%Y%H%M%OS2"))*100)
+  cohortTableName <- cohortTableHandlerConfig$cohortTable$cohortTableName
+  if(cohortTableName  |> stringr::str_detect("<timestamp>")){
+    cohortTableName <- cohortTableName |> stringr::str_replace("<timestamp>", timestamp)
+  }
+  cohortTableHandlerConfig$cohortTable$cohortTableName <- cohortTableName
+  # END TEMP
+
+  cohortTableHandler <- createCohortTableHandlerFromList(cohortTableHandlerConfig, loadConnectionChecksLevel)
+
 
   if(!is.null(addCohorts) ){
     if(addCohorts == "EunomiaDefaultCohorts"){
@@ -109,8 +66,109 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
         verbose = T
       )
     }
+    if(addCohorts == "HadesExtrasAsthmaCohorts"){
+      cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+        settingsFileName = "testdata/asthma/Cohorts.csv",
+        jsonFolder = "testdata/asthma/cohorts",
+        sqlFolder = "testdata/asthma/sql/sql_server",
+        cohortFileNameFormat = "%s",
+        cohortFileNameValue = c("cohortId"),
+        subsetJsonFolder = "testdata/asthma/cohort_subset_definitions/",
+        packageName = "HadesExtras",
+        verbose = FALSE
+      )
+    }
+    if(addCohorts == "HadesExtrasFractureCohortsMatched"){
+      cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+        settingsFileName = "testdata/fracture/Cohorts.csv",
+        jsonFolder = "testdata/fracture/cohorts",
+        sqlFolder = "testdata/fracture/sql/sql_server",
+        cohortFileNameFormat = "%s",
+        cohortFileNameValue = c("cohortId"),
+        subsetJsonFolder = "testdata/fracture/cohort_subset_definitions/",
+        packageName = "HadesExtras",
+        verbose = T
+      )
+
+      # Match
+      subsetDef <- CohortGenerator::createCohortSubsetDefinition(
+        name = "",
+        definitionId = 1,
+        subsetOperators = list(
+          HadesExtras::createMatchingSubset(
+            matchToCohortId = 1,
+            matchRatio = 10,
+            matchSex = TRUE,
+            matchBirthYear = TRUE,
+            matchCohortStartDateWithInDuration = FALSE,
+            newCohortStartDate = "asMatch",
+            newCohortEndDate = "keep"
+          )
+        )
+      )
+
+      cohortDefinitionSet <- cohortDefinitionSet |>
+        CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
+    }
+    if(addCohorts == "HadesExtrasAsthmaCohortsMatched"){
+      # cohorts from eunomia
+      cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+        settingsFileName = "testdata/asthma/Cohorts.csv",
+        jsonFolder = "testdata/asthma/cohorts",
+        sqlFolder = "testdata/asthma/sql/sql_server",
+        cohortFileNameFormat = "%s",
+        cohortFileNameValue = c("cohortId"),
+        subsetJsonFolder = "testdata/asthma/cohort_subset_definitions/",
+        packageName = "HadesExtras",
+        verbose = FALSE
+      )
+
+      # Match to sex and bday, match ratio 10
+      subsetDef <- CohortGenerator::createCohortSubsetDefinition(
+        name = "",
+        definitionId = 1,
+        subsetOperators = list(
+          HadesExtras::createMatchingSubset(
+            matchToCohortId = 1,
+            matchRatio = 10,
+            matchSex = TRUE,
+            matchBirthYear = TRUE,
+            matchCohortStartDateWithInDuration = FALSE,
+            newCohortStartDate = "asMatch",
+            newCohortEndDate = "keep"
+          )
+        )
+      )
+
+      cohortDefinitionSet <- cohortDefinitionSet |>
+        CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
+
+    }
+
     cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
   }
 
   return(cohortTableHandler)
 }
+
+
+
+helper_getParedSourcePersonAndPersonIds  <- function(
+    connection,
+    cohortDatabaseSchema,
+    numberPersons){
+
+  # Connect, collect tables
+  personTable <- dplyr::tbl(connection, tmp_inDatabaseSchema(cohortDatabaseSchema, "person"))
+
+  # get first n persons
+  pairedSourcePersonAndPersonIds  <- personTable  |>
+    dplyr::arrange(person_id) |>
+    dplyr::select(person_id, person_source_value) |>
+    dplyr::collect(n=numberPersons)
+
+
+  return(pairedSourcePersonAndPersonIds)
+}
+
+
