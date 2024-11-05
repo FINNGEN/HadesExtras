@@ -89,14 +89,13 @@ CDMdbHandler <- R6::R6Class(
     #' @param cdmDatabaseSchema             Name of the CDM database schema
     #' @param vocabularyDatabaseSchema      (Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)
     #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
-    initialize = function(
-        databaseId,
-        databaseName,
-        databaseDescription,
-        connectionHandler,
-        cdmDatabaseSchema,
-        vocabularyDatabaseSchema = cdmDatabaseSchema,
-        loadConnectionChecksLevel = "allChecks") {
+    initialize = function(databaseId,
+                          databaseName,
+                          databaseDescription,
+                          connectionHandler,
+                          cdmDatabaseSchema,
+                          vocabularyDatabaseSchema = cdmDatabaseSchema,
+                          loadConnectionChecksLevel = "allChecks") {
       checkmate::assertString(databaseId)
       checkmate::assertString(databaseName, )
       checkmate::assertString(databaseDescription)
@@ -159,7 +158,11 @@ CDMdbHandler <- R6::R6Class(
         tryCatch(
           {
             private$.connectionHandler$getConnection() |>
-              tmp_dplyr_copy_to(cars, overwrite = TRUE)
+              DatabaseConnector::insertTable(
+                tableName = "test_temp_table",
+                data = dplyr::tibble(x = 1),
+                tempTable = TRUE
+              )
             private$.connectionHandler$getConnection() |>
               DatabaseConnector::dropEmulatedTempTables()
           },

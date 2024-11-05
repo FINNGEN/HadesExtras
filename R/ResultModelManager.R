@@ -1,4 +1,3 @@
-
 #' createConnectionHandler
 #'
 #' Creates a connection handler object based on the provided connection details settings.
@@ -18,14 +17,12 @@
 #' @return A connection handler object.
 #'
 #' @export
-ResultModelManager_createConnectionHandler  <- function(
+ResultModelManager_createConnectionHandler <- function(
     connectionDetailsSettings,
     tempEmulationSchema = NULL,
     useBigrqueryUpload = NULL,
     usePooledConnection = FALSE,
-    ...
-){
-
+    ...) {
   #
   # Check parameters
   #
@@ -37,45 +34,44 @@ ResultModelManager_createConnectionHandler  <- function(
   # function
   #
 
-  if(connectionDetailsSettings$dbms == "eunomia"){
+  if (connectionDetailsSettings$dbms == "eunomia") {
     connectionDetails <- Eunomia::getEunomiaConnectionDetails()
-  }else{
+  } else {
     connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
   }
 
   # set tempEmulationSchema if in config
-  if(!is.null(tempEmulationSchema)){
+  if (!is.null(tempEmulationSchema)) {
     options(sqlRenderTempEmulationSchema = tempEmulationSchema)
-  }else{
+  } else {
     options(sqlRenderTempEmulationSchema = NULL)
   }
 
   # set useBigrqueryUpload if in config
-  if(!is.null(useBigrqueryUpload)){
+  if (!is.null(useBigrqueryUpload)) {
     options(useBigrqueryUpload = useBigrqueryUpload)
 
     # bq authentication
-    if(useBigrqueryUpload==TRUE){
-      checkmate::assertTRUE(connectionDetails$dbms=="bigquery")
+    if (useBigrqueryUpload == TRUE) {
+      checkmate::assertTRUE(connectionDetails$dbms == "bigquery")
 
-      options(gargle_oauth_cache=FALSE) #to avoid the question that freezes the app
+      options(gargle_oauth_cache = FALSE) # to avoid the question that freezes the app
       connectionString <- connectionDetails$connectionString()
-      if( connectionString |> stringr::str_detect(";OAuthType=0;")){
+      if (connectionString |> stringr::str_detect(";OAuthType=0;")) {
         OAuthPvtKeyPath <- connectionString |>
           stringr::str_extract("OAuthPvtKeyPath=([:graph:][^;]+);") |>
-          stringr::str_remove("OAuthPvtKeyPath=") |> stringr::str_remove(";")
+          stringr::str_remove("OAuthPvtKeyPath=") |>
+          stringr::str_remove(";")
 
         checkmate::assertFileExists(OAuthPvtKeyPath)
         bigrquery::bq_auth(path = OAuthPvtKeyPath)
-
-      }else{
+      } else {
         bigrquery::bq_auth(scopes = "https://www.googleapis.com/auth/bigquery")
       }
 
       connectionDetails$connectionString
     }
-
-  }else{
+  } else {
     options(useBigrqueryUpload = NULL)
   }
 
@@ -88,6 +84,4 @@ ResultModelManager_createConnectionHandler  <- function(
   }
 
   return(connectionHandler)
-
 }
-

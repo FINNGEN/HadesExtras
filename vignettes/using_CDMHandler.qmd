@@ -10,8 +10,8 @@ editor_options:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-    collapse = TRUE,
-    comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 ```
 
@@ -26,7 +26,7 @@ A testing database can be downloaded from Eunomia. See [Eunomia](https://ohdsi.g
 ```{r}
 # Set EUNOMIA_DATA_FOLDER if not already set
 if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
-  Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
+    Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
 }
 
 # Get the path to the Eunomia database
@@ -70,8 +70,8 @@ It includes attributes and functions to retrieve information from the database a
 connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!config$connection$connectionDetailsSettings)
 
 connectionHandler <- ResultModelManager::ConnectionHandler$new(
-  connectionDetails = connectionDetails,
-  loadConnection = FALSE
+    connectionDetails = connectionDetails,
+    loadConnection = FALSE
 )
 
 CDMdb <- CDMdbHandler$new(

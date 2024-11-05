@@ -15,7 +15,7 @@ helper_createNewConnection <- function(addCohorts = FALSE) {
   return(connection)
 }
 
-helper_createNewCohortTableHandler <- function(addCohorts = NULL) {
+helper_createNewCohortTableHandler <- function(addCohorts = NULL, loadConnectionChecksLevel = "basicChecks") {
   addCohorts |> checkmate::assertCharacter(len = 1, null.ok = TRUE)
   addCohorts |> checkmate::assertSubset(c(
     "EunomiaDefaultCohorts", "HadesExtrasFractureCohorts", "HadesExtrasAsthmaCohorts",
@@ -25,19 +25,7 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL) {
   # by default use the one from setup.R
   cohortTableHandlerConfig <- test_cohortTableHandlerConfig # set by setup.R
 
-  loadConnectionChecksLevel <- "basicChecks"
-
-  # TEMP, create a timestaped table
-  timestamp <- as.character(as.numeric(format(Sys.time(), "%d%m%Y%H%M%OS2")) * 100)
-  cohortTableName <- cohortTableHandlerConfig$cohortTable$cohortTableName
-  if (cohortTableName |> stringr::str_detect("<timestamp>")) {
-    cohortTableName <- cohortTableName |> stringr::str_replace("<timestamp>", timestamp)
-  }
-  cohortTableHandlerConfig$cohortTable$cohortTableName <- cohortTableName
-  # END TEMP
-
   cohortTableHandler <- createCohortTableHandlerFromList(cohortTableHandlerConfig, loadConnectionChecksLevel)
-
 
   if (!is.null(addCohorts)) {
     if (addCohorts == "EunomiaDefaultCohorts") {

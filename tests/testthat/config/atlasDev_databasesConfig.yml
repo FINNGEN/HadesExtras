@@ -11,8 +11,8 @@ BQ5K:
           user: ""
           password: ""
           connectionString: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=atlas-development-270609;OAuthType=0;OAuthServiceAcctEmail=146473670970-compute@developer.gserviceaccount.com;OAuthPvtKeyPath=<OAuthPvtKeyPath>;Timeout=100000;
-          pathToDriver: <pathToDriver>
-      tempEmulationSchema: atlas-development-270609.sandbox 
+          pathToDriver: <pathToDriver>/bigquery
+      tempEmulationSchema: atlas-development-270609.sandbox
     cdm:
         cdmDatabaseSchema: atlas-development-270609.finngen_omop_r11
         vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_r11
@@ -31,8 +31,8 @@ BQ500k:
           user: ""
           password: ""
           connectionString: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=atlas-development-270609;OAuthType=0;OAuthServiceAcctEmail=146473670970-compute@developer.gserviceaccount.com;OAuthPvtKeyPath=<OAuthPvtKeyPath>;Timeout=100000;
-          pathToDriver: <pathToDriver>
-      tempEmulationSchema: atlas-development-270609.sandbox 
+          pathToDriver: <pathToDriver>/bigquery
+      tempEmulationSchema: atlas-development-270609.sandbox
     cdm:
         cdmDatabaseSchema: atlas-development-270609.etl_sam_dev_omop
         vocabularyDatabaseSchema: atlas-development-270609.etl_sam_dev_omop
