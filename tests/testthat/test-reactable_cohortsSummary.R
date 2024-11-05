@@ -1,9 +1,9 @@
-
-
 test_that("rectable_cohortsSummary works", {
-
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
   # cohorts from eunomia
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -13,7 +13,7 @@ test_that("rectable_cohortsSummary works", {
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/asthma/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -28,7 +28,7 @@ test_that("rectable_cohortsSummary works", {
 
   cohort_data <- tibble::tibble(
     cohort_name = rep(c("cohortdata A", "cohortdata B"), 50),
-    person_source_value = c(sourcePersonToPersonId$person_source_value[1:90], LETTERS[1:10] ),
+    person_source_value = c(sourcePersonToPersonId$person_source_value[1:90], LETTERS[1:10]),
     cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 50),
     cohort_end_date = rep(as.Date(c(NA, "2020-01-04")), 50)
   )
@@ -51,21 +51,26 @@ test_that("rectable_cohortsSummary works", {
     HadesExtras::correctEmptyCohortsInCohortsSummary()
 
   # table -------------------------------------------------------------------
-  reactableResult <- rectable_cohortsSummary(cohortsSummary)#,  deleteButtonsShinyId = "test")
+  reactableResult <- rectable_cohortsSummary(cohortsSummary) # ,  deleteButtonsShinyId = "test")
 
   reactableResult |> checkmate::expect_class(classes = c("reactable", "htmlwidget"))
-  reactableResult$x$tag$attribs$columns |> length() |> expect_equal(7)
+  reactableResult$x$tag$attribs$columns |>
+    length() |>
+    expect_equal(7)
 
   #
-  reactableResult <- rectable_cohortsSummary(cohortsSummary,  deleteButtonsShinyId = "test")
+  reactableResult <- rectable_cohortsSummary(cohortsSummary, deleteButtonsShinyId = "test")
 
   reactableResult |> checkmate::expect_class(classes = c("reactable", "htmlwidget"))
-  reactableResult$x$tag$attribs$columns |> length() |> expect_equal(8)
+  reactableResult$x$tag$attribs$columns |>
+    length() |>
+    expect_equal(8)
 
   #
-  reactableResult <- rectable_cohortsSummary(cohortsSummary,  deleteButtonsShinyId = "test", editButtonsShinyId = "test2")
+  reactableResult <- rectable_cohortsSummary(cohortsSummary, deleteButtonsShinyId = "test", editButtonsShinyId = "test2")
 
   reactableResult |> checkmate::expect_class(classes = c("reactable", "htmlwidget"))
-  reactableResult$x$tag$attribs$columns |> length() |> expect_equal(9)
-
+  reactableResult$x$tag$attribs$columns |>
+    length() |>
+    expect_equal(9)
 })

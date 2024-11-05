@@ -1,9 +1,7 @@
-
 #
 # CohortGenerator_deleteCohortFromCohortTable
 #
 test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
-
   connection <- helper_createNewConnection()
 
   CohortGenerator::createCohortTables(
@@ -18,7 +16,7 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortName"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -31,7 +29,7 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
     incremental = FALSE
   )
 
-  generatedCohorts$cohortId |>  expect_equal(c(10,20))
+  generatedCohorts$cohortId |> expect_equal(c(10, 20))
 
   resultDelete <- CohortGenerator_deleteCohortFromCohortTable(
     connection = connection,
@@ -62,13 +60,16 @@ test_that("cohortDataToCohortDefinitionSet works", {
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema
   )
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    numberPersons = 2*5
+    numberPersons = 2 * 5
   )
 
   cohort_data <- tibble::tibble(
@@ -94,13 +95,14 @@ test_that("cohortDataToCohortDefinitionSet works", {
 
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
-  cohortGeneratorResults |> names() |> checkmate::expect_names(must.include = c("cohortId","generationStatus", "startTime","endTime","buildInfo"))
+  cohortGeneratorResults |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortId", "generationStatus", "startTime", "endTime", "buildInfo"))
 
   cohortGeneratorResults$generationStatus |> expect_equal(c("COMPLETE", "COMPLETE"))
 
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message |> expect_equal("All person_source_values were found")
   cohortGeneratorResults$buildInfo[[2]]$logTibble$message |> expect_equal("All person_source_values were found")
-
 })
 
 test_that("cohortDataToCohortDefinitionSet reports missing source person id", {
@@ -110,13 +112,16 @@ test_that("cohortDataToCohortDefinitionSet reports missing source person id", {
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema
   )
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    numberPersons = 2*5
+    numberPersons = 2 * 5
   )
 
   cohort_data <- tibble::tibble(
@@ -142,13 +147,14 @@ test_that("cohortDataToCohortDefinitionSet reports missing source person id", {
 
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
-  cohortGeneratorResults |> names() |> checkmate::expect_names(must.include = c("cohortId","generationStatus", "startTime","endTime","buildInfo"))
+  cohortGeneratorResults |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortId", "generationStatus", "startTime", "endTime", "buildInfo"))
 
   cohortGeneratorResults$generationStatus |> expect_equal(c("COMPLETE", "COMPLETE"))
 
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message |> expect_equal("2 person_source_values were not found")
   cohortGeneratorResults$buildInfo[[2]]$logTibble$message |> expect_equal("3 person_source_values were not found")
-
 })
 
 test_that("cohortDataToCohortDefinitionSet reports missing cohort_start_date", {
@@ -158,13 +164,16 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_start_date", {
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema
   )
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    numberPersons = 2*5
+    numberPersons = 2 * 5
   )
 
   cohort_data <- tibble::tibble(
@@ -190,14 +199,15 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_start_date", {
 
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
-  cohortGeneratorResults |> names() |> checkmate::expect_names(must.include = c("cohortId","generationStatus", "startTime","endTime","buildInfo"))
+  cohortGeneratorResults |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortId", "generationStatus", "startTime", "endTime", "buildInfo"))
 
   cohortGeneratorResults$generationStatus |> expect_equal(c("COMPLETE", "COMPLETE"))
 
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message |> expect_equal("All person_source_values were found")
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[1]] |> expect_equal("All person_source_values were found")
   cohortGeneratorResults$buildInfo[[2]]$logTibble$message[[2]] |> expect_equal("5 cohort_start_dates were missing and set to the first observation date")
-
 })
 
 test_that("cohortDataToCohortDefinitionSet reports missing cohort_end_date", {
@@ -207,13 +217,16 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_end_date", {
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema
   )
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    numberPersons = 2*5
+    numberPersons = 2 * 5
   )
 
   cohort_data <- tibble::tibble(
@@ -238,14 +251,15 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_end_date", {
 
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
-  cohortGeneratorResults |> names() |> checkmate::expect_names(must.include = c("cohortId","generationStatus", "startTime","endTime","buildInfo"))
+  cohortGeneratorResults |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortId", "generationStatus", "startTime", "endTime", "buildInfo"))
 
   cohortGeneratorResults$generationStatus |> expect_equal(c("COMPLETE", "COMPLETE"))
 
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[1]] |> expect_equal("All person_source_values were found")
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[2]] |> expect_equal("5 cohort_end_dates were missing and set to the first observation date")
   cohortGeneratorResults$buildInfo[[2]]$logTibble$message[[1]] |> expect_equal("All person_source_values were found")
-
 })
 
 
@@ -256,13 +270,16 @@ test_that("cohortDataToCohortDefinitionSet also works from imported files", {
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema
   )
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    numberPersons = 2*5
+    numberPersons = 2 * 5
   )
 
   cohort_data <- tibble::tibble(
@@ -280,20 +297,20 @@ test_that("cohortDataToCohortDefinitionSet also works from imported files", {
   CohortGenerator::saveCohortDefinitionSet(
     cohortDefinitionSet,
     settingsFileName = file.path(tempdir(), "inst/Cohorts.csv"),
-    jsonFolder = file.path(tempdir(),"inst/cohorts"),
-    sqlFolder = file.path(tempdir(),"inst/sql/sql_server"),
+    jsonFolder = file.path(tempdir(), "inst/cohorts"),
+    sqlFolder = file.path(tempdir(), "inst/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    subsetJsonFolder = file.path(tempdir(),"inst/cohort_subset_definitions/")
+    subsetJsonFolder = file.path(tempdir(), "inst/cohort_subset_definitions/")
   )
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
     settingsFileName = file.path(tempdir(), "inst/Cohorts.csv"),
-    jsonFolder = file.path(tempdir(),"inst/cohorts"),
-    sqlFolder = file.path(tempdir(),"inst/sql/sql_server"),
+    jsonFolder = file.path(tempdir(), "inst/cohorts"),
+    sqlFolder = file.path(tempdir(), "inst/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    subsetJsonFolder = file.path(tempdir(),"inst/cohort_subset_definitions/")
+    subsetJsonFolder = file.path(tempdir(), "inst/cohort_subset_definitions/")
   )
 
   # function
@@ -307,14 +324,15 @@ test_that("cohortDataToCohortDefinitionSet also works from imported files", {
 
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
-  cohortGeneratorResults |> names() |> checkmate::expect_names(must.include = c("cohortId","generationStatus", "startTime","endTime","buildInfo"))
+  cohortGeneratorResults |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortId", "generationStatus", "startTime", "endTime", "buildInfo"))
 
   cohortGeneratorResults$generationStatus |> expect_equal(c("COMPLETE", "COMPLETE"))
 
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[1]] |> expect_equal("All person_source_values were found")
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[2]] |> expect_equal("5 cohort_end_dates were missing and set to the first observation date")
   cohortGeneratorResults$buildInfo[[2]]$logTibble$message[[1]] |> expect_equal("All person_source_values were found")
-
 })
 
 
@@ -325,13 +343,16 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema
   )
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    numberPersons = 2*5
+    numberPersons = 2 * 5
   )
 
   cohort_data <- tibble::tibble(
@@ -345,8 +366,10 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
     cohortData = cohort_data
   )
 
-  incrementalFolder <- file.path(tempdir(),stringr::str_remove_all(Sys.time(),"-|:|\\.|\\s"))
-  on.exit({unlink(incrementalFolder, recursive = TRUE)})
+  incrementalFolder <- file.path(tempdir(), stringr::str_remove_all(Sys.time(), "-|:|\\.|\\s"))
+  on.exit({
+    unlink(incrementalFolder, recursive = TRUE)
+  })
 
   cohortGeneratorResults <- CohortGenerator_generateCohortSet(
     connection = connection,
@@ -388,8 +411,9 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
 
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[1]] |> expect_equal("All person_source_values were found")
   cohortGeneratorResults$buildInfo[[1]]$logTibble$message[[2]] |> expect_equal("5 cohort_end_dates were missing and set to the first observation date")
-  cohortGeneratorResults$buildInfo[[2]]$logTibble |> nrow() |> expect_equal(0)
-
+  cohortGeneratorResults$buildInfo[[2]]$logTibble |>
+    nrow() |>
+    expect_equal(0)
 })
 
 
@@ -398,10 +422,12 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
 # CohortGenerator_getCohortsOverlaps
 #
 test_that("CohortGenerator_getCohortsOverlaps works", {
-
   # get test settings
   connection <- helper_createNewConnection()
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   cohort_data <- tibble::tibble(
@@ -414,7 +440,7 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
   DatabaseConnector::insertTable(
     connection = connection,
     databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    tableName = 'cohort',
+    tableName = "cohort",
     data = cohort_data
   )
 
@@ -422,35 +448,49 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = 'cohort'
-  )|> dplyr::arrange()
+    cohortTable = "cohort"
+  ) |> dplyr::arrange()
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
-  cohortOverlaps |> nrow() |> expect_equal(3)
+  cohortOverlaps |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |>
+    nrow() |>
+    expect_equal(3)
 
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '10') &
-    stringr::str_detect(cohortIdCombinations, '20')
-  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
-  cohortOverlaps |> dplyr::filter(
-    !stringr::str_detect(cohortIdCombinations, '10') &
-    stringr::str_detect(cohortIdCombinations, '20')
-  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(2)
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '10') &
-    !stringr::str_detect(cohortIdCombinations, '20')
-  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(2)
-
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "10") &
+        stringr::str_detect(cohortIdCombinations, "20")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(3)
+  cohortOverlaps |>
+    dplyr::filter(
+      !stringr::str_detect(cohortIdCombinations, "10") &
+        stringr::str_detect(cohortIdCombinations, "20")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(2)
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "10") &
+        !stringr::str_detect(cohortIdCombinations, "20")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(2)
 })
 
 
 test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
-
   # get test settings
   connection <- helper_createNewConnection()
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   cohort_data <- tibble::tibble(
@@ -463,7 +503,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
   DatabaseConnector::insertTable(
     connection = connection,
     databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    tableName = 'cohort',
+    tableName = "cohort",
     data = cohort_data
   )
 
@@ -471,33 +511,43 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = 'cohort'
-  )|> dplyr::arrange()
+    cohortTable = "cohort"
+  ) |> dplyr::arrange()
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
-  cohortOverlaps |> nrow() |> expect_equal(2)
+  cohortOverlaps |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |>
+    nrow() |>
+    expect_equal(2)
 
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '-10-') &
-    !stringr::str_detect(cohortIdCombinations, '-20-')
-  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(5)
-  cohortOverlaps |> dplyr::filter(
-    !stringr::str_detect(cohortIdCombinations, '-10-') &
-    stringr::str_detect(cohortIdCombinations, '-20-')
-  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(5)
-
-
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "-10-") &
+        !stringr::str_detect(cohortIdCombinations, "-20-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(5)
+  cohortOverlaps |>
+    dplyr::filter(
+      !stringr::str_detect(cohortIdCombinations, "-10-") &
+        stringr::str_detect(cohortIdCombinations, "-20-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(5)
 })
 
 
 
 test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
-
   # get test settings
   connection <- helper_createNewConnection()
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   cohort_data <- tibble::tibble(
@@ -510,7 +560,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
   DatabaseConnector::insertTable(
     connection = connection,
     databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    tableName = 'cohort',
+    tableName = "cohort",
     data = cohort_data
   )
 
@@ -518,37 +568,51 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = 'cohort'
-  )|> dplyr::arrange()
+    cohortTable = "cohort"
+  ) |> dplyr::arrange()
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
-  cohortOverlaps |> nrow() |> expect_equal(3)
+  cohortOverlaps |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |>
+    nrow() |>
+    expect_equal(3)
 
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '-10-') &
-    stringr::str_detect(cohortIdCombinations, '-20-')
-  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
-  cohortOverlaps |> dplyr::filter(
-    !stringr::str_detect(cohortIdCombinations, '-10-') &
-    stringr::str_detect(cohortIdCombinations, '-20-')
-  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(3)
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '-10-') &
-    !stringr::str_detect(cohortIdCombinations, '-20-')
-  ) |> dplyr::pull("numberOfSubjects") |>expect_equal(1)
-
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "-10-") &
+        stringr::str_detect(cohortIdCombinations, "-20-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(2)
+  cohortOverlaps |>
+    dplyr::filter(
+      !stringr::str_detect(cohortIdCombinations, "-10-") &
+        stringr::str_detect(cohortIdCombinations, "-20-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(3)
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "-10-") &
+        !stringr::str_detect(cohortIdCombinations, "-20-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(1)
 })
 
 
 
 
 test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
-
   # get test settings
   connection <- helper_createNewConnection()
-  on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  on.exit({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # test params
   cohort_data <- tibble::tibble(
@@ -561,7 +625,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
   DatabaseConnector::insertTable(
     connection = connection,
     databaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    tableName = 'cohort',
+    tableName = "cohort",
     data = cohort_data
   )
 
@@ -569,37 +633,74 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
     connection = connection,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = 'cohort'
-  )|> dplyr::arrange()
+    cohortTable = "cohort"
+  ) |> dplyr::arrange()
 
   # expectations
   cohortOverlaps |> checkmate::expect_tibble()
-  cohortOverlaps |> names() |> checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
-  cohortOverlaps |> nrow() |> expect_equal(4)
+  cohortOverlaps |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortIdCombinations", "numberOfSubjects"))
+  cohortOverlaps |>
+    nrow() |>
+    expect_equal(4)
 
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '-10-') &
-    !stringr::str_detect(cohortIdCombinations, '-20-')&
-    !stringr::str_detect(cohortIdCombinations, '-30-')
-  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "-10-") &
+        !stringr::str_detect(cohortIdCombinations, "-20-") &
+        !stringr::str_detect(cohortIdCombinations, "-30-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(2)
 
-  cohortOverlaps |> dplyr::filter(
-    stringr::str_detect(cohortIdCombinations, '-10-') &
-    stringr::str_detect(cohortIdCombinations, '-20-')&
-    stringr::str_detect(cohortIdCombinations, '-30-')
-  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(3)
+  cohortOverlaps |>
+    dplyr::filter(
+      stringr::str_detect(cohortIdCombinations, "-10-") &
+        stringr::str_detect(cohortIdCombinations, "-20-") &
+        stringr::str_detect(cohortIdCombinations, "-30-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(3)
 
-  cohortOverlaps |> dplyr::filter(
-    !stringr::str_detect(cohortIdCombinations, '-10-') &
-    stringr::str_detect(cohortIdCombinations, '-20-')&
-    !stringr::str_detect(cohortIdCombinations, '-30-')
-  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
+  cohortOverlaps |>
+    dplyr::filter(
+      !stringr::str_detect(cohortIdCombinations, "-10-") &
+        stringr::str_detect(cohortIdCombinations, "-20-") &
+        !stringr::str_detect(cohortIdCombinations, "-30-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(2)
 
-  cohortOverlaps |> dplyr::filter(
-    !stringr::str_detect(cohortIdCombinations, '-10-') &
-    !stringr::str_detect(cohortIdCombinations, '-20-')&
-    stringr::str_detect(cohortIdCombinations, '-30-')
-  ) |> dplyr::pull("numberOfSubjects") |> expect_equal(2)
-
+  cohortOverlaps |>
+    dplyr::filter(
+      !stringr::str_detect(cohortIdCombinations, "-10-") &
+        !stringr::str_detect(cohortIdCombinations, "-20-") &
+        stringr::str_detect(cohortIdCombinations, "-30-")
+    ) |>
+    dplyr::pull("numberOfSubjects") |>
+    expect_equal(2)
 })
 
+#
+# removeCohortIdsFromCohortOverlapsTable
+#
+test_that("removeCohortIdsFromCohortOverlapsTable works", {
+  cohortOverlaps <- data.frame(
+    cohortIdCombinations = c("-1-2-", "-2-3-", "-3-4-"),
+    numberOfSubjects = c(10, 15, 20)
+  )
+  cohortIds <- c(2, 3)
+
+  cohortOverlaps <- removeCohortIdsFromCohortOverlapsTable(cohortOverlaps, cohortIds) |>
+    dplyr::arrange(cohortIdCombinations)
+
+  cohortOverlaps$cohortIdCombinations |> expect_equal(c("-1-", "-4-"))
+  cohortOverlaps$numberOfSubjects |> expect_equal(c(10, 20))
+
+  cohortOverlaps <- removeCohortIdsFromCohortOverlapsTable(cohortOverlaps, c()) |>
+    dplyr::arrange(cohortIdCombinations)
+
+  cohortOverlaps$cohortIdCombinations |> expect_equal(c("-1-", "-4-"))
+  cohortOverlaps$numberOfSubjects |> expect_equal(c(10, 20))
+})

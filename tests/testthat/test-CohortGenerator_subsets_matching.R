@@ -1,4 +1,3 @@
-
 #
 # createMatchingSubset
 #
@@ -34,9 +33,8 @@ test_that("Matching subset naming and instantitation", {
 
 
 test_that("Matching Subset works", {
-
   connection <- helper_createNewConnection()
-  #on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  # on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
 
   CohortGenerator::createCohortTables(
     connection = connection,
@@ -51,7 +49,7 @@ test_that("Matching Subset works", {
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortName"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -102,18 +100,15 @@ test_that("Matching Subset works", {
   )
 
   checkmate::expect_tibble(cohortDemographics)
-
 })
 
 
 
 test_that("Matching Subset works for different parameters", {
-
-
-  testthat::skip_if(testSelectedConfiguration$connection$connectionDetailsSettings$dbms!="eunomia")
+  testthat::skip_if(testSelectedConfiguration$connection$connectionDetailsSettings$dbms != "eunomia")
 
   connection <- helper_createNewConnection()
-  #on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  # on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
 
   CohortGenerator::createCohortTables(
     connection = connection,
@@ -128,7 +123,7 @@ test_that("Matching Subset works for different parameters", {
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortName"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -266,17 +261,4 @@ test_that("Matching Subset works for different parameters", {
   cohortDemographics$histogramBirthYear[[3]]$n[[2]] |> expect_equal(10) # 1971, there is only 10 in controls
 
   cohortDemographics$histogramBirthYear[[1]]$year |> expect_equal(cohortDemographics$histogramBirthYear[[3]]$year)
-
-
 })
-
-
-
-
-
-
-
-
-
-
-

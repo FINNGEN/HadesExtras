@@ -120,8 +120,8 @@ CohortGenerator_generateCohortSet <- function(
     cohortData <- .jsonToCohortData(cohortDefinitionSetCohortDataType)
 
     # Connect to tables and copy cohortData to database
-    personTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(cdmDatabaseSchema, "person"))
-    observationPeriodTable <- dplyr::tbl(connection, tmp_inDatabaseSchema(cdmDatabaseSchema, "observation_period"))
+    personTbl <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
+    observationPeriodTable <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "observation_period"))
     cohortDataTable <- tmp_dplyr_copy_to(connection, cohortData, overwrite = TRUE)
 
     # join to cohort_data_table cohort_names_table.cohort_name; person.person_id; observation_period period dates
@@ -385,9 +385,9 @@ CohortGenerator_getCohortDemograpics <- function(
   #
   # function
   #
-  cohortTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(cohortDatabaseSchema, cohortTable))
-  personTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(cdmDatabaseSchema, "person"))
-  conceptTbl <- dplyr::tbl(connection, tmp_inDatabaseSchema(vocabularyDatabaseSchema, "concept"))
+  cohortTbl <- dplyr::tbl(connection, dbplyr::in_schema(cohortDatabaseSchema, cohortTable))
+  personTbl <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
+  conceptTbl <- dplyr::tbl(connection, dbplyr::in_schema(vocabularyDatabaseSchema, "concept"))
 
   cohortCounts <- CohortGenerator::getCohortCounts(
     connection = connection,

@@ -1,4 +1,3 @@
-
 #
 # createMatchingSubset
 #
@@ -17,9 +16,8 @@ test_that("Operation subset naming and instantitation", {
 
 
 test_that("Operation Subset works", {
-
   connection <- helper_createNewConnection()
-  #on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  # on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
 
   CohortGenerator::createCohortTables(
     connection = connection,
@@ -34,7 +32,7 @@ test_that("Operation Subset works", {
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortName"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -63,7 +61,7 @@ test_that("Operation Subset works", {
     incremental = FALSE
   )
 
-    cohortDemographics <- CohortGenerator_getCohortDemograpics(
+  cohortDemographics <- CohortGenerator_getCohortDemograpics(
     connection = connection,
     cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
     cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
@@ -71,8 +69,13 @@ test_that("Operation Subset works", {
   )
 
   checkmate::expect_tibble(cohortDemographics)
-  cohortDemographics |> dplyr::pull(cohortId) |> expect_equal(c(10, 20, 20300))
-  cohortDemographics |> dplyr::pull(cohortEntries) |> expect_equal(c(2, 40, 42))
-  cohortDemographics |> dplyr::pull(cohortSubjects) |> expect_equal(c(2, 40, 42))
-
+  cohortDemographics |>
+    dplyr::pull(cohortId) |>
+    expect_equal(c(10, 20, 20300))
+  cohortDemographics |>
+    dplyr::pull(cohortEntries) |>
+    expect_equal(c(2, 40, 42))
+  cohortDemographics |>
+    dplyr::pull(cohortSubjects) |>
+    expect_equal(c(2, 40, 42))
 })

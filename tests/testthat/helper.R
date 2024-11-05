@@ -141,7 +141,7 @@ helper_getParedSourcePersonAndPersonIds <- function(
     cohortDatabaseSchema,
     numberPersons) {
   # Connect, collect tables
-  personTable <- dplyr::tbl(connection, tmp_inDatabaseSchema(cohortDatabaseSchema, "person"))
+  personTable <- dplyr::tbl(connection, dbplyr::in_schema(cohortDatabaseSchema, "person"))
 
   # get first n persons
   pairedSourcePersonAndPersonIds <- personTable |>

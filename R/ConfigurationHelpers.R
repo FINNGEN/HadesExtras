@@ -1,4 +1,3 @@
-
 #' Read and Parse YAML File with Placeholder Replacement
 #'
 #' Reads a YAML file from a given path, replaces specified placeholders with provided values,

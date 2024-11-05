@@ -3,7 +3,7 @@
 #
 testingDatabase <- "Eunomia-GiBleed"
 # testingDatabase <- "Eunomia-MIMIC"
-#testingDatabase <- "AtlasDevelopment"
+# testingDatabase <- "AtlasDevelopment"
 
 # check correct settings
 possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment")

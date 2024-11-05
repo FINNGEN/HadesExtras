@@ -52,7 +52,7 @@ test_that("CohortTableHandler$insertOrUpdateCohorts adds a cohort", {
   withr::defer({
     rm(cohortTableHandler)
     gc()
-  }) 
+  })
 
   cohortDefinitionSet <- tibble::tibble(
     cohortId = 10,

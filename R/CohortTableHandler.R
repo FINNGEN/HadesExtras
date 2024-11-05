@@ -197,7 +197,7 @@ CohortTableHandler <- R6::R6Class(
       if (length(cohortIdsExists) != 0) {
         warning("Following cohort ids already exists on the cohort table and will be updated: ", paste(cohortIdsExists, collapse = ", "))
       }
- 
+
       #
       # Function
       #

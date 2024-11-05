@@ -1,6 +1,3 @@
-
-
-
 #' Get List of Analysis
 #'
 #' This function returns a tibble containing analysis information.
@@ -11,7 +8,6 @@
 #' @export
 #'
 getListOfAnalysis <- function() {
-
   colTypes <- readr::cols(
     analysisId = readr::col_integer(),
     analysisName = readr::col_character(),
@@ -19,7 +15,7 @@ getListOfAnalysis <- function() {
     isBinary = readr::col_logical(),
     isStandard = readr::col_logical(),
     isSourceConcept = readr::col_logical()
-    )
+  )
 
   analysisRef <- system.file("covariates/analysisRef.csv", package = "HadesExtras") |>
     readr::read_csv(col_types = colTypes)
@@ -47,12 +43,10 @@ getListOfAnalysis <- function() {
 #'
 #' @export
 #'
-FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
+FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
     analysisIds,
     temporalStartDays = c(-99999),
-    temporalEndDays =   c(99999)
-){
-
+    temporalEndDays = c(99999)) {
   analysisIds |> checkmate::assertNumeric()
   temporalStartDays |> checkmate::assertNumeric()
   temporalEndDays |> checkmate::assertNumeric()
@@ -68,12 +62,11 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
   #
   # Standard feature extraction settings
   #
-  if (selectedAnalysis |> dplyr::filter(isStandard == TRUE ) |> nrow() > 0) {
-
+  if (selectedAnalysis |> dplyr::filter(isStandard == TRUE) |> nrow() > 0) {
     standardCovariatesSettings <- FeatureExtraction::createTemporalCovariateSettings(
       useDemographicsGender = ifelse("DemographicsGender" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useDemographicsAge = ifelse("DemographicsAge" %in% selectedAnalysis$analysisName, TRUE, FALSE),
-      useDemographicsAgeGroup =  ifelse("DemographicsAgeGroup" %in% selectedAnalysis$analysisName, TRUE, FALSE),
+      useDemographicsAgeGroup = ifelse("DemographicsAgeGroup" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useDemographicsRace = ifelse("DemographicsRace" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useDemographicsEthnicity = ifelse("DemographicsEthnicity" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useDemographicsIndexYear = ifelse("DemographicsIndexYear" %in% selectedAnalysis$analysisName, TRUE, FALSE),
@@ -83,7 +76,7 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
       useDemographicsTimeInCohort = ifelse("DemographicsTimeInCohort" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useDemographicsIndexYearMonth = ifelse("DemographicsIndexYearMonth" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useCareSiteId = ifelse("CareSiteId" %in% selectedAnalysis$analysisName, TRUE, FALSE),
-      useConditionOccurrence =  ifelse("ConditionOccurrence" %in% selectedAnalysis$analysisName, TRUE, FALSE),
+      useConditionOccurrence = ifelse("ConditionOccurrence" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useConditionOccurrencePrimaryInpatient = ifelse("ConditionOccurrencePrimaryInpatient" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useConditionEraStart = ifelse("ConditionEraStart" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useConditionEraOverlap = ifelse("ConditionEraOverlap" %in% selectedAnalysis$analysisName, TRUE, FALSE),
@@ -100,7 +93,7 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
       useMeasurementValue = ifelse("MeasurementValue" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useMeasurementRangeGroup = ifelse("MeasurementRangeGroup" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useObservation = ifelse("Observation" %in% selectedAnalysis$analysisName, TRUE, FALSE),
-      useCharlsonIndex =  ifelse("CharlsonIndex" %in% selectedAnalysis$analysisName, TRUE, FALSE),
+      useCharlsonIndex = ifelse("CharlsonIndex" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useDcsi = ifelse("Dcsi" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useChads2 = ifelse("Chads2" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useChads2Vasc = ifelse("Chads2Vasc" %in% selectedAnalysis$analysisName, TRUE, FALSE),
@@ -113,50 +106,46 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
       useVisitCount = ifelse("VisitCount" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       useVisitConceptCount = ifelse("VisitConceptCount" %in% selectedAnalysis$analysisName, TRUE, FALSE),
       temporalStartDays = temporalStartDays,
-      temporalEndDays =   temporalEndDays
-
+      temporalEndDays = temporalEndDays
     )
 
-    listOfCovariateSetings[[length(listOfCovariateSetings)+1]] <- standardCovariatesSettings
-
+    listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- standardCovariatesSettings
   }
 
 
   #
   # detailed feature extraction settings
   #
-  if (selectedAnalysis |> dplyr::filter(isStandard == FALSE ) |> nrow() > 0) {
-
+  if (selectedAnalysis |> dplyr::filter(isStandard == FALSE) |> nrow() > 0) {
     listAnalyses <- list()
     if ("ConditionOccurrenceSourceConcept" %in% selectedAnalysis$analysisName) {
-      listAnalyses[[length(listAnalyses)+1]] <- analysisDetails_ConditionOccurrenceSourceConcept
+      listAnalyses[[length(listAnalyses) + 1]] <- analysisDetails_ConditionOccurrenceSourceConcept
     }
     if ("DrugExposureSourceConcept" %in% selectedAnalysis$analysisName) {
-      listAnalyses[[length(listAnalyses)+1]] <- analysisDetails_DrugExposureSourceConcept
+      listAnalyses[[length(listAnalyses) + 1]] <- analysisDetails_DrugExposureSourceConcept
     }
     if ("ProcedureOccurrenceSourceConcept" %in% selectedAnalysis$analysisName) {
-      listAnalyses[[length(listAnalyses)+1]] <-analysisDetails_ProcedureOccurrenceSourceConcept
+      listAnalyses[[length(listAnalyses) + 1]] <- analysisDetails_ProcedureOccurrenceSourceConcept
     }
     if ("MeasurementSourceConcept" %in% selectedAnalysis$analysisName) {
-      listAnalyses[[length(listAnalyses)+1]] <- analysisDetails_MeasurementSourceConcept
+      listAnalyses[[length(listAnalyses) + 1]] <- analysisDetails_MeasurementSourceConcept
     }
     if ("DeviceExposureSourceConcept" %in% selectedAnalysis$analysisName) {
-      listAnalyses[[length(listAnalyses)+1]] <-analysisDetails_DeviceExposureSourceConcept
+      listAnalyses[[length(listAnalyses) + 1]] <- analysisDetails_DeviceExposureSourceConcept
     }
     if ("ObservationSourceConcept" %in% selectedAnalysis$analysisName) {
-      listAnalyses[[length(listAnalyses)+1]] <- analysisDetails_ObservationSourceConcept
+      listAnalyses[[length(listAnalyses) + 1]] <- analysisDetails_ObservationSourceConcept
     }
 
     if (length(listAnalyses) != 0) {
       analysisDetailsCovatiateSettings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
         analyses = listAnalyses,
         temporalStartDays = temporalStartDays,
-        temporalEndDays =   temporalEndDays
+        temporalEndDays = temporalEndDays
       )
 
-      listOfCovariateSetings[[length(listOfCovariateSetings)+1]] <- analysisDetailsCovatiateSettings
+      listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- analysisDetailsCovatiateSettings
     }
-
   }
 
   #
@@ -164,11 +153,10 @@ FeatureExtraction_createTemporalCovariateSettingsFromList  <- function(
   #
 
   if ("YearOfBirth" %in% selectedAnalysis$analysisName) {
-    listOfCovariateSetings[[length(listOfCovariateSetings)+1]] <- covariateData_YearOfBirth()
+    listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_YearOfBirth()
   }
 
 
 
   return(listOfCovariateSetings)
-
 }
