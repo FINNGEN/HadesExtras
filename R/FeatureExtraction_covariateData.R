@@ -1,5 +1,3 @@
-
-
 #' covariateData_YearOfBirth
 #'
 #'
@@ -18,35 +16,36 @@ covariateData_YearOfBirth <- function() {
 #' @export
 #'
 YearOfBirth <- function(
-  connection,
-  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  cdmDatabaseSchema,
-  cdmVersion = "5",
-  cohortTable = "#cohort_person",
-  cohortIds = c(-1),
-  rowIdField = "subject_id",
+    connection,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    cdmDatabaseSchema,
+    cdmVersion = "5",
+    cohortTable = "#cohort_person",
+    cohortIds = c(-1),
+    rowIdField = "subject_id",
     covariateSettings,
     aggregated = FALSE,
-    minCharacterizationMean = 0
-  ) {
-
+    minCharacterizationMean = 0) {
   writeLines("Constructing YearOfBirth covariate")
 
   # Some SQL to construct the covariate:
-  sql <- paste("SELECT
+  sql <- paste(
+    "SELECT
                cohort_definition_id AS cohort_definition_id,
                @row_id_field AS row_id,
                1041 AS covariate_id,
                p.year_of_birth AS covariate_value",
-               "FROM @cohort_table c",
-               "INNER JOIN @cdm_database_schema.person p",
-               "ON p.person_id = c.subject_id",
-               "{@cohort_ids != -1} ? {WHERE cohort_definition_id IN (@cohort_ids)}")
+    "FROM @cohort_table c",
+    "INNER JOIN @cdm_database_schema.person p",
+    "ON p.person_id = c.subject_id",
+    "{@cohort_ids != -1} ? {WHERE cohort_definition_id IN (@cohort_ids)}"
+  )
   sql <- SqlRender::render(sql,
-                           cohort_table = cohortTable,
-                           cohort_ids = cohortIds,
-                           row_id_field = rowIdField,
-                           cdm_database_schema = cdmDatabaseSchema)
+    cohort_table = cohortTable,
+    cohort_ids = cohortIds,
+    row_id_field = rowIdField,
+    cdm_database_schema = cdmDatabaseSchema
+  )
   sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
 
   # Retrieve the covariate:
@@ -77,14 +76,14 @@ YearOfBirth <- function(
       covariateRef = covariateRef,
       analysisRef = analysisRef
     )
-  }else{
+  } else {
     result <- Andromeda::andromeda(
-      covariates = tibble::tibble(covariateId=NA_real_, sumValue=NA_integer_, averageValue=NA_integer_, .rows = 0),
+      covariates = tibble::tibble(covariateId = NA_real_, sumValue = NA_integer_, averageValue = NA_integer_, .rows = 0),
       covariateRef = covariateRef,
       analysisRef = analysisRef,
-      covariatesContinuous = covariates   |>
-        tidyr::nest(data=-cohortDefinitionId)   |>
-        dplyr::mutate(data=purrr::map(data,.computeStats)) |>
+      covariatesContinuous = covariates |>
+        tidyr::nest(data = -cohortDefinitionId) |>
+        dplyr::mutate(data = purrr::map(data, .computeStats)) |>
         tidyr::unnest(data)
     )
   }
@@ -116,14 +115,3 @@ YearOfBirth <- function(
   )
   return(result)
 }
-
-
-
-
-
-
-
-
-
-
-

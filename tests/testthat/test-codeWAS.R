@@ -1,12 +1,13 @@
-
 #
 # With covariates
 #
 
 test_that("executeCodeWAS works", {
-
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
   # cohorts from eunomia
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -16,65 +17,90 @@ test_that("executeCodeWAS works", {
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/fracture/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
-  analysisIds  <- c(101, 141, 1, 2, 402, 702, 41)
+  analysisIds <- c(101, 141, 1, 2, 402, 702, 41)
 
   exportFolder <- file.path(tempdir(), "CodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
-  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+  on.exit({
+    unlink(exportFolder, recursive = TRUE)
+    gc()
+  })
 
   suppressWarnings(
-  executeCodeWAS(
-    exportFolder = exportFolder,
-    cohortTableHandler = cohortTableHandler,
-    cohortIdCases = 1,
-    cohortIdControls = 2,
-    analysisIds = analysisIds,
-    covariatesIds = c(8507001, 1041),
-    minCellCount = 1
-  )
+    executeCodeWAS(
+      exportFolder = exportFolder,
+      cohortTableHandler = cohortTableHandler,
+      cohortIdCases = 1,
+      cohortIdControls = 2,
+      analysisIds = analysisIds,
+      covariatesIds = c(8507001, 1041),
+      minCellCount = 1
+    )
   )
 
   expect_true(file.exists(file.path(exportFolder, "codewas_results.csv")))
 
-  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv"))  |> tibble::as_tibble()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter( stringr::str_detect(covariate_id, "101$"))  |> nrow() |> expect_gt(0)
+  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv")) |> tibble::as_tibble()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(stringr::str_detect(covariate_id, "101$")) |>
+    nrow() |>
+    expect_gt(0)
 
   suppressWarnings(
-  HadesExtras::csvFilesToSqlite(
-    dataFolder = exportFolder,
-    sqliteDbPath = file.path(exportFolder, "analysisResults.sqlite"),
-    overwrite = TRUE,
-    analysis = "codeWAS"
-  )
+    HadesExtras::csvFilesToSqlite(
+      dataFolder = exportFolder,
+      sqliteDbPath = file.path(exportFolder, "analysisResults.sqlite"),
+      overwrite = TRUE,
+      analysis = "codeWAS"
+    )
   )
 
-  analysisResultsHandler  <- ResultModelManager::ConnectionHandler$new(
+  analysisResultsHandler <- ResultModelManager::ConnectionHandler$new(
     connectionDetails = DatabaseConnector::createConnectionDetails(
       dbms = "sqlite",
       server = file.path(exportFolder, "analysisResults.sqlite")
     )
   )
-  codeWASResults  <- analysisResultsHandler$tbl("codewas_results") |> dplyr::collect()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)   |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)   |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-
+  codeWASResults <- analysisResultsHandler$tbl("codewas_results") |> dplyr::collect()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
 })
 
 
 test_that("executeCodeWAS warnings with cohort overlap", {
-
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
   # cohorts from eunomia
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -84,17 +110,20 @@ test_that("executeCodeWAS warnings with cohort overlap", {
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/asthma/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
-  analysisIds  <- c(101, 141, 1, 2, 402, 702, 41)
+  analysisIds <- c(101, 141, 1, 2, 402, 702, 41)
 
   exportFolder <- file.path(tempdir(), "CodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
-  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+  on.exit({
+    unlink(exportFolder, recursive = TRUE)
+    gc()
+  })
 
   suppressWarnings(
     expect_warning(
@@ -113,19 +142,32 @@ test_that("executeCodeWAS warnings with cohort overlap", {
 
   expect_true(file.exists(file.path(exportFolder, "codewas_results.csv")))
 
-  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv"))  |> tibble::as_tibble()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter( stringr::str_detect(covariate_id, "101$"))  |> nrow() |> expect_gt(0)
-
+  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv")) |> tibble::as_tibble()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(stringr::str_detect(covariate_id, "101$")) |>
+    nrow() |>
+    expect_gt(0)
 })
 
 
 test_that("executeCodeWAS works spliting in chuncs", {
-
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
   # cohorts from eunomia
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -135,17 +177,20 @@ test_that("executeCodeWAS works spliting in chuncs", {
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/fracture/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
-  analysisIds  <- c(101, 141, 1, 2, 402, 702, 41)
+  analysisIds <- c(101, 141, 1, 2, 402, 702, 41)
 
   exportFolder <- file.path(tempdir(), "CodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
-  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+  on.exit({
+    unlink(exportFolder, recursive = TRUE)
+    gc()
+  })
 
   suppressWarnings(
     executeCodeWAS(
@@ -156,38 +201,53 @@ test_that("executeCodeWAS works spliting in chuncs", {
       analysisIds = analysisIds,
       covariatesIds = c(8507001, 1041),
       minCellCount = 1,
-      chunksSizeNOutcomes =  100
+      chunksSizeNOutcomes = 100
     )
   )
 
   expect_true(file.exists(file.path(exportFolder, "codewas_results.csv")))
 
-  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv"))  |> tibble::as_tibble()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter( stringr::str_detect(covariate_id, "101$"))  |> nrow() |> expect_gt(0)
-
-
+  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv")) |> tibble::as_tibble()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(stringr::str_detect(covariate_id, "101$")) |>
+    nrow() |>
+    expect_gt(0)
 })
 
 
 
 test_that("executeCodeWAS works for big size", {
-library(ParallelLogger)
+  library(ParallelLogger)
   clearLoggers()
-  logger <- createLogger(name = "SIMPLE",
-                         threshold = "INFO",
-                         appenders = list(createConsoleAppender(layout = layoutTimestamp)))
+  logger <- createLogger(
+    name = "SIMPLE",
+    threshold = "INFO",
+    appenders = list(createConsoleAppender(layout = layoutTimestamp))
+  )
 
   registerLogger(logger)
 
-  if(testSelectedConfiguration$database$databaseName != "bigquery500k"){
+  if (testSelectedConfiguration$database$databaseName != "bigquery500k") {
     skip("Skip test, it is only for bigquery500k")
   }
 
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -197,18 +257,21 @@ library(ParallelLogger)
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/fracture/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
   cohortTableHandler$getCohortCounts()
 
-  analysisIds  <- c(101, 1, 41)
+  analysisIds <- c(101, 1, 41)
 
   exportFolder <- file.path(tempdir(), "CodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
-  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+  on.exit({
+    unlink(exportFolder, recursive = TRUE)
+    gc()
+  })
 
   startTime <- Sys.time()
   suppressWarnings(
@@ -219,7 +282,7 @@ library(ParallelLogger)
       cohortIdControls = 2,
       analysisIds = analysisIds,
       covariatesIds = c(8507001, 1041),
-        minCellCount = 1,
+      minCellCount = 1,
       cores = 7
     )
   )
@@ -228,13 +291,23 @@ library(ParallelLogger)
 
   expect_true(file.exists(file.path(exportFolder, "codewas_results.csv")))
 
-  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv"))  |> tibble::as_tibble()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter( stringr::str_detect(covariate_id, "101$"))  |> nrow() |> expect_gt(0)
-
-
+  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv")) |> tibble::as_tibble()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(stringr::str_detect(covariate_id, "101$")) |>
+    nrow() |>
+    expect_gt(0)
 })
 
 
@@ -244,9 +317,11 @@ library(ParallelLogger)
 
 
 test_that("executeCodeWAS works with no covariates", {
-
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
   # cohorts from eunomia
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -256,17 +331,20 @@ test_that("executeCodeWAS works with no covariates", {
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/fracture/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
-  analysisIds  <- c(101, 141, 1, 2, 402, 702, 41)
+  analysisIds <- c(101, 141, 1, 2, 402, 702, 41)
 
   exportFolder <- file.path(tempdir(), "CodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
-  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+  on.exit({
+    unlink(exportFolder, recursive = TRUE)
+    gc()
+  })
 
   suppressWarnings(
     executeCodeWAS(
@@ -289,31 +367,51 @@ test_that("executeCodeWAS works with no covariates", {
     )
   )
 
-  analysisResultsHandler  <- ResultModelManager::ConnectionHandler$new(
+  analysisResultsHandler <- ResultModelManager::ConnectionHandler$new(
     connectionDetails = DatabaseConnector::createConnectionDetails(
       dbms = "sqlite",
       server = file.path(exportFolder, "analysisResults.sqlite")
     )
   )
 
-  codeWASResults  <- analysisResultsHandler$tbl("codewas_results") |> dplyr::collect()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)   |> nrow() |> expect_equal(1)
+  codeWASResults <- analysisResultsHandler$tbl("codewas_results") |> dplyr::collect()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(1)
 
-  codeWASResults |> dplyr::filter(model_type=='binary')  |> dplyr::filter(is.na(odds_ratio))  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(model_type=='continuous')  |> dplyr::filter(is.na(standard_error))  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(is.na(p_value))  |> nrow() |> expect_equal(0)
-
-
+  codeWASResults |>
+    dplyr::filter(model_type == "binary") |>
+    dplyr::filter(is.na(odds_ratio)) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(model_type == "continuous") |>
+    dplyr::filter(is.na(standard_error)) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(is.na(p_value)) |>
+    nrow() |>
+    expect_equal(0)
 })
 
 
 
 test_that("executeCodeWAS works when n multiple events per subject", {
-
   cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({rm(cohortTableHandler);gc()})
+  on.exit({
+    rm(cohortTableHandler)
+    gc()
+  })
 
   # cohorts from eunomia
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -323,7 +421,7 @@ test_that("executeCodeWAS works when n multiple events per subject", {
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     subsetJsonFolder = here::here("inst/testdata/asthma/cohort_subset_definitions/"),
-    #packageName = "HadesExtras",
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -353,11 +451,14 @@ test_that("executeCodeWAS works when n multiple events per subject", {
     cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef)
   )
 
-  analysisIds  <- c(101, 141, 1, 2, 402, 702, 41)
+  analysisIds <- c(101, 141, 1, 2, 402, 702, 41)
 
   exportFolder <- file.path(tempdir(), "CodeWAS")
   dir.create(exportFolder, showWarnings = FALSE)
-  on.exit({unlink(exportFolder, recursive = TRUE);gc()})
+  on.exit({
+    unlink(exportFolder, recursive = TRUE)
+    gc()
+  })
 
   suppressWarnings(
     executeCodeWAS(
@@ -373,11 +474,23 @@ test_that("executeCodeWAS works when n multiple events per subject", {
 
   expect_true(file.exists(file.path(exportFolder, "codewas_results.csv")))
 
-  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv"))  |> tibble::as_tibble()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)  |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter( stringr::str_detect(covariate_id, "101$"))  |> nrow() |> expect_gt(0)
+  codeWASResults <- read.csv(file.path(exportFolder, "codewas_results.csv")) |> tibble::as_tibble()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(stringr::str_detect(covariate_id, "101$")) |>
+    nrow() |>
+    expect_gt(0)
 
   suppressWarnings(
     HadesExtras::csvFilesToSqlite(
@@ -388,17 +501,23 @@ test_that("executeCodeWAS works when n multiple events per subject", {
     )
   )
 
-  analysisResultsHandler  <- ResultModelManager::ConnectionHandler$new(
+  analysisResultsHandler <- ResultModelManager::ConnectionHandler$new(
     connectionDetails = DatabaseConnector::createConnectionDetails(
       dbms = "sqlite",
       server = file.path(exportFolder, "analysisResults.sqlite")
     )
   )
-  codeWASResults  <- analysisResultsHandler$tbl("codewas_results") |> dplyr::collect()
-  codeWASResults |> dplyr::filter(covariate_id == 1002)   |> nrow() |> expect_equal(1)
-  codeWASResults |> dplyr::filter(covariate_id == 1041)   |> nrow() |> expect_equal(0)
-  codeWASResults |> dplyr::filter(covariate_id == 8507001)  |> nrow() |> expect_equal(0)
-
+  codeWASResults <- analysisResultsHandler$tbl("codewas_results") |> dplyr::collect()
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1002) |>
+    nrow() |>
+    expect_equal(1)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 1041) |>
+    nrow() |>
+    expect_equal(0)
+  codeWASResults |>
+    dplyr::filter(covariate_id == 8507001) |>
+    nrow() |>
+    expect_equal(0)
 })
-
-

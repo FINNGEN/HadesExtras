@@ -18,10 +18,10 @@
 #' # age: <age>
 #' #
 #' # You can replace those placeholders by passing named arguments:
-#' readAndParseYalm("path/to/yaml/file", name = "John", age = 30)
+#' readAndParseYaml("path/to/yaml/file", name = "John", age = 30)
 #'
 #' @export
-readAndParseYalm <- function(pathToYalmFile, ...) {
+readAndParseYaml <- function(pathToYalmFile, ...) {
   # read the yaml file
   yalmFile <- readLines(pathToYalmFile)
   # get the names of the parameters

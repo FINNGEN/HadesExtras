@@ -19,7 +19,6 @@ E1:
     webapiurl: https://api.ohdsi.org/WebAPI
     sourcekey:
     resultsshchema:
-
 # EUNOMIA 2
 E2:
   cohortTableHandler:

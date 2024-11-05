@@ -1,0 +1,136 @@
+---
+title: "Using CDMHandler"
+vignette: >
+  %\VignetteIndexEntry{Using CDMHandler}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{quarto::html}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+```{r setup}
+library(HadesExtras)
+# options("DEBUG_DATABASECONNECTOR_DBPLYR" = FALSE)
+```
+
+# Getting an Eunomia database for testing
+
+A testing database can be downloaded from Eunomia. See [Eunomia](https://ohdsi.github.io/Eunomia/reference/getDatabaseFile.html) for more details.
+```{r}
+# Set EUNOMIA_DATA_FOLDER if not already set
+if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
+  Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
+}
+
+# Get the path to the Eunomia database
+pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
+```
+
+# Configuration 
+
+We need the following configuration to connect to the database and to specify the OMOP-CDM schema. 
+For convenience, this can be written in a parameterised yaml format and some parameters can be set using `readAndParseYaml` function.
+
+```{r}
+config_yaml <- "
+  database:
+      databaseId: E1
+      databaseName: GiBleed
+      databaseDescription: Eunomia database GiBleed
+  connection:
+    connectionDetailsSettings:
+        dbms: sqlite
+        server: <pathToGiBleedEunomiaSqlite>
+  cdm:
+      cdmDatabaseSchema: main
+      vocabularyDatabaseSchema: main
+"
+
+pathToConfigYaml <- file.path(tempdir(), "config.yml")
+writeLines(config_yaml, pathToConfigYaml)
+```
+
+```{r}
+config <- readAndParseYaml(pathToConfigYaml, pathToGiBleedEunomiaSqlite = pathToGiBleedEunomiaSqlite)
+```
+
+# CDMHandled
+
+CDMHandled is a R6 object connected to a OMOP-CDM. 
+It includes attributes and functions to retrieve information from the database and work with the tables.
+
+```{r, eval=FALSE}
+connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!config$connection$connectionDetailsSettings)
+
+connectionHandler <- ResultModelManager::ConnectionHandler$new(
+  connectionDetails = connectionDetails,
+  loadConnection = FALSE
+)
+
+CDMdb <- CDMdbHandler$new(
+    databaseId = config$database$databaseId,
+    databaseName = config$database$databaseName,
+    databaseDescription = config$database$databaseDescription,
+    connectionHandler = connectionHandler,
+    cdmDatabaseSchema = config$cdm$cdmDatabaseSchema,
+    vocabularyDatabaseSchema = config$cdm$vocabularyDatabaseSchema
+)
+```
+
+Or for convenience `createCDMdbHandlerFromList` can be used. 
+```{r}
+CDMdb <- createCDMdbHandlerFromList(config)
+```
+
+
+First thing to do is to check the status of the connection. 
+`CDMdb$connectionStatusLog` not only shows if the connection is correct, but also if the `tempEmulationSchema` works, and all the CDM and Vocabulary tables are available in the database.  
+```{r}
+CDMdb$connectionStatusLog
+```
+
+Function `reactable_connectionStatus` creates an interactive table with this information.
+```{r}
+CDMdb$connectionStatusLog |>
+    reactable_connectionStatus()
+```
+
+We can get information on the CDM and Vocabulary version: 
+```{r}
+CDMdb$CDMInfo
+```
+
+```{r}
+CDMdb$vocabularyInfo
+```
+
+Tables in the database can be used as if they were tibbles thanks to  [dbplyr](https://dbplyr.tidyverse.org/). 
+```{r}
+CDMdb$getTblCDMSchema$person() |>
+    dplyr::count(year_of_birth)
+```
+
+```{r}
+CDMdb$getTblCDMSchema$person() |>
+    dplyr::left_join(
+        CDMdb$getTblVocabularySchema$concept() |> dplyr::select(concept_id, concept_name),
+        by = c("gender_concept_id" = "concept_id")
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(x = year_of_birth, fill = factor(concept_name))) +
+    ggplot2::geom_bar()
+```
+
+
+
+
+
+
+
+

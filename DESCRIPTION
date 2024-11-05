@@ -53,4 +53,4 @@ Suggests:
     yaml, 
     usethis
 Config/testthat/edition: 3
-VignetteBuilder: knitr
+VignetteBuilder: quarto

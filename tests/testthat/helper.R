@@ -1,5 +1,4 @@
-helper_createNewConnection <- function(addCohorts = FALSE){
-
+helper_createNewConnection <- function(addCohorts = FALSE) {
   checkmate::assertLogical(addCohorts, len = 1, null.ok = FALSE)
 
   # by default use the one from setup.R
@@ -7,7 +6,7 @@ helper_createNewConnection <- function(addCohorts = FALSE){
 
   connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
 
-  if(addCohorts){
+  if (addCohorts) {
     Eunomia::createCohorts(connectionDetails)
   }
 
@@ -16,24 +15,22 @@ helper_createNewConnection <- function(addCohorts = FALSE){
   return(connection)
 }
 
-
-helper_createNewCohortTableHandler <- function(addCohorts = NULL){
-
+helper_createNewCohortTableHandler <- function(addCohorts = NULL) {
   addCohorts |> checkmate::assertCharacter(len = 1, null.ok = TRUE)
   addCohorts |> checkmate::assertSubset(c(
-    "EunomiaDefaultCohorts", "HadesExtrasFractureCohorts","HadesExtrasAsthmaCohorts",
-    "HadesExtrasFractureCohortsMatched","HadesExtrasAsthmaCohortsMatched"
+    "EunomiaDefaultCohorts", "HadesExtrasFractureCohorts", "HadesExtrasAsthmaCohorts",
+    "HadesExtrasFractureCohortsMatched", "HadesExtrasAsthmaCohortsMatched"
   ), empty.ok = TRUE)
 
   # by default use the one from setup.R
   cohortTableHandlerConfig <- test_cohortTableHandlerConfig # set by setup.R
 
-  loadConnectionChecksLevel = "basicChecks"
+  loadConnectionChecksLevel <- "basicChecks"
 
   # TEMP, create a timestaped table
-  timestamp <- as.character(as.numeric(format(Sys.time(), "%d%m%Y%H%M%OS2"))*100)
+  timestamp <- as.character(as.numeric(format(Sys.time(), "%d%m%Y%H%M%OS2")) * 100)
   cohortTableName <- cohortTableHandlerConfig$cohortTable$cohortTableName
-  if(cohortTableName  |> stringr::str_detect("<timestamp>")){
+  if (cohortTableName |> stringr::str_detect("<timestamp>")) {
     cohortTableName <- cohortTableName |> stringr::str_replace("<timestamp>", timestamp)
   }
   cohortTableHandlerConfig$cohortTable$cohortTableName <- cohortTableName
@@ -42,8 +39,8 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
   cohortTableHandler <- createCohortTableHandlerFromList(cohortTableHandlerConfig, loadConnectionChecksLevel)
 
 
-  if(!is.null(addCohorts) ){
-    if(addCohorts == "EunomiaDefaultCohorts"){
+  if (!is.null(addCohorts)) {
+    if (addCohorts == "EunomiaDefaultCohorts") {
       cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
         settingsFileName = "testdata/name/Cohorts.csv",
         jsonFolder = "testdata/name/cohorts",
@@ -54,7 +51,7 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
         verbose = FALSE
       )
     }
-    if(addCohorts == "HadesExtrasFractureCohorts"){
+    if (addCohorts == "HadesExtrasFractureCohorts") {
       cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
         settingsFileName = "testdata/fracture/Cohorts.csv",
         jsonFolder = "testdata/fracture/cohorts",
@@ -66,7 +63,7 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
         verbose = T
       )
     }
-    if(addCohorts == "HadesExtrasAsthmaCohorts"){
+    if (addCohorts == "HadesExtrasAsthmaCohorts") {
       cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
         settingsFileName = "testdata/asthma/Cohorts.csv",
         jsonFolder = "testdata/asthma/cohorts",
@@ -78,7 +75,7 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
         verbose = FALSE
       )
     }
-    if(addCohorts == "HadesExtrasFractureCohortsMatched"){
+    if (addCohorts == "HadesExtrasFractureCohortsMatched") {
       cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
         settingsFileName = "testdata/fracture/Cohorts.csv",
         jsonFolder = "testdata/fracture/cohorts",
@@ -110,7 +107,7 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
       cohortDefinitionSet <- cohortDefinitionSet |>
         CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
     }
-    if(addCohorts == "HadesExtrasAsthmaCohortsMatched"){
+    if (addCohorts == "HadesExtrasAsthmaCohortsMatched") {
       # cohorts from eunomia
       cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
         settingsFileName = "testdata/asthma/Cohorts.csv",
@@ -142,7 +139,6 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
 
       cohortDefinitionSet <- cohortDefinitionSet |>
         CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 2)
-
     }
 
     cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -152,23 +148,19 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL){
 }
 
 
-
-helper_getParedSourcePersonAndPersonIds  <- function(
+helper_getParedSourcePersonAndPersonIds <- function(
     connection,
     cohortDatabaseSchema,
-    numberPersons){
-
+    numberPersons) {
   # Connect, collect tables
   personTable <- dplyr::tbl(connection, tmp_inDatabaseSchema(cohortDatabaseSchema, "person"))
 
   # get first n persons
-  pairedSourcePersonAndPersonIds  <- personTable  |>
+  pairedSourcePersonAndPersonIds <- personTable |>
     dplyr::arrange(person_id) |>
     dplyr::select(person_id, person_source_value) |>
-    dplyr::collect(n=numberPersons)
+    dplyr::collect(n = numberPersons)
 
 
   return(pairedSourcePersonAndPersonIds)
 }
-
-
