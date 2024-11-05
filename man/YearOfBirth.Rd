@@ -6,7 +6,7 @@
 \usage{
 YearOfBirth(
   connection,
-  oracleTempSchema = NULL,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
   cdmVersion = "5",
   cohortTable = "#cohort_person",

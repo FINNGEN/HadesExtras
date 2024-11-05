@@ -11,8 +11,8 @@ Functions to complement Hades packages
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/javier-gracia-tabuenca-tuni/HadesExtras}
-  \item Report bugs at \url{https://github.com/javier-gracia-tabuenca-tuni/HadesExtras/issues}
+  \item \url{https://github.com/FINNGEN/HadesExtras}
+  \item Report bugs at \url{https://github.com/FINNGEN/HadesExtras/issues}
 }
 
 }

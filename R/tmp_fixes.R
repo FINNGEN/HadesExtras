@@ -50,7 +50,6 @@ tmp_ConnectionHandler <- R6::R6Class(
 )
 
 
-
 #' tmp fix for dplyr::copy_to
 #'
 #' dplyr::copy_to is very slow to upload tables to BQ.
@@ -105,9 +104,7 @@ tmp_dplyr_copy_to <- function(dest, df, name = deparse(substitute(df)), overwrit
     # bigrquery::bq_table_upload(tmp_table, tibble_cohors)
 
   }else{
-browser()
     newTable <- dplyr::copy_to(dest, df, name, overwrite, ...)
-
   }
 
   return(newTable)
