@@ -1,10 +1,9 @@
 ---
 title: "Using Matching Subset"
-output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using Matching Subset}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
 editor_options: 
   chunk_output_type: console
 ---
@@ -17,10 +16,29 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-#library(HadesExtras)
-devtools::load_all(".")
+library(HadesExtras)
+#devtools::load_all(".")
 #options("DEBUG_DATABASECONNECTOR_DBPLYR" = FALSE)
 ```
+
+# Intro
+
+The CohortTableHandler is an extension of `CDMHandled` (see vignette) to include the a `cohort` table and the functions to work with this table.
+
+# Getting an Eunomia database for testing
+
+A testing database can be downloaded from Eunomia. See [Eunomia](https://ohdsi.github.io/Eunomia/reference/getDatabaseFile.html) for more details.
+
+```{r}  
+# Set EUNOMIA_DATA_FOLDER if not already set
+if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
+    Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
+}
+
+# Get the path to the Eunomia database
+pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
+```
+
 
 # Configuration 
 
@@ -28,34 +46,29 @@ Create a `CohortTableHandles` with a test cohort.
 
 ```{r}
 config_yaml <- "
-  database: 
-     databaseId: E1
-     databaseName: Eunomia
-     databaseDescription: Eunomia database
+  database:
+    databaseId: E1
+    databaseName: GiBleed
+    databaseDescription: Eunomia database GiBleed
   connection:
     connectionDetailsSettings:
-        dbms: eunomia
+        dbms: sqlite
+        server: <pathToGiBleedEunomiaSqlite>
   cdm:
-      cdmDatabaseSchema: main
-      vocabularyDatabaseSchema: main
+    cdmDatabaseSchema: main
+    vocabularyDatabaseSchema: main
   cohortTable:
-      cohortDatabaseSchema: main
-      cohortTableName: test_cohort_table"
-
-cat(config_yaml)
+    cohortDatabaseSchema: main
+    cohortTableName: test_cohort_table
+"
+pathToConfigYaml <- file.path(tempdir(), "config.yml")
+writeLines(config_yaml, pathToConfigYaml)
 ```
 
 ```{r}
-config <- yaml::yaml.load(config_yaml)
+config <- readAndParseYaml(pathToConfigYaml, pathToGiBleedEunomiaSqlite = pathToGiBleedEunomiaSqlite)
 ```
-
-```{r, eval=FALSE, echo=FALSE}
-configurations <- yaml::read_yaml(testthat::test_path("config", "test_config.yml"))
-configurationName <- "dev_bigquery"
-configurationName <- "dev_eunomia"
-config <- configurations[[configurationName]]
-```
-
+     
 # Create CohortTableHandler
 
 As in `CDMHandled`, to create a `CohortTableHandles`, for convenience `createCohortTableHandlerFromList` can be used. 

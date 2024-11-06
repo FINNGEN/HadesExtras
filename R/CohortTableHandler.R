@@ -96,7 +96,7 @@ CohortTableHandler <- R6::R6Class(
         cohortTableName <- cohortTableName |> stringr::str_replace("<timestamp>", timestamp)
       }
       private$.cohortTableNames <- CohortGenerator::getCohortTableNames(cohortTableName)
-      private$.incrementalFolder <- file.path(tempdir(), stringr::str_remove_all(Sys.time(), "-|:|\\.|\\s"))
+      private$.incrementalFolder <- file.path(tempdir(), timestamp)
 
       private$.cohortDefinitionSet <- tibble::tibble(
         cohortId = 0,

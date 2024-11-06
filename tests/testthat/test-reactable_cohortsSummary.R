@@ -1,44 +1,9 @@
 test_that("rectable_cohortsSummary works", {
-  cohortTableHandler <- helper_createNewCohortTableHandler()
-  on.exit({
+  cohortTableHandler <- helper_createNewCohortTableHandler(addCohorts = "EunomiaDefaultCohorts")
+  withr::defer({
     rm(cohortTableHandler)
     gc()
   })
-
-  # cohorts from eunomia
-  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/asthma/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/asthma/cohorts"),
-    sqlFolder = here::here("inst/testdata/asthma/sql/sql_server"),
-    cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortId"),
-    subsetJsonFolder = here::here("inst/testdata/asthma/cohort_subset_definitions/"),
-    # packageName = "HadesExtras",
-    verbose = FALSE
-  )
-
-  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
-
-  # cohorts from cohort data
-  sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
-    connection = cohortTableHandler$connectionHandler$getConnection(),
-    cohortDatabaseSchema = cohortTableHandler$cdmDatabaseSchema,
-    numberPersons = 100
-  )
-
-  cohort_data <- tibble::tibble(
-    cohort_name = rep(c("cohortdata A", "cohortdata B"), 50),
-    person_source_value = c(sourcePersonToPersonId$person_source_value[1:90], LETTERS[1:10]),
-    cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 50),
-    cohort_end_date = rep(as.Date(c(NA, "2020-01-04")), 50)
-  )
-
-  cohortDefinitionSet <- cohortDataToCohortDefinitionSet(
-    cohortData = cohort_data,
-    newCohortIds = c(10, 11),
-  )
-
-  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 
   cohortsSummary <- cohortTableHandler$getCohortsSummary()
 

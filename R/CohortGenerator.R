@@ -266,11 +266,6 @@ CohortGenerator_generateCohortSet <- function(
 }
 
 
-
-
-
-
-
 #' deleteCohortFromCohortTable
 #'
 #' Deletes specified cohorts from a cohort table in a database.
@@ -542,25 +537,26 @@ CohortGenerator_getCohortsOverlaps <- function(
 #'
 #' @export
 removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
-
   if (length(cohortIds) == 0) {
     return(cohortOverlaps)
   }
 
   cohortOverlaps |> checkmate::assertDataFrame()
-  cohortOverlaps  |> names()  |> checkmate::assertSubset(c('cohortIdCombinations', 'numberOfSubjects'))
+  cohortOverlaps |>
+    names() |>
+    checkmate::assertSubset(c("cohortIdCombinations", "numberOfSubjects"))
   cohortIds |> checkmate::assertNumeric()
 
   cohortOverlaps <- cohortOverlaps |>
     dplyr::mutate(
-      cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~{
-        a <- stringr::str_split(.x, '-')[[1]]   |>
-          setdiff(c('', as.character(cohortIds)))  |>
-          paste0(collapse = '-')
-        a  <- paste0('-', a, '-')
+      cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~ {
+        a <- stringr::str_split(.x, "-")[[1]] |>
+          setdiff(c("", as.character(cohortIds))) |>
+          paste0(collapse = "-")
+        a <- paste0("-", a, "-")
       }),
     ) |>
-    dplyr::filter(!stringr::str_detect(cohortIdCombinations, '--')) |>
+    dplyr::filter(!stringr::str_detect(cohortIdCombinations, "--")) |>
     dplyr::group_by(cohortIdCombinations) |>
     dplyr::summarize(numberOfSubjects = sum(numberOfSubjects), .groups = "drop")
 
