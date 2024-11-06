@@ -331,7 +331,11 @@ CohortGenerator_deleteCohortFromCohortTable  <- function(
     generatedCohorts <- readr::read_csv(recordKeepingFile, show_col_types = FALSE)
     generatedCohorts <- generatedCohorts |>
       dplyr::filter(!cohortId %in% cohortIds)
-    readr::write_csv(generatedCohorts, recordKeepingFile)
+    if (nrow(generatedCohorts) == 0) {
+      unlink(recordKeepingFile)
+    } else {
+      readr::write_csv(generatedCohorts, recordKeepingFile)
+    }
   }
 
   return(TRUE)
