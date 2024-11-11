@@ -275,10 +275,13 @@ CohortGenerator_generateCohortSet <- function(
 #' @param cohortDatabaseSchema The schema name of the cohort database.
 #' @param cohortTableNames A list containing the name of the cohort table.
 #' @param cohortIds Numeric vector of cohort IDs to be deleted.
+#' @param incrementalFolder The folder where the incremental file is stored (optional).
 #'
 #' @importFrom checkmate assertCharacter assertList assertNumeric
 #' @importFrom DatabaseConnector connect disconnect executeSql
 #' @importFrom SqlRender readSql render translate
+#' @importFrom dplyr filter
+#' @importFrom readr read_csv write_csv
 #'
 #' @return TRUE if the deletion was successful; otherwise, an error is raised.
 #
@@ -288,7 +291,9 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
     connection = NULL,
     cohortDatabaseSchema,
     cohortTableNames,
-    cohortIds) {
+    cohortIds,
+    incrementalFolder = NULL
+  ){
   #
   # Validate parameters
   #
@@ -320,6 +325,18 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
     targetDialect = connection@dbms
   )
   DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
+
+  if(!is.null(incrementalFolder)){
+    recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
+    generatedCohorts <- readr::read_csv(recordKeepingFile, show_col_types = FALSE)
+    generatedCohorts <- generatedCohorts |>
+      dplyr::filter(!cohortId %in% cohortIds)
+    if (nrow(generatedCohorts) == 0) {
+      unlink(recordKeepingFile)
+    } else {
+      readr::write_csv(generatedCohorts, recordKeepingFile)
+    }
+  }
 
   return(TRUE)
 }

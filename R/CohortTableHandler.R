@@ -211,7 +211,10 @@ CohortTableHandler <- R6::R6Class(
 
       # TODO: fix cohortDefinitionSet for subsets using
       cohortDefinitionSet <- cohortDefinitionSet |>
-        dplyr::mutate(subsetParent = dplyr::if_else(is.na(isSubset) | isSubset == FALSE, cohortId, subsetParent))
+        dplyr::mutate(
+          subsetParent = dplyr::if_else( is.na(isSubset) | isSubset==FALSE, cohortId, subsetParent),
+          isSubset=dplyr::if_else(is.na(isSubset), FALSE,isSubset)
+        )
       attr(cohortDefinitionSet, "hasSubsetDefinitions") <- hasSubSets
 
       # generate cohorts in incremental mode
@@ -288,7 +291,8 @@ CohortTableHandler <- R6::R6Class(
         connection = self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
-        cohortIds = cohortIds
+        cohortIds = cohortIds,
+        incrementalFolder = private$.incrementalFolder
       )
 
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>

@@ -200,6 +200,9 @@ test_that("CohortTableHandler$insertOrUpdateCohorts can insert a cohort with no 
 #
 # Delete cohorts
 #
+#
+# Delete cohorts
+#
 test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary", {
   cohortTableHandler <- helper_createNewCohortTableHandler()
   withr::defer({
@@ -237,6 +240,7 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
   cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(20))
   cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-20-"))
 })
+
 
 
 #
