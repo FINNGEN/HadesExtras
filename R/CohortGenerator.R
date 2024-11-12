@@ -64,20 +64,6 @@ CohortGenerator_generateCohortSet <- function(
   }
 
   #
-  # Pre calculate tmp_cohortdata settings. This needs to be here so that incremental mode detects the cohort not to copy to cohortData
-  #
-  cohortDataImportTmpTableName <- getOption("cohortDataImportTmpTableName", "tmp_cohortdata")
-  cohortDataImportTmpTableNameFull <- cohortDataImportTmpTableName
-  # if we are using a tempEmulationSchema, full path to table has to be recalculated, and changed in the sql
-  sqlRenderTempEmulationSchema <- getOption("sqlRenderTempEmulationSchema")
-  if (!is.null(sqlRenderTempEmulationSchema)) {
-    cohortDataImportTmpTableNameFull <- paste0(sqlRenderTempEmulationSchema, ".", SqlRender::getTempTablePrefix(), cohortDataImportTmpTableName)
-    # we have to correct the sql in cohortDefinitionSet
-    cohortDefinitionSet <- cohortDefinitionSet |>
-      dplyr::mutate(sql = stringr::str_replace(sql, cohortDataImportTmpTableName, cohortDataImportTmpTableNameFull))
-  }
-
-  #
   # start function before generateCohortSet
   #
 
@@ -96,23 +82,22 @@ CohortGenerator_generateCohortSet <- function(
   cohortDefinitionSetCohortDataType <- cohortDefinitionSet |>
     dplyr::filter(cohortType == "FromCohortData")
 
+  # if incremental mode, ignore cohorts that are not changed
   if (incremental == TRUE) {
-    recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
+
     cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
-      dplyr::filter(
-        # hasChange == TRUE
-        purrr::map2_lgl(
-          .x = cohortId,
-          .y = sql,
-          .f = ~ {
-            CohortGenerator::isTaskRequired(
-              cohortId = .x,
-              checksum = CohortGenerator::computeChecksum(.y),
-              recordKeepingFile = recordKeepingFile
-            )
-          }
-        )
-      )
+      dplyr::mutate(currentChecksum = CohortGenerator::computeChecksum(sql))
+
+    recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
+    if (file.exists(recordKeepingFile)) {       
+      recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE) |>
+        dplyr::rename(previousChecksum = checksum)
+
+      cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
+        dplyr::left_join(recordKeeping, by = c("cohortId" = "cohortId")) |>
+        dplyr::filter(is.na(previousChecksum) | currentChecksum != previousChecksum) |>
+        dplyr::select(cohortId, cohortName, json, sql, cohortType, currentChecksum)
+    } 
   }
 
   if (nrow(cohortDefinitionSetCohortDataType) != 0) {
@@ -122,23 +107,24 @@ CohortGenerator_generateCohortSet <- function(
     # Connect to tables and copy cohortData to database
     personTbl <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
     observationPeriodTable <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "observation_period"))
-    cohortDataTable <- tmp_dplyr_copy_to(connection, cohortData, overwrite = TRUE)
+    cohortDataTable <- dplyr::copy_to(connection, cohortData, temporary = TRUE, overwrite = TRUE)
 
     # join to cohort_data_table cohort_names_table.cohort_name; person.person_id; observation_period period dates
     toAppend <- cohortDataTable |>
       dplyr::left_join(
-        personTbl |> dplyr::select(person_id, person_source_value),
-        by = "person_source_value"
-      ) |>
-      dplyr::left_join(
-        observationPeriodTable |>
-          dplyr::select(person_id, observation_period_start_date, observation_period_end_date) |>
-          dplyr::group_by(person_id) |>
-          dplyr::summarise(
-            observation_period_start_date = min(observation_period_start_date, na.rm = TRUE),
-            observation_period_end_date = max(observation_period_end_date, na.rm = TRUE)
+        personTbl |>
+          dplyr::select(person_id, person_source_value) |>
+          dplyr::left_join(
+            observationPeriodTable |>
+              dplyr::select(person_id, observation_period_start_date, observation_period_end_date) |>
+              dplyr::group_by(person_id) |>
+              dplyr::summarise(
+                observation_period_start_date = min(observation_period_start_date, na.rm = TRUE),
+                observation_period_end_date = max(observation_period_end_date, na.rm = TRUE)
+              ),
+            by = c("person_id" = "person_id")
           ),
-        by = "person_id"
+        by = c("person_source_value" = "person_source_value")
       )
 
     # collect check cohortData to add
@@ -161,19 +147,20 @@ CohortGenerator_generateCohortSet <- function(
         cohort_start_date = dplyr::if_else(is.na(cohort_start_date), observation_period_start_date, cohort_start_date),
         cohort_end_date = dplyr::if_else(is.na(cohort_end_date), observation_period_end_date, cohort_end_date)
       ) |>
-      dplyr::select(cohort_definition_id, subject_id = person_id, cohort_start_date, cohort_end_date) #|>
-    # dplyr::compute()
-    # instead of compute, we create a temporal table, so the same stays the same in the sql, this is necesary for incremental mode
-    # overwrite not working
-    # browser()
-    try(DatabaseConnector::dbRemoveTable(connection, cohortDataImportTmpTableNameFull), silent = TRUE)
-    # browser()
-    toAppend <- dplyr::copy_to(connection, toAppend, cohortDataImportTmpTableName, temporary = TRUE, overwrite = TRUE)
+      dplyr::select(cohort_definition_id, subject_id = person_id, cohort_start_date, cohort_end_date) |>
+      dplyr::compute()
+
+    # Update @source_cohort_table in the sql
+    cohortDataImportTmpTableName <- toAppend |>
+      dbplyr::remote_name()
+
+    cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
+      dplyr::mutate(sql = stringr::str_replace(sql, "@source_cohort_table", cohortDataImportTmpTableName))
 
     # replace recalculated cohortDefinitionSets
     cohortDefinitionSet <- dplyr::bind_rows(
       cohortDefinitionSet |> dplyr::filter(!(cohortId %in% cohortDefinitionSetCohortDataType$cohortId)),
-      cohortDefinitionSetCohortDataType
+      cohortDefinitionSetCohortDataType |> dplyr::select(cohortId, cohortName, json, sql, cohortType)
     ) |>
       dplyr::arrange(cohortId)
   }
@@ -181,7 +168,7 @@ CohortGenerator_generateCohortSet <- function(
   #
   # end function before generateCohortSet
   #
-  # browser()
+
   results <- CohortGenerator::generateCohortSet(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -205,7 +192,6 @@ CohortGenerator_generateCohortSet <- function(
       })
     )
 
-  # browser()
   #
   # start function after generateCohortSet
   #
@@ -222,6 +208,22 @@ CohortGenerator_generateCohortSet <- function(
       dplyr::select(-cohortDataInfo)
 
     DatabaseConnector::dropEmulatedTempTables(connection)
+
+    # correct recordKeepingFile
+    if (incremental == TRUE) {
+      recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
+      recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE) 
+
+      recordKeeping <- recordKeeping |>
+        dplyr::left_join(
+          cohortDefinitionSetCohortDataType |> dplyr::select(cohortId, currentChecksum),
+          by = c("cohortId" = "cohortId")
+        ) |>
+        dplyr::mutate(checksum = ifelse(is.na(currentChecksum), checksum, currentChecksum)) |>
+        dplyr::select(-currentChecksum)
+
+      readr::write_csv(recordKeeping, recordKeepingFile)
+    }
   }
 
   #
@@ -292,8 +294,7 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
     cohortDatabaseSchema,
     cohortTableNames,
     cohortIds,
-    incrementalFolder = NULL
-  ){
+    incrementalFolder = NULL) {
   #
   # Validate parameters
   #
@@ -326,7 +327,7 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
   )
   DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
 
-  if(!is.null(incrementalFolder)){
+  if (!is.null(incrementalFolder)) {
     recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
     generatedCohorts <- readr::read_csv(recordKeepingFile, show_col_types = FALSE)
     generatedCohorts <- generatedCohorts |>

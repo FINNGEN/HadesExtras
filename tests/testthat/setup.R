@@ -1,14 +1,14 @@
 #
 # SELECT DATABASE and CO2 CONFIGURATION
 #
-testingDatabase <- "Eunomia-GiBleed"
-# testingDatabase <- "Eunomia-MIMIC"
-# testingDatabase <- "AtlasDevelopment"
+
+# Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Eunomia-GiBleed")
+testingDatabase <- Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT")
 
 # check correct settings
 possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment")
 if (!(testingDatabase %in% possibleDatabases)) {
-  message("Please select a valid database from: ", paste(possibleDatabases, collapse = ", "))
+  message("Please set a valid testing environment in envar HADESEXTAS_TESTING_ENVIRONMENT, from: ", paste(possibleDatabases, collapse = ", "))
   stop()
 }
 

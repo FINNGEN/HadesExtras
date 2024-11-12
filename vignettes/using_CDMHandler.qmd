@@ -22,10 +22,9 @@ library(HadesExtras)
 
 # Getting an Eunomia database for testing
 
-A testing database can be downloaded from Eunomia. See [Eunomia](https://ohdsi.github.io/Eunomia/reference/getDatabaseFile.html) for more details.
 ```{r}
 # Set EUNOMIA_DATA_FOLDER if not already set
-if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
+if (dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER")) == FALSE) {
     Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
 }
 

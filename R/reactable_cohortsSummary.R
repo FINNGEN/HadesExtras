@@ -335,7 +335,7 @@ rectable_cohortsSummary <- function(
 #' @importFrom dplyr count mutate
 #'
 .buildInfoStr <- function(buildInfo) {
-  # browser()
+  # 
   emojis <- list(
     error = "\u274c",
     warning = "\u26A0\uFE0F",

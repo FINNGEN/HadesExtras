@@ -186,10 +186,9 @@ cohortDataToCohortDefinitionSet <- function(
         .y = cohort,
         .f = ~ {
           paste0(
-            "--", digest::digest(.y), "\n",
+            "--", digest::digest(.y), "\n", # Digest inserted for incremental mode to detect changes in cohortData
             SqlRender::render(
               sql = sqlToRender,
-              source_cohort_table = getOption("cohortDataImportTmpTableName", "tmp_cohortdata"),
               source_cohort_id = .x,
               is_temp_table = TRUE
             )

@@ -1,15 +1,15 @@
-helper_createNewConnection <- function(addCohorts = FALSE) {
-  checkmate::assertLogical(addCohorts, len = 1, null.ok = FALSE)
+helper_createNewConnection <- function() {
 
   # by default use the one from setup.R
   connectionDetailsSettings <- test_cohortTableHandlerConfig$connection$connectionDetailsSettings
 
   connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
-
-  if (addCohorts) {
-    Eunomia::createCohorts(connectionDetails)
+  
+  if (!is.null(test_cohortTableHandlerConfig$connection$tempEmulationSchema)) {
+    options(sqlRenderTempEmulationSchema = test_cohortTableHandlerConfig$connection$tempEmulationSchema)
+  } else {
+    options(sqlRenderTempEmulationSchema = NULL)
   }
-
   connection <- DatabaseConnector::connect(connectionDetails)
 
   return(connection)
@@ -138,10 +138,10 @@ helper_createNewCohortTableHandler <- function(addCohorts = NULL, loadConnection
 
 helper_getParedSourcePersonAndPersonIds <- function(
     connection,
-    cohortDatabaseSchema,
+    cdmDatabaseSchema,
     numberPersons) {
   # Connect, collect tables
-  personTable <- dplyr::tbl(connection, dbplyr::in_schema(cohortDatabaseSchema, "person"))
+  personTable <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
 
   # get first n persons
   pairedSourcePersonAndPersonIds <- personTable |>
