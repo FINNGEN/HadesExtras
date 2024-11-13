@@ -128,12 +128,14 @@ test_that(" cohortDataToCohortDefinitionSet works with ", {
 
 test_that("getCohortDataFromCohortTable returns a cohort", {
 
-  connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- 'test_cohort'
 
-  CohortGenerator::createCohortTables(
+  CohortGenerator_createCohortTables(
     connection = connection,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
@@ -148,18 +150,18 @@ test_that("getCohortDataFromCohortTable returns a cohort", {
 
   generatedCohorts <- CohortGenerator::generateCohortSet(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSet,
     incremental = FALSE
   )
 
   cohortData <- getCohortDataFromCohortTable(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName,
     cohortNameIds = generatedCohorts |> dplyr::select(cohortId, cohortName)
   )
 
