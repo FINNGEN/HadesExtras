@@ -34,14 +34,20 @@ test_that("Matching subset naming and instantitation", {
 
 test_that("Matching Subset works", {
   connection <- helper_createNewConnection()
-  # on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
-  CohortGenerator::createCohortTables(
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- 'test_cohort'
+
+  CohortGenerator_createCohortTables(
     connection = connection,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName)
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
   )
-
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
     settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
@@ -85,18 +91,18 @@ test_that("Matching Subset works", {
 
   generatedCohorts <- CohortGenerator::generateCohortSet(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = CohortGenerator::getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSetWithSubsetDef,
     incremental = FALSE
   )
 
   cohortDemographics <- CohortGenerator_getCohortDemograpics(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName
   )
 
   checkmate::expect_tibble(cohortDemographics)
@@ -105,15 +111,22 @@ test_that("Matching Subset works", {
 
 
 test_that("Matching Subset works for different parameters", {
-  testthat::skip_if(testSelectedConfiguration$connection$connectionDetailsSettings$dbms != "eunomia")
+  testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "Eunomia-GiBleed")
 
   connection <- helper_createNewConnection()
-  # on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
-  CohortGenerator::createCohortTables(
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- 'test_cohort'
+
+  CohortGenerator_createCohortTables(
     connection = connection,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName)
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName)
   )
 
 
@@ -159,18 +172,18 @@ test_that("Matching Subset works for different parameters", {
 
   generatedCohorts <- CohortGenerator::generateCohortSet(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSetWithSubsetDef,
     incremental = FALSE
   )
 
   cohortDemographics <- CohortGenerator_getCohortDemograpics(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName
   )
 
   cohortDemographics$sexCounts[[3]]$n[[1]] |> expect_equal(20) # female
@@ -199,18 +212,18 @@ test_that("Matching Subset works for different parameters", {
 
   generatedCohorts <- CohortGenerator::generateCohortSet(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSetWithSubsetDef,
     incremental = FALSE
   )
 
   cohortDemographics <- CohortGenerator_getCohortDemograpics(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName
   )
 
   cohortDemographics$sexCounts[[3]]$n[[1]] |> expect_equal(10) # female, there is only 10
@@ -241,18 +254,18 @@ test_that("Matching Subset works for different parameters", {
 
   generatedCohorts <- CohortGenerator::generateCohortSet(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSetWithSubsetDef,
     incremental = FALSE
   )
 
   cohortDemographics <- CohortGenerator_getCohortDemograpics(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName
   )
 
   cohortDemographics$sexCounts[[3]]$n[[1]] |> expect_equal(10) # female, half
