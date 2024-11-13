@@ -3,13 +3,23 @@ helper_createNewConnection <- function() {
   # by default use the one from setup.R
   connectionDetailsSettings <- test_cohortTableHandlerConfig$connection$connectionDetailsSettings
 
-  connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
-  
   if (!is.null(test_cohortTableHandlerConfig$connection$tempEmulationSchema)) {
     options(sqlRenderTempEmulationSchema = test_cohortTableHandlerConfig$connection$tempEmulationSchema)
   } else {
     options(sqlRenderTempEmulationSchema = NULL)
   }
+
+  # create connection
+  if (!is.null(connectionDetailsSettings$drv)) {
+    # IBD connection details
+    eval(parse(text = paste0("tmpDriverVar <- ", connectionDetailsSettings$drv)))
+    connectionDetailsSettings$drv  <- tmpDriverVar
+    connectionDetails <- rlang::exec(DatabaseConnector::createDbiConnectionDetails, !!!connectionDetailsSettings)
+  } else {
+    # JDBC connection details
+    connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!connectionDetailsSettings)
+  }
+
   connection <- DatabaseConnector::connect(connectionDetails)
 
   return(connection)

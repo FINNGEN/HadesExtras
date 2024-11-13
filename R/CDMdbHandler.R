@@ -339,7 +339,15 @@ createCDMdbHandlerFromList <- function(
   }
 
   # create connectionHandler
-  connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!config$connection$connectionDetailsSettings)
+  if (!is.null(config$connection$connectionDetailsSettings$drv)) {
+    # IBD connection details
+    eval(parse(text = paste0("tmpDriverVar <- ", connectionDetailsSettings$drv)))
+    connectionDetailsSettings$drv  <- tmpDriverVar
+    connectionDetails <- rlang::exec(DatabaseConnector::createDbiConnectionDetails, !!!connectionDetailsSettings)
+  } else {
+    # JDBC connection details
+    connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!config$connection$connectionDetailsSettings)
+  }
 
   connectionHandler <- ResultModelManager::ConnectionHandler$new(
     connectionDetails = connectionDetails,

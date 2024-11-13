@@ -1,36 +1,32 @@
+test_databasesConfig <- readAndParseYaml(
+    pathToYalmFile = testthat::test_path("config", "atlasDev_databasesConfig.yml"),
+    OAuthPvtKeyPath = Sys.getenv("GCP_SERVICE_KEY"),
+    pathToDriver = Sys.getenv("DATABASECONNECTOR_JAR_FOLDER")
+  )
 
+connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!test_databasesConfig$BQ5K$cohortTableHandler$connection$connectionDetailsSettings)
+connection_jdbi <- DatabaseConnector::connect(connectionDetails)
 
-
-
-table <- dbplyr::in_schema("atlas-development-270609.finngen_omop_r11", "person")
-connection <- CDMdb$connectionHandler$getConnection()
-dplyr::tbl(connection, table)
-
-
-bigrquery::bq_auth(path = Sys.getenv("GCP_SERVICE_KEY"))
-
-con <- DBI::dbConnect(
-  bigrquery::bigquery(),
-  project = "atlas-development-270609",
-  billing =  'atlas-development-270609'
-)
-con
-
-dplyr::tbl(con, table)  |> dplyr::show_query()
-
-
-
-
+cars <- dplyr::copy_to(connection_jdbi, cars, overwrite = TRUE)
 
 
 
 bigrquery::bq_auth(path = Sys.getenv("GCP_SERVICE_KEY"))
 
-con <- DBI::dbConnect(
+connection_bigrquery <- DBI::dbConnect(
   bigrquery::bigquery(),
   project = "atlas-development-270609",
   billing =  'atlas-development-270609'
 )
+
+
+cars <- dplyr::copy_to(connection_bigrquery, cars, overwrite = TRUE)
+
+
+
+
+bigrquery::bq_auth(path = Sys.getenv("GCP_SERVICE_KEY"))
+options(sqlRenderTempEmulationSchema = "atlas-development-270609.sandbox")
 
 cd <- DatabaseConnector::createDbiConnectionDetails(
   dbms = "bigquery",
@@ -39,7 +35,21 @@ cd <- DatabaseConnector::createDbiConnectionDetails(
   billing =  'atlas-development-270609'
 )
 
-connection2 <- DatabaseConnector::connect(cd)
+connection_dbi <- DatabaseConnector::connect(cd)
+
+aaa <- mtcars |> tibble::as_tibble() |> dplyr::mutate(speed = as.numeric(NA)) 
+tbl_cars <- dplyr::copy_to(connection_dbi, aaa , overwrite = TRUE)
+
+
+
+
+bq_table <- bigrquery::bq_table("atlas-development-270609", "sandbox", "aaaaa")
+bigrquery::bq_table_upload(bq_table, values = aaa, fields = bigrquery::bq_fields(aaa))
+
+bigrquery::bq_table_download(bq_table)
+
+
+
 
 table <- dbplyr::in_schema("atlas-development-270609.finngen_omop_r11", "person")
 table <- dbplyr::in_schema("atlas-development-270609.finngen_omop_r11", "person")
@@ -62,6 +72,9 @@ DatabaseConnector::insertTable(
 
 
 
+table <- dbplyr::in_schema("atlas-development-270609.finngen_omop_r11", "person")
+connection <- CDMdb$connectionHandler$getConnection()
+dplyr::tbl(connection, table)
 
 config <- '
 database:
@@ -93,3 +106,6 @@ connectionHandler <- ResultModelManager::ConnectionHandler$new(connectionDetails
 
 connectionHandler$getConnection()
 connectionHandler$tbl('person', config$cdm$cdmDatabaseSchema )
+
+
+sub(".*ProjectId=([^;]+).*", "\\1", "/www.googleapis.com/bigquery/v2:443;ProjectId=atlas-development-270609;OAuthType=0;OAuthServiceAcctEmail=146473670970-compute@developer.gserviceac")

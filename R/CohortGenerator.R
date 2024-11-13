@@ -107,7 +107,7 @@ CohortGenerator_generateCohortSet <- function(
     # Connect to tables and copy cohortData to database
     personTbl <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
     observationPeriodTable <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "observation_period"))
-    cohortDataTable <- dplyr::copy_to(connection, cohortData, temporary = TRUE, overwrite = TRUE)
+    cohortDataTable <- dplyr::copy_to(connection, cohortData, overwrite = TRUE, temporary = TRUE)
 
     # join to cohort_data_table cohort_names_table.cohort_name; person.person_id; observation_period period dates
     toAppend <- cohortDataTable |>
@@ -138,7 +138,7 @@ CohortGenerator_generateCohortSet <- function(
         n_missing_cohort_end = sum(ifelse(is.null(cohort_end_date), 1L, 0L), na.rm = TRUE)
       ) |>
       dplyr::collect()
-
+    
     # compute changes in toAppend
     toAppend <- toAppend |>
       dplyr::filter(!is.na(person_id)) |>
@@ -579,4 +579,61 @@ removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
     dplyr::summarize(numberOfSubjects = sum(numberOfSubjects), .groups = "drop")
 
   return(cohortOverlaps)
+}
+
+
+#' CohortGenerator_createCohortTables
+#'
+#' Wrapper for CohortGenerator::createCohortTables, where if bigquery is used, the tables are created using bigrquery::bq_table_create.
+#' 
+#' @importFrom bigrquery bq_table bq_table_exists bq_table_delete bq_table_create
+#' @importFrom tibble tibble
+#' @importFrom DatabaseConnector connect disconnect
+#' @importFrom CohortGenerator createCohortTables getCohortTableNames
+#' 
+#' @export
+CohortGenerator_createCohortTables <- function(
+  connectionDetails = NULL,
+  connection = NULL,
+  cohortDatabaseSchema,
+  cohortTableNames = CohortGenerator::getCohortTableNames(),
+  incremental = FALSE) {
+
+  if (is.null(connection)) {
+    connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
+
+  if (connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)) {
+
+    strings <- strsplit(cohortDatabaseSchema, "\\.")
+    bq_project <- strings[[1]][1]
+    bq_dataset <- strings[[1]][2]
+
+    # TODO: atm we make only the cohort table
+    bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableNames$cohortTable)
+    cohortTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      subject_id = as.integer(),
+      cohort_start_date = as.Date(as.character()),
+      cohort_end_date = as.Date(as.character())
+    )
+    
+    if (bigrquery::bq_table_exists(bq_table) && !incremental) {
+      bigrquery::bq_table_delete(bq_table)
+      bigrquery::bq_table_create(bq_table, fields = cohortTableTemplate)
+    } 
+
+    if (!bigrquery::bq_table_exists(bq_table)) {
+      bigrquery::bq_table_create(bq_table, fields = cohortTableTemplate)
+    }
+
+  } else {
+    CohortGenerator::createCohortTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = cohortTableNames,
+      incremental = incremental
+    )
+  }
 }

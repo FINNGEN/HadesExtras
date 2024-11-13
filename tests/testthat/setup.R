@@ -6,7 +6,7 @@
 testingDatabase <- Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT")
 
 # check correct settings
-possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment")
+possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment", "AtlasDevelopment-DBI")
 if (!(testingDatabase %in% possibleDatabases)) {
   message("Please set a valid testing environment in envar HADESEXTAS_TESTING_ENVIRONMENT, from: ", paste(possibleDatabases, collapse = ", "))
   stop()
@@ -57,6 +57,24 @@ if (testingDatabase %in% c("AtlasDevelopment")) {
     pathToYalmFile = testthat::test_path("config", "atlasDev_databasesConfig.yml"),
     OAuthPvtKeyPath = Sys.getenv("GCP_SERVICE_KEY"),
     pathToDriver = Sys.getenv("DATABASECONNECTOR_JAR_FOLDER")
+  )
+
+  test_cohortTableHandlerConfig <- test_databasesConfig[[1]]$cohortTableHandler
+}
+
+#
+# AtlasDevelopmet-DBI Database
+#
+if (testingDatabase %in% c("AtlasDevelopment-DBI")) {
+  if (Sys.getenv("GCP_SERVICE_KEY") == "") {
+    message("GCP_SERVICE_KEY not set. Please set this environment variable to the path of the GCP service key.")
+    stop()
+  }
+
+  bigrquery::bq_auth(path = Sys.getenv("GCP_SERVICE_KEY"))
+
+  test_databasesConfig <- readAndParseYaml(
+    pathToYalmFile = testthat::test_path("config", "atlasDev_DBI_databasesConfig.yml")
   )
 
   test_cohortTableHandlerConfig <- test_databasesConfig[[1]]$cohortTableHandler

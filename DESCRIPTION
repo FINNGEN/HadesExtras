@@ -44,7 +44,8 @@ Imports:
     speedglm
 Remotes:  
     OHDSI/CohortGenerator,
-    OHDSI/ResultModelManager
+    OHDSI/ResultModelManager, 
+    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI
 Suggests: 
     devtools,
     ROhdsiWebApi,
