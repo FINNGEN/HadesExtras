@@ -610,22 +610,82 @@ CohortGenerator_createCohortTables <- function(
     bq_project <- strings[[1]][1]
     bq_dataset <- strings[[1]][2]
 
-    # TODO: atm we make only the cohort table
-    bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableNames$cohortTable)
+    # Create table templates based on SQL schema
     cohortTableTemplate <- tibble::tibble(
       cohort_definition_id = as.integer(),
       subject_id = as.integer(),
       cohort_start_date = as.Date(as.character()),
       cohort_end_date = as.Date(as.character())
     )
-    
-    if (bigrquery::bq_table_exists(bq_table) && !incremental) {
-      bigrquery::bq_table_delete(bq_table)
-      bigrquery::bq_table_create(bq_table, fields = cohortTableTemplate)
-    } 
 
-    if (!bigrquery::bq_table_exists(bq_table)) {
-      bigrquery::bq_table_create(bq_table, fields = cohortTableTemplate)
+    inclusionTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      rule_sequence = as.integer(),
+      name = as.character(),
+      description = as.character()
+    )
+
+    inclusionResultTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      inclusion_rule_mask = as.integer(),
+      person_count = as.integer(),
+      mode_id = as.integer()
+    )
+
+    inclusionStatsTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      rule_sequence = as.integer(),
+      person_count = as.integer(),
+      gain_count = as.integer(),
+      person_total = as.integer(),
+      mode_id = as.integer()
+    )
+
+    summaryStatsTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      base_count = as.integer(),
+      final_count = as.integer(),
+      mode_id = as.integer()
+    )
+
+    censorStatsTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      lost_count = as.integer()
+    )
+
+    # Create or replace tables based on templates
+    tableTemplates <- list(
+      cohortTable = cohortTableTemplate,
+      inclusionTable = inclusionTableTemplate,
+      inclusionResultTable = inclusionResultTableTemplate,
+      inclusionStatsTable = inclusionStatsTableTemplate,
+      summaryStatsTable = summaryStatsTableTemplate,
+      censorStatsTable = censorStatsTableTemplate
+    )
+
+    for (tableName in names(tableTemplates)) {
+      tableSuffix <- switch(tableName,
+        "cohortTable" = "",
+        "inclusionTable" = "_inclusion",
+        "inclusionResultTable" = "_inclusion_result",
+        "inclusionStatsTable" = "_inclusion_stats",
+        "summaryStatsTable" = "_summary_stats",
+        "censorStatsTable" = "_censor_stats"
+      )
+      
+      fullTableName <- paste0(cohortTableNames$cohortTable, tableSuffix)
+      bq_table <- bigrquery::bq_table(bq_project, bq_dataset, fullTableName)
+      
+      if (bigrquery::bq_table_exists(bq_table) && !incremental) {
+        message(paste("Replacing bigquery table", fullTableName))
+        bigrquery::bq_table_delete(bq_table)
+        bigrquery::bq_table_create(bq_table, fields = tableTemplates[[tableName]])
+      }
+
+      if (!bigrquery::bq_table_exists(bq_table)) {
+        message(paste("Creating bigquery table", fullTableName))
+        bigrquery::bq_table_create(bq_table, fields = tableTemplates[[tableName]])
+      }
     }
 
   } else {
@@ -634,6 +694,60 @@ CohortGenerator_createCohortTables <- function(
       cohortDatabaseSchema = cohortDatabaseSchema,
       cohortTableNames = cohortTableNames,
       incremental = incremental
+    )
+  }
+}
+
+#' CohortGenerator_dropCohortStatsTables
+#' 
+#' Wrapper for CohortGenerator::dropCohortStatsTables, where if bigquery is used, the tables are deleted using bigrquery::bq_table_delete.
+#' 
+#' @importFrom DatabaseConnector connect disconnect
+#' @importFrom CohortGenerator dropCohortStatsTables getCohortTableNames
+#'
+#' @export
+CohortGenerator_dropCohortStatsTables <- function(
+  connectionDetails = NULL,
+  connection = NULL,
+  cohortDatabaseSchema,
+  cohortTableNames = CohortGenerator::getCohortTableNames()) {
+
+  if (is.null(connection)) {
+    connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
+
+  if (connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)) {
+    strings <- strsplit(cohortDatabaseSchema, "\\.")
+    bq_project <- strings[[1]][1]
+    bq_dataset <- strings[[1]][2]
+
+    # Define all table suffixes (including empty for main cohort table)
+    tableSuffixes <- c(
+      "",  # for main cohort table
+      "_inclusion",
+      "_inclusion_result",
+      "_inclusion_stats",
+      "_summary_stats",
+      "_censor_stats"
+    )
+
+    # Delete all related tables
+    for (suffix in tableSuffixes) {
+      tableName <- paste0(cohortTableNames$cohortTable, suffix)
+      bq_table <- bigrquery::bq_table(bq_project, bq_dataset, tableName)
+      
+      if (bigrquery::bq_table_exists(bq_table)) {
+        message(paste("Deleting bigquery table", tableName))
+        bigrquery::bq_table_delete(bq_table)
+      }
+    }
+  } else {
+    CohortGenerator::dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = cohortTableNames,
+      dropCohortTable = TRUE
     )
   }
 }

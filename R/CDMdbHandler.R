@@ -180,7 +180,6 @@ CDMdbHandler <- R6::R6Class(
         connectionStatusLog$WARNING("Check temp table creation", "skipped")
       }
 
-
       # Check vocabularyDatabaseSchema and populates getTblVocabularySchema
       getTblVocabularySchema <- list()
       vocabularyInfo <- NULL
@@ -319,7 +318,7 @@ CDMdbHandler <- R6::R6Class(
 #'
 #' @return A CDMdbHandler object.
 #'
-#' @importFrom checkmate assertList assertSubset
+#' @importFrom checkmate assertList assertNames
 #'
 #' @export
 createCDMdbHandlerFromList <- function(
@@ -331,28 +330,8 @@ createCDMdbHandlerFromList <- function(
     names() |>
     checkmate::assertNames(must.include = c("database", "connection", "cdm"))
 
-  # set tempEmulationSchema if in config
-  if (!is.null(config$connection$tempEmulationSchema)) {
-    options(sqlRenderTempEmulationSchema = config$connection$tempEmulationSchema)
-  } else {
-    options(sqlRenderTempEmulationSchema = NULL)
-  }
-
   # create connectionHandler
-  if (!is.null(config$connection$connectionDetailsSettings$drv)) {
-    # IBD connection details
-    eval(parse(text = paste0("tmpDriverVar <- ", connectionDetailsSettings$drv)))
-    connectionDetailsSettings$drv  <- tmpDriverVar
-    connectionDetails <- rlang::exec(DatabaseConnector::createDbiConnectionDetails, !!!connectionDetailsSettings)
-  } else {
-    # JDBC connection details
-    connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!config$connection$connectionDetailsSettings)
-  }
-
-  connectionHandler <- ResultModelManager::ConnectionHandler$new(
-    connectionDetails = connectionDetails,
-    loadConnection = FALSE
-  )
+  connectionHandler <- connectionHandlerFromList(config$connection)
 
   # create CDMdbHandler
   CDMdb <- CDMdbHandler$new(

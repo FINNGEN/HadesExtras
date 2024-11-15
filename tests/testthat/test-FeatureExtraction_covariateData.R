@@ -1,5 +1,5 @@
 test_that("covariateData_YearOfBirth works", {
-  connection <- helper_createNewConnection(addCohorts = TRUE)
+  connection <- helper_createNewConnection()
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)

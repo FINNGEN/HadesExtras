@@ -127,11 +127,10 @@ CohortTableHandler <- R6::R6Class(
     #' @description
     #' Closes the connection if active.
     finalize = function() {
-      CohortGenerator::dropCohortStatsTables(
+      CohortGenerator_dropCohortStatsTables(
         connection = self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
-        cohortTableNames = self$cohortTableNames,
-        dropCohortTable = TRUE
+        cohortTableNames = self$cohortTableNames
       )
       unlink(private$.incrementalFolder, recursive = TRUE)
 
@@ -153,7 +152,7 @@ CohortTableHandler <- R6::R6Class(
       errorMessage <- ""
       tryCatch(
         {
-          CohortGenerator::createCohortTables(
+          CohortGenerator_createCohortTables(
             connection = self$connectionHandler$getConnection(),
             cohortDatabaseSchema = self$cohortDatabaseSchema,
             cohortTableNames = self$cohortTableNames
@@ -403,7 +402,7 @@ CohortTableHandler <- R6::R6Class(
 #'
 #' @return A CohortTableHandler object.
 #'
-#' @importFrom checkmate assertList assertSubset
+#' @importFrom checkmate assertList assertNames
 #'
 #' @export
 createCohortTableHandlerFromList <- function(
@@ -414,20 +413,8 @@ createCohortTableHandlerFromList <- function(
     names() |>
     checkmate::assertSubset(c("database", "connection", "cdm", "cohortTable"))
 
-  # set tempEmulationSchema if in config
-  if (!is.null(cohortTableHandlerConfig$connection$tempEmulationSchema)) {
-    options(sqlRenderTempEmulationSchema = cohortTableHandlerConfig$connection$tempEmulationSchema)
-  } else {
-    options(sqlRenderTempEmulationSchema = NULL)
-  }
-
   # create connectionHandler
-  connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!cohortTableHandlerConfig$connection$connectionDetailsSettings)
-
-  connectionHandler <- ResultModelManager::ConnectionHandler$new(
-    connectionDetails = connectionDetails,
-    loadConnection = FALSE
-  )
+  connectionHandler <- connectionHandlerFromList(cohortTableHandlerConfig$connection)
 
   # create cohortTableHandler
   cohortTableHandler <- CohortTableHandler$new(

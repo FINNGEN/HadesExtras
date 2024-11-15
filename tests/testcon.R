@@ -19,6 +19,17 @@ connection_bigrquery <- DBI::dbConnect(
   billing =  'atlas-development-270609'
 )
 
+# list tables
+ds <- bigrquery::bq_dataset("atlas-development-270609", "sandbox")
+bq_list_tables <- bigrquery::bq_dataset_tables(ds)
+
+list_tables <- c()
+for (table in bq_list_tables) {
+  if (table$type == "TABLE") {
+    list_tables <- c(list_tables, table$table)
+  }
+}
+list_tables
 
 cars <- dplyr::copy_to(connection_bigrquery, cars, overwrite = TRUE)
 

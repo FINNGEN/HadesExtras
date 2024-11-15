@@ -10,7 +10,6 @@ BQ5K:
           dbms: bigquery
           drv: bigrquery::bigquery()
           project: atlas-development-270609
-          dataset: sandbox
           billing: atlas-development-270609
       tempEmulationSchema: atlas-development-270609.sandbox
     cdm:
@@ -18,7 +17,7 @@ BQ5K:
         vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_r11
     cohortTable:
         cohortDatabaseSchema: atlas-development-270609.sandbox
-        cohortTableName: test_cohort_table
+        cohortTableName: hadesextras_test_cohort_table_<timestamp>
 BQ500k:
   cohortTableHandler:
     database:
@@ -30,7 +29,6 @@ BQ500k:
           dbms: bigquery
           drv: bigrquery::bigquery()
           project: atlas-development-270609
-          dataset: sandbox
           billing: atlas-development-270609
       tempEmulationSchema: atlas-development-270609.sandbox
     cdm:
@@ -38,4 +36,4 @@ BQ500k:
         vocabularyDatabaseSchema: atlas-development-270609.etl_sam_dev_omop
     cohortTable:
         cohortDatabaseSchema: atlas-development-270609.sandbox
-        cohortTableName: test_cohort_table
+        cohortTableName: hadesextras_test_cohort_table_<timestamp>

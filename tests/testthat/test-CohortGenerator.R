@@ -810,3 +810,43 @@ test_that("removeCohortIdsFromCohortOverlapsTable works", {
   cohortOverlaps$cohortIdCombinations |> expect_equal(c("-1-", "-4-"))
   cohortOverlaps$numberOfSubjects |> expect_equal(c(10, 20))
 })
+
+
+#
+# CohortGenerator_dropCohortStatsTables
+#
+test_that("CohortGenerator_dropCohortStatsTables works", {
+  
+  testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
+
+  connection <- helper_createNewConnection()
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- 'test_cohort2'
+
+  CohortGenerator_createCohortTables(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName)
+  )
+
+  strings <- strsplit(cohortDatabaseSchema, "\\.")
+  bq_project <- strings[[1]][1]
+  bq_dataset <- strings[[1]][2]
+
+  bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
+  bigrquery::bq_table_exists(bq_table) |> expect_true() 
+
+  CohortGenerator_dropCohortStatsTables(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName)
+  )
+
+  bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
+  bigrquery::bq_table_exists(bq_table) |> expect_false() 
+})
