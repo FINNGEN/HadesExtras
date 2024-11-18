@@ -6,7 +6,7 @@
 #' If so, uploads cohortData found in the json column to the database and transforms that data in to a temporal table with cohortTable format.
 #' CohortGenerator::generateCohortSet is called and processes the sql column that will copy the contents of the temporal cohortTable to the
 #' target cohortTable.
-#' It adds a column to the restuls tibble, 'buildInfo' with a LogTibble with information on the cohort construction.
+#' It adds a column to the results tibble, 'buildInfo' with a LogTibble with information on the cohort construction.
 #'
 #' @param connectionDetails as in CohortGenerator::generateCohortSet.
 #' @param connection as in CohortGenerator::generateCohortSet.
@@ -19,7 +19,7 @@
 #' @param incremental as in CohortGenerator::generateCohortSet.
 #' @param incrementalFolder as in CohortGenerator::generateCohortSet.
 #'
-#' @returns resutls from CohortGenerator::generateCohortSet with additional column 'buildInfo'
+#' @returns results from CohortGenerator::generateCohortSet with additional column 'buildInfo'
 #'
 #' @importFrom checkmate assertDataFrame assertNames
 #' @importFrom DatabaseConnector connect disconnect dbExistsTable dbRemoveTable dropEmulatedTempTables executeSql

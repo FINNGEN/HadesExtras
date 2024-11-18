@@ -35,7 +35,7 @@ pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FA
 # Configuration 
 
 We need the following configuration to connect to the database and to specify the OMOP-CDM schema. 
-For convenience, this can be written in a parameterised yaml format and some parameters can be set using `readAndParseYaml` function.
+For convenience, this can be written in a parameterized yaml format and some parameters can be set using `readAndParseYaml` function.
 
 ```{r}
 config_yaml <- "

@@ -91,7 +91,7 @@ To add cohort to the `cohortTableHandler` object we need a `cohortDefinitionSet`
 `cohortDefinitionSet` can be created from
 [Atlas](https://ohdsi.github.io/CohortGenerator/articles/GeneratingCohorts.html#downloading-cohorts-from-atlas) 
 cohort definitions, or from 
-[study pacakages](https://ohdsi.github.io/CohortGenerator/reference/getCohortDefinitionSet.html). 
+[study packages](https://ohdsi.github.io/CohortGenerator/reference/getCohortDefinitionSet.html). 
 
 Additionally, `HadesExtras` includes a way to produce `cohortDefinitionSet` based on a list of local person ids (OMOP table person field person_source_value). 
 
