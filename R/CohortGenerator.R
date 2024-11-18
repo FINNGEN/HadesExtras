@@ -586,6 +586,12 @@ removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 #'
 #' Wrapper for CohortGenerator::createCohortTables, where if bigquery is used, the tables are created using bigrquery::bq_table_create.
 #' 
+#' @param connectionDetails An object of class \code{connectionDetails} containing database connection details.
+#' @param connection A database connection object created using \code{DatabaseConnector::connect}.
+#' @param cohortDatabaseSchema The schema where the cohort tables will be created.
+#' @param cohortTableNames A list containing the names of the cohort tables to be created.
+#' @param incremental Logical. If TRUE, only creates tables that don't already exist.
+#'
 #' @importFrom bigrquery bq_table bq_table_exists bq_table_delete bq_table_create
 #' @importFrom tibble tibble
 #' @importFrom DatabaseConnector connect disconnect
@@ -702,7 +708,12 @@ CohortGenerator_createCohortTables <- function(
 #' 
 #' Wrapper for CohortGenerator::dropCohortStatsTables, where if bigquery is used, the tables are deleted using bigrquery::bq_table_delete.
 #' 
-#' @importFrom DatabaseConnector connect disconnect
+#' @param connectionDetails An object of class \code{connectionDetails} containing database connection details.
+#' @param connection A database connection object created using \code{DatabaseConnector::connect}.
+#' @param cohortDatabaseSchema The schema where the cohort tables will be created.
+#' @param cohortTableNames A list containing the names of the cohort tables to be created.
+#'
+#' @importFrom bigrquery bq_table bq_table_exists bq_table_delete
 #' @importFrom CohortGenerator dropCohortStatsTables getCohortTableNames
 #'
 #' @export

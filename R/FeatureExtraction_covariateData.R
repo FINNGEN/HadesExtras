@@ -1,5 +1,7 @@
 #' covariateData_YearOfBirth
 #'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
 #'
 #' @export
 #'
@@ -12,6 +14,23 @@ covariateData_YearOfBirth <- function() {
 
 #' YearOfBirth
 #'
+#' @param connection A database connection object created using \code{DatabaseConnector::connect}.
+#' @param tempEmulationSchema The temp schema where the covariate tables will be created.
+#' @param cdmDatabaseSchema The schema where the cdm tables are located.
+#' @param cdmVersion The version of the cdm.
+#' @param cohortTable The table where the cohort data is located.
+#' @param cohortIds The cohort ids to include.
+#' @param rowIdField The field in the cohort table that is the row id.
+#' @param covariateSettings A list of settings for the covariate data.
+#' @param aggregated Logical. If TRUE, the covariate data is aggregated.
+#' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
+#' @importFrom dplyr select mutate
+#' @importFrom tidyr nest unnest
+#' @importFrom purrr map
+#' @importFrom Andromeda andromeda
 #'
 #' @export
 #'

@@ -7,7 +7,7 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
 
   testCohortDefinitionTable <- tibble::tribble(
@@ -30,8 +30,9 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
     cohortDefinitionTable = cohortTableName
   )
 
-  cohortNames |> dplyr::pull(cohort_definition_name) |> expect_equal(c("Diabetes Cohort", "Hypertension Cohort", "Obesity Cohort"))
-
+  cohortNames |>
+    dplyr::pull(cohort_definition_name) |>
+    expect_equal(c("Diabetes Cohort", "Hypertension Cohort", "Obesity Cohort"))
 })
 
 
@@ -42,6 +43,9 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
     rm(cohortTableHandler)
     gc()
   })
+
+  cohortDatabaseSchema <- cohortTableHandler$cohortDatabaseSchema
+  cohortTableName <- "cohort"
 
   # set data
   testCohortTable <- tibble::tribble(
@@ -57,11 +61,15 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
     2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
     2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
     2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
-  )
+  ) |>
+    dplyr::mutate(
+      cohort_definition_id = as.integer(cohort_definition_id),
+      subject_id = as.integer(subject_id)
+    )
 
   DatabaseConnector::insertTable(
     connection = cohortTableHandler$connectionHandler$getConnection(),
-    table = "cohort",
+    table = cohortTableName,
     data = testCohortTable
   )
 
@@ -73,8 +81,8 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
   )
 
   cohortDefinitionSet <- cohortTableToCohortDefinitionSettings(
-    cohortDatabaseSchema = cohortTableHandler$cohortDatabaseSchema,
-    cohortTable = "cohort",
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName,
     cohortDefinitionTable = testCohortDefinitionTable,
     cohortDefinitionIds = c(1, 2)
   )
@@ -107,7 +115,11 @@ test_that(" change cohort ids", {
     2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
     2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
     2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
-  )
+  )|>
+    dplyr::mutate(
+      cohort_definition_id = as.integer(cohort_definition_id),
+      subject_id = as.integer(subject_id)
+    )
 
   DatabaseConnector::insertTable(
     connection = cohortTableHandler$connectionHandler$getConnection(),

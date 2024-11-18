@@ -13,8 +13,8 @@ BQ5K:
           billing: atlas-development-270609
       tempEmulationSchema: atlas-development-270609.sandbox
     cdm:
-        cdmDatabaseSchema: atlas-development-270609.finngen_omop_r11
-        vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_r11
+        cdmDatabaseSchema: atlas-development-270609.etl_sam_r12_5k_omop
+        vocabularyDatabaseSchema: atlas-development-270609.etl_sam_r12_5k_omop
     cohortTable:
         cohortDatabaseSchema: atlas-development-270609.sandbox
         cohortTableName: hadesextras_test_cohort_table_<timestamp>

@@ -99,22 +99,25 @@ testthat::test_that("test that .operationStringToBinaryTreeworks", {
 # "1Ip2"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
-  on.exit({
+  withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
 
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   # set data
   testTable <- tibble::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 2, 2, 2, 2),
-    subject_id = c(1, 2, 3, 4, 3, 4, 5, 6),
-    cohort_start_date = c(rep(as.Date("2000-01-01"), 4), rep(as.Date("2010-01-01"), 4)),
-    cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4))
+    cohort_definition_id = c(1, 1, 1, 1, 2, 2, 2, 2) |> as.integer(),
+    subject_id = c(1, 2, 3, 4, 3, 4, 5, 6) |> as.integer(),
+    cohort_start_date = c(rep(as.Date("2000-01-01"), 4), rep(as.Date("2010-01-01"), 4)) |> as.Date(),
+    cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4)) |> as.Date()
   )
 
   DatabaseConnector::insertTable(
     connection = connection,
-    table = "testOperationsTable",
+    table = cohortTableName,
     data = testTable
   )
 
@@ -123,8 +126,8 @@ testthat::test_that("test that operationStringToSQL works", {
 
   sql <- SqlRender::render(
     sql = sql,
-    cohort_database_schema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohort_table = "testOperationsTable",
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTableName,
     output_table = "",
     warnOnMissingParameters = TRUE
   )
@@ -134,8 +137,9 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |> tibble::as_tibble()
-
+  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+    tibble::as_tibble() |>
+    dplyr::arrange(subject_id)
   # results
   result |>
     dplyr::pull(subject_id) |>
@@ -152,22 +156,25 @@ testthat::test_that("test that operationStringToSQL works", {
 # "1Mp2"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
-  on.exit({
+  withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
 
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   # set data
   testTable <- tibble::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 2, 2, 2, 2),
-    subject_id = c(1, 2, 3, 4, 3, 4, 5, 6),
+    cohort_definition_id = c(1, 1, 1, 1, 2, 2, 2, 2) |> as.integer(),
+    subject_id = c(1, 2, 3, 4, 3, 4, 5, 6) |> as.integer(),
     cohort_start_date = c(rep(as.Date("2000-01-01"), 4), rep(as.Date("2010-01-01"), 4)),
     cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4))
   )
 
   DatabaseConnector::insertTable(
     connection = connection,
-    table = "testOperationsTable",
+    table = cohortTableName,
     data = testTable
   )
 
@@ -176,8 +183,8 @@ testthat::test_that("test that operationStringToSQL works", {
 
   sql <- SqlRender::render(
     sql = sql,
-    cohort_database_schema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohort_table = "testOperationsTable",
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTableName  ,
     output_table = "",
     warnOnMissingParameters = TRUE
   )
@@ -187,7 +194,9 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |> tibble::as_tibble()
+  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+    tibble::as_tibble() |>
+    dplyr::arrange(subject_id)
 
   # results
   result |>
@@ -204,25 +213,30 @@ testthat::test_that("test that operationStringToSQL works", {
 
 
 
+
+
 # "1Ip2Mp3"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
-  on.exit({
+  withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
 
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   # set data
   testTable <- tibble::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3),
-    subject_id = c(1, 2, 3, 4, 3, 4, 5, 6, 4, 10, 11, 12),
-    cohort_start_date = c(rep(as.Date("2000-01-01"), 4), rep(as.Date("2010-01-01"), 4), rep(as.Date("2020-01-01"), 4)),
-    cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4), rep(as.Date("2020-12-01"), 4))
+    cohort_definition_id = c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3) |> as.integer(),
+    subject_id = c(1, 2, 3, 4, 3, 4, 5, 6, 4, 10, 11, 12) |> as.integer(),
+    cohort_start_date = c(rep(as.Date("2000-01-01"), 4), rep(as.Date("2010-01-01"), 4), rep(as.Date("2020-01-01"), 4)) ,
+    cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4), rep(as.Date("2020-12-01"), 4)) 
   )
 
   DatabaseConnector::insertTable(
     connection = connection,
-    table = "testOperationsTable",
+    table = cohortTableName,
     data = testTable
   )
 
@@ -231,8 +245,8 @@ testthat::test_that("test that operationStringToSQL works", {
 
   sql <- SqlRender::render(
     sql = sql,
-    cohort_database_schema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohort_table = "testOperationsTable",
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTableName,
     output_table = "",
     warnOnMissingParameters = TRUE
   )
@@ -242,7 +256,9 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |> tibble::as_tibble()
+  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+    tibble::as_tibble() |>
+    dplyr::arrange(subject_id)
 
   # results
   result |>
@@ -260,10 +276,13 @@ testthat::test_that("test that operationStringToSQL works", {
 # "1Upd2"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
-  on.exit({
+  withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName  <- "test_operations_table"
 
   # set data
   testTable <- tibble::tribble(
@@ -279,12 +298,16 @@ testthat::test_that("test that operationStringToSQL works", {
     2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
     2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
     2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
+  ) |> 
+  dplyr::mutate(
+    cohort_definition_id = as.integer(cohort_definition_id),
+    subject_id = as.integer(subject_id)
   )
 
 
   DatabaseConnector::insertTable(
     connection = connection,
-    table = "testOperationsTable",
+    table = cohortTableName,
     data = testTable
   )
 
@@ -293,8 +316,8 @@ testthat::test_that("test that operationStringToSQL works", {
 
   sql <- SqlRender::render(
     sql = sql,
-    cohort_database_schema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohort_table = "testOperationsTable",
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTableName,
     output_table = "",
     warnOnMissingParameters = TRUE
   )
@@ -304,7 +327,9 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |> tibble::as_tibble()
+  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+    tibble::as_tibble() |>
+    dplyr::arrange(subject_id)
 
   # results
   result |>

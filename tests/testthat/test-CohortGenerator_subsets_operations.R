@@ -39,7 +39,7 @@ test_that("Operation Subset works", {
     jsonFolder = here::here("inst/testdata/matching/cohorts"),
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortName"),
+    cohortFileNameValue = c("cohortId"),
     # packageName = "HadesExtras",
     verbose = FALSE
   )

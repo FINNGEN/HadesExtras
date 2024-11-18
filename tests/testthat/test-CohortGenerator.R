@@ -65,7 +65,7 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
     jsonFolder = here::here("inst/testdata/matching/cohorts"),
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortName"),
+    cohortFileNameValue = c("cohortId"),
     # packageName = "HadesExtras",
     verbose = FALSE
   )
@@ -121,7 +121,7 @@ test_that("cohortDataToCohortDefinitionSet works", {
     cohortTableNames = getCohortTableNames(cohortTableName)
   )
 
-  # test params
+  # test paramssd 
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,

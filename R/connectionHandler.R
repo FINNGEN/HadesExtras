@@ -20,7 +20,7 @@ connectionHandlerFromList <- function(configConnection) {
   configConnection |> checkmate::assertList()
   configConnection |>
     names() |>
-    checkmate::assertNames(must.include = c("tempEmulationSchema", "connectionDetailsSettings"))
+    checkmate::assertNames(must.include = c( "connectionDetailsSettings"))
 
   # set tempEmulationSchema if in config
   if (!is.null(configConnection$tempEmulationSchema)) {

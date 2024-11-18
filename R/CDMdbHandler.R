@@ -1,27 +1,31 @@
-#' CDMdbHandler
+#' CDM Database Handler Class
 #'
 #' @description
-#' Class for handling database connection and schema information for a CDM database
-#'
-#' @field databaseId           A text id for the database the it connects to (read-only).
-#' @field databaseName           A text id for the database the it connects to (read-only).
-#' @field databaseDescription    A text description for the database the it connects to (read-only).
-#' @field connectionHandler           ConnectionHandler object for managing the database connection (read-only).
-#' @field vocabularyDatabaseSchema    Name of the vocabulary database schema (read-only).
-#' @field cdmDatabaseSchema           Name of the CDM database schema (read-only).
-#' @field connectionStatusLog            Log tibble object for storing connection status information (read-only).
-#' @field vocabularyInfo              Data frame containing information about the vocabulary database (read-only).
-#' @field CDMInfo                     Data frame containing information about the CDM database (read-only).
-#' @field getTblVocabularySchema               List of functions that create dbplyr table for the vocabulary tables (read-only).
-#' @field getTblCDMSchema                      List of functions that create dbplyr table for the CDM tables (read-only).
-#'
-#' @importFrom R6 R6Class
-#' @importFrom checkmate assertClass assertString
-#' @importFrom dplyr filter select collect
-#' @importFrom DBI dbIsValid
-#' @importFrom DatabaseConnector connect disconnect getTableNames dropEmulatedTempTables
+#' A class for handling CDM database connections and operations
 #'
 #' @export
+#' @importFrom R6 R6Class
+#'
+#' @field databaseId The ID of the database
+#' @field databaseName The name of the database
+#' @field databaseDescription Description of the database
+#' @field connectionHandler Handler for database connections
+#' @field vocabularyDatabaseSchema Schema name for the vocabulary database
+#' @field cdmDatabaseSchema Schema name for the CDM database
+#' @field connectionStatusLog Log of connection status and operations
+#' @field vocabularyInfo Information about the vocabulary tables
+#' @field CDMInfo Information about the CDM structure
+#' @field getTblVocabularySchema Function to get vocabulary schema table
+#' @field getTblCDMSchema Function to get CDM schema table
+#'
+#' @section Methods:
+#' \describe{
+#'   \item{`initialize(databaseId)`}{Initialize a new CDM database handler}
+#'   \item{`loadConnection(loadConnectionChecksLevel)`}{Load database connection with specified check level}
+#' }
+#'
+#' @param databaseId ID of the database to connect to
+#' @param loadConnectionChecksLevel Level of connection checks to perform
 CDMdbHandler <- R6::R6Class(
   classname = "CDMdbHandler",
   private = list(

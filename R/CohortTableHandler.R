@@ -4,15 +4,22 @@
 #' Class for handling cohort tables in a CDM database.
 #' Inherits from CDMdbHandler.
 #'
-#' @field cohortDatabaseSchema Name of the cohort database schema (read-only).
-#' @field databaseId           A text id for the database the it connects to (read-only).
-#' @field databaseName           A text id for the database the it connects to (read-only).
-#' @field databaseDescription    A text description for the database the it connects to (read-only).
-#' @field incrementalFolder Path to folder used by CohortGenerator in inclemetnal mode (read-only).
-#' @field cohortDefinitionSet Table in cohortDefinitionSet with the current cohorts in the cohortTable (read-only).
-#' @field cohortGeneratorResults Table with results from CohortGenerator_generateCohortSet with the current cohorts in the cohortTable(read-only).
-#' @field cohortDemograpics Table with results from CohortGenerator_getCohortDemograpics with the current cohorts in the cohortTable(read-only).
+#' @field cohortDatabaseSchema Schema where cohort tables are stored
+#' @field cohortTableNames Names of the cohort tables in the database
+#' @field incrementalFolder Path to folder for incremental operations
+#' @field cohortDefinitionSet Set of cohort definitions
+#' @field cohortGeneratorResults Results from cohort generation process
+#' @field cohortDemograpics Demographic information for cohorts
+#' @field cohortsOverlap Information about overlapping cohorts
 #'
+#' @param databaseId ID of the database to connect to
+#' @param loadConnectionChecksLevel Level of checks to perform during connection
+#' @param newCohortName New name to assign to the cohort
+#' @param newShortName New short name to assign to the cohort
+#' @param cohortDefinitionSet Set of cohort definitions to use
+#' @param incrementalFolder Path to folder for incremental operations
+#' @param cohortDatabaseSchema Schema name where cohort tables are stored
+#' 
 #' @importFrom R6 R6Class
 #' @importFrom checkmate assertClass assertString
 #' @importFrom CohortGenerator createEmptyCohortDefinitionSet createCohortTables getCohortTableNames generateCohortSet getCohortCounts dropCohortStatsTables
@@ -75,7 +82,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param cohortTableName Name of the cohort table.
     #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
     initialize = function(connectionHandler,
-                          databseId,
+                          databaseId,
                           databaseName,
                           databaseDescription,
                           cdmDatabaseSchema,
@@ -114,7 +121,7 @@ CohortTableHandler <- R6::R6Class(
       # super$initialize is calling self$loadConnection(), self$loadConnection() is calling super$loadConnection()
 
       super$initialize(
-        databaseId = databseId,
+        databaseId = databaseId,
         databaseName = databaseName,
         databaseDescription = databaseDescription,
         connectionHandler = connectionHandler,
@@ -162,7 +169,6 @@ CohortTableHandler <- R6::R6Class(
           errorMessage <<- error$message
         }
       )
-
       if (errorMessage != "") {
         private$.connectionStatusLog$ERROR("Create cohort tables", errorMessage)
       } else {
@@ -419,7 +425,7 @@ createCohortTableHandlerFromList <- function(
   # create cohortTableHandler
   cohortTableHandler <- CohortTableHandler$new(
     connectionHandler = connectionHandler,
-    databseId = cohortTableHandlerConfig$database$databaseId,
+    databaseId = cohortTableHandlerConfig$database$databaseId,
     databaseName = cohortTableHandlerConfig$database$databaseName,
     databaseDescription = cohortTableHandlerConfig$database$databaseDescription,
     cdmDatabaseSchema = cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
@@ -431,3 +437,4 @@ createCohortTableHandlerFromList <- function(
 
   return(cohortTableHandler)
 }
+

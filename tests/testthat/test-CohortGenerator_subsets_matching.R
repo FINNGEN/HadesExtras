@@ -54,7 +54,7 @@ test_that("Matching Subset works", {
     jsonFolder = here::here("inst/testdata/matching/cohorts"),
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortName"),
+    cohortFileNameValue = c("cohortId"),
     # packageName = "HadesExtras",
     verbose = FALSE
   )
@@ -135,7 +135,7 @@ test_that("Matching Subset works for different parameters", {
     jsonFolder = here::here("inst/testdata/matching/cohorts"),
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortName"),
+    cohortFileNameValue = c("cohortId"),
     # packageName = "HadesExtras",
     verbose = FALSE
   )

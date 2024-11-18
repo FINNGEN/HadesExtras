@@ -5,13 +5,43 @@ test_that("covariateData_YearOfBirth works", {
     DatabaseConnector::disconnect(connection)
   })
 
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- 'test_cohort'
+
+  # set data
+  testTable <- tibble::tribble(
+    ~cohort_definition_id, ~subject_id, ~cohort_start_date, ~cohort_end_date,
+    1, 1, as.Date("2000-01-01"), as.Date("2000-12-01"),
+    1, 2, as.Date("2000-01-01"), as.Date("2000-12-01"),
+    1, 3, as.Date("2000-01-01"), as.Date("2000-12-01"),
+    1, 4, as.Date("2000-01-01"), as.Date("2000-12-01"),
+    1, 5, as.Date("2000-01-01"), as.Date("2000-12-01"),
+    1, 5, as.Date("2004-01-01"), as.Date("2004-12-01"),
+    2, 2, as.Date("2001-01-01"), as.Date("2002-12-01"), # non overplaping
+    2, 3, as.Date("2000-06-01"), as.Date("2000-09-01"), # inside
+    2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
+    2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
+    2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
+  ) |> 
+  dplyr::mutate(
+    cohort_definition_id = as.integer(cohort_definition_id),
+    subject_id = as.integer(subject_id)
+  )
+
+  DatabaseConnector::insertTable(
+    connection = connection,
+    table = cohortTableName,
+    data = testTable
+  )
+
   covariateSettings <- covariateData_YearOfBirth()
 
   covariate_control <- FeatureExtraction::getDbCovariateData(
     connection = connection,
-    cohortTable = "cohort",
-    cohortDatabaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
-    cdmDatabaseSchema = test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
+    cohortTable = cohortTableName,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
     covariateSettings = covariateSettings,
     cohortIds = 1,
     aggregated = FALSE
@@ -28,23 +58,15 @@ test_that("covariateData_YearOfBirth works", {
     dplyr::distinct(covariateId) |>
     dplyr::pull(covariateId) |>
     expect_equal(1041)
-})
 
-
-test_that("covariateData_YearOfBirth works aggregated", {
-  connection <- helper_createNewConnection(addCohorts = TRUE)
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
-
+  # aggregated data
   covariateSettings <- covariateData_YearOfBirth()
 
   covariate_control <- FeatureExtraction::getDbCovariateData(
     connection = connection,
-    cohortTable = "cohort",
-    cohortDatabaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
-    cdmDatabaseSchema = test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
+    cohortTable = cohortTableName,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
     covariateSettings = covariateSettings,
     cohortIds = 1,
     aggregated = TRUE

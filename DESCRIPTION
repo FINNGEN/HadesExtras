@@ -34,14 +34,15 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    tippy,
     validate,
     DatabaseConnector,
     FeatureExtraction,
     CohortGenerator,
     ResultModelManager,
     Eunomia, 
-    speedglm
+    tippy,
+    yaml,
+    Andromeda
 Remotes:  
     OHDSI/CohortGenerator,
     OHDSI/ResultModelManager, 
@@ -51,10 +52,12 @@ Suggests:
     ROhdsiWebApi,
     ggplot2,
     knitr,
+    quarto,
     rmarkdown,
     testthat (>= 3.0.0),
     here,
     yaml, 
-    usethis
+    usethis,
+    withr
 Config/testthat/edition: 3
 VignetteBuilder: quarto

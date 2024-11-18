@@ -112,9 +112,9 @@ cohortDefinitionSet <- ROhdsiWebApi::exportCohortDefinitionSet(
 
 ```{r}
 cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/atlasCohortsSaved/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/atlasCohortsSaved/cohorts"),
-    sqlFolder = here::here("inst/testdata/atlasCohortsSaved/sql/sql_server"),
+    settingsFileName = here::here("inst/testdata/eunomia/Cohorts.csv"),
+    jsonFolder = here::here("inst/testdata/eunomia/cohorts"),
+    sqlFolder = here::here("inst/testdata/eunomia/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
     # packageName = "HadesExtras",

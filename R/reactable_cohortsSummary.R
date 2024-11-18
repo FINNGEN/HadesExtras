@@ -4,7 +4,8 @@
 #'
 #' @param cohortsSummary A tibble in  cohortsSummary format.
 #' @param deleteButtonsShinyId An optional Shiny input ID for handling the click of the delete buttons.
-#'
+#' @param editButtonsShinyId An optional Shiny input ID for handling the click of the edit buttons.
+#' 
 #' @importFrom checkmate assertString
 #' @importFrom dplyr mutate if_else select
 #' @importFrom purrr map_chr
