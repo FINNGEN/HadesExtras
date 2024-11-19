@@ -4,16 +4,8 @@
 		"CriteriaList" : [
 			{
 				"ConditionOccurrence" : {
-					"OccurrenceStartDate" : {
-						"Value" : "1970-06-01",
-						"Op" : "lt"
-					},
+					"CodesetId" : 1,
 					"ConditionTypeExclude" : false
-				}
-			},
-			{
-				"DrugExposure" : {
-					"DrugTypeExclude" : false
 				}
 			}
 		],
@@ -58,43 +50,7 @@
 	"ExpressionLimit" : {
 		"Type" : "First"
 	},
-	"InclusionRules" : [
-		{
-			"name" : "Not having fracture",
-			"expression" : {
-				"Type" : "ALL",
-				"CriteriaList" : [
-					{
-						"Criteria" : {
-							"ConditionOccurrence" : {
-								"CodesetId" : 1,
-								"ConditionTypeExclude" : false
-							}
-						},
-						"StartWindow" : {
-							"Start" : {
-								"Coeff" : -1
-							},
-							"End" : {
-								"Coeff" : 1
-							},
-							"UseIndexEnd" : false,
-							"UseEventEnd" : false
-						},
-						"RestrictVisit" : false,
-						"IgnoreObservationPeriod" : false,
-						"Occurrence" : {
-							"Type" : 0,
-							"Count" : 0,
-							"IsDistinct" : false
-						}
-					}
-				],
-				"DemographicCriteriaList" : [],
-				"Groups" : []
-			}
-		}
-	],
+	"InclusionRules" : [],
 	"CensoringCriteria" : [],
 	"CollapseSettings" : {
 		"CollapseType" : "ERA",
