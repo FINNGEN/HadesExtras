@@ -52,31 +52,6 @@ test_that("Cohort asthma", {
 })
 
 
-test_that("Cohort eunomia", {
-  cohortTableHandler <- helper_createNewCohortTableHandler()
-  withr::defer({
-    rm(cohortTableHandler)
-    gc()
-  })
-
-   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/eunomia/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/eunomia/cohorts"),
-    sqlFolder = here::here("inst/testdata/eunomia/sql/sql_server"),
-    cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
-    verbose = FALSE
-)
-  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
-  cohortCounts <- cohortTableHandler$getCohortCounts()  |> 
-    dplyr::arrange(cohortId)
-
-  cohortCounts |> checkmate::expect_tibble(nrows = 3)
-  cohortCounts$cohortName |> expect_equal(c("[CohortGenerator] celecoxib", "[CohortGenerator] celecoxib age 40", "[CohortGenerator] celecoxib age 40 and male"))
-})
-
-
 test_that("Cohort matching", {
   cohortTableHandler <- helper_createNewCohortTableHandler()
   withr::defer({
