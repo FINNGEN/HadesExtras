@@ -79,3 +79,59 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
 
   result[[1]]$analyses[[1]]$analysisId |> expect_equal(141)
 })
+
+test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all covariates", {
+  connection <- helper_createNewConnection()
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- 'test_cohort'
+
+  CohortGenerator_createCohortTables(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+  )
+
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = here::here("inst/testdata/asthma/Cohorts.csv"),
+    jsonFolder = here::here("inst/testdata/asthma/cohorts"),
+    sqlFolder = here::here("inst/testdata/asthma/sql/sql_server"),
+    cohortFileNameFormat = "%s",
+    cohortFileNameValue = c("cohortId"),
+    # packageName = "HadesExtras",
+    verbose = FALSE
+  )
+
+  CohortGenerator::generateCohortSet(
+    connection = connection,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+    cohortDefinitionSet = cohortDefinitionSet,
+    incremental = FALSE
+  )
+
+  analysisIds <- getListOfAnalysis() |> dplyr::pull(analysisId)
+  covariateSettings <- FeatureExtraction_createTemporalCovariateSettingsFromList(analysisIds)
+
+  covariateData <- FeatureExtraction::getDbCovariateData(
+    connection = connection,
+    cohortTable = cohortTableName,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    covariateSettings = covariateSettings,
+    cohortIds = c(1783699, 1783700),
+    aggregated = TRUE
+  )
+
+  covariateData$analysisRef |>
+    dplyr::collect() |> 
+    dplyr::pull(analysisId) |>
+    setdiff(analysisIds)  |> 
+    expect_length(0)
+})

@@ -105,7 +105,7 @@ analysisDetails_ProcedureOccurrenceSourceConcept <- FeatureExtraction::createAna
   analysisId = 541,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 514,
+    analysisId = 541,
     analysisName = "ProcedureOccurrenceSourceConcept",
     domainId = "Procedure",
     domainTable = "procedure_occurrence",

@@ -35,9 +35,9 @@ getListOfAnalysis <- function() {
 #' @param temporalStartDays A vector of temporal start days for each analysis ID.
 #' @param temporalEndDays A vector of temporal end days for each analysis ID.
 #'
-#' @importFrom checkmate assertInteger
+#' @importFrom checkmate assertInteger subsetVector
 #' @importFrom FeatureExtraction createTemporalCovariateSettings createDetailedTemporalCovariateSettings
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter nrow
 #'
 #' @return A list of temporal covariate settings.
 #'
