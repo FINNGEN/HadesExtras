@@ -4,12 +4,18 @@
 \alias{rectable_cohortsSummary}
 \title{Cohorts Summary Table}
 \usage{
-rectable_cohortsSummary(cohortsSummary, deleteButtonsShinyId = NULL)
+rectable_cohortsSummary(
+  cohortsSummary,
+  deleteButtonsShinyId = NULL,
+  editButtonsShinyId = NULL
+)
 }
 \arguments{
 \item{cohortsSummary}{A tibble in  cohortsSummary format.}
 
 \item{deleteButtonsShinyId}{An optional Shiny input ID for handling the click of the delete buttons.}
+
+\item{editButtonsShinyId}{An optional Shiny input ID for handling the click of the edit buttons.}
 }
 \value{
 A reactable table displaying cohort summary information.

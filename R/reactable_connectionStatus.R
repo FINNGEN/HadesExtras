@@ -17,16 +17,16 @@ reactable_connectionStatus <- function(
       error = "\u274c",
       warning = "\u26A0\uFE0F",
       success = "\u2705",
-      info = '\u2139\uFE0F'
-    )
-    ) {
-
+      info = "\u2139\uFE0F"
+    )) {
   connectionStatus |> checkmate::assertTibble()
-  connectionStatus |> names() |>  checkmate::assertNames(must.include = c("databaseName", "type", "step", "message"))
+  connectionStatus |>
+    names() |>
+    checkmate::assertNames(must.include = c("databaseName", "type", "step", "message"))
 
-  if(nrow(connectionStatus)==0){
+  if (nrow(connectionStatus) == 0) {
     return(connectionStatus |>
-             reactable::reactable())
+      reactable::reactable())
   }
 
   connectionStatus |>
@@ -57,5 +57,3 @@ reactable_connectionStatus <- function(
       )
     )
 }
-
-

@@ -4,15 +4,22 @@
 #' Class for handling cohort tables in a CDM database.
 #' Inherits from CDMdbHandler.
 #'
-#' @field cohortDatabaseSchema Name of the cohort database schema (read-only).
-#' @field databaseId           A text id for the database the it connects to (read-only).
-#' @field databaseName           A text id for the database the it connects to (read-only).
-#' @field databaseDescription    A text description for the database the it connects to (read-only).
-#' @field incrementalFolder Path to folder used by CohortGenerator in inclemetnal mode (read-only).
-#' @field cohortDefinitionSet Table in cohortDefinitionSet with the current cohorts in the cohortTable (read-only).
-#' @field cohortGeneratorResults Table with results from CohortGenerator_generateCohortSet with the current cohorts in the cohortTable(read-only).
-#' @field cohortDemograpics Table with results from CohortGenerator_getCohortDemograpics with the current cohorts in the cohortTable(read-only).
+#' @field cohortDatabaseSchema Schema where cohort tables are stored
+#' @field cohortTableNames Names of the cohort tables in the database
+#' @field incrementalFolder Path to folder for incremental operations
+#' @field cohortDefinitionSet Set of cohort definitions
+#' @field cohortGeneratorResults Results from cohort generation process
+#' @field cohortDemograpics Demographic information for cohorts
+#' @field cohortsOverlap Information about overlapping cohorts
 #'
+#' @param databaseId ID of the database to connect to
+#' @param loadConnectionChecksLevel Level of checks to perform during connection
+#' @param newCohortName New name to assign to the cohort
+#' @param newShortName New short name to assign to the cohort
+#' @param cohortDefinitionSet Set of cohort definitions to use
+#' @param incrementalFolder Path to folder for incremental operations
+#' @param cohortDatabaseSchema Schema name where cohort tables are stored
+#' 
 #' @importFrom R6 R6Class
 #' @importFrom checkmate assertClass assertString
 #' @importFrom CohortGenerator createEmptyCohortDefinitionSet createCohortTables getCohortTableNames generateCohortSet getCohortCounts dropCohortStatsTables
@@ -32,18 +39,34 @@ CohortTableHandler <- R6::R6Class(
     # Internal cohorts data
     .cohortDefinitionSet = NULL,
     .cohortGeneratorResults = NULL,
-    .cohortDemograpics = NULL
+    .cohortDemograpics = NULL,
+    .cohortsOverlap = NULL
   ),
   active = list(
     # Read-only parameters
     # database parameters
-    cohortDatabaseSchema = function(){return(private$.cohortDatabaseSchema)},
-    cohortTableNames = function(){return(private$.cohortTableNames)},
-    incrementalFolder = function(){return(private$.incrementalFolder)},
+    cohortDatabaseSchema = function() {
+      return(private$.cohortDatabaseSchema)
+    },
+    cohortTableNames = function() {
+      return(private$.cohortTableNames)
+    },
+    incrementalFolder = function() {
+      return(private$.incrementalFolder)
+    },
     # Internal cohorts data
-    cohortDefinitionSet = function(){return(private$.cohortDefinitionSet)},
-    cohortGeneratorResults = function(){return(private$.cohortGeneratorResults)},
-    cohortDemograpics = function(){return(private$.cohortDemograpics)}
+    cohortDefinitionSet = function() {
+      return(private$.cohortDefinitionSet)
+    },
+    cohortGeneratorResults = function() {
+      return(private$.cohortGeneratorResults)
+    },
+    cohortDemograpics = function() {
+      return(private$.cohortDemograpics)
+    },
+    cohortsOverlap = function() {
+      return(private$.cohortsOverlap)
+    }
   ),
   public = list(
     #' @description
@@ -59,7 +82,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param cohortTableName Name of the cohort table.
     #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
     initialize = function(connectionHandler,
-                          databseId,
+                          databaseId,
                           databaseName,
                           databaseDescription,
                           cdmDatabaseSchema,
@@ -74,40 +97,47 @@ CohortTableHandler <- R6::R6Class(
       checkmate::assertString(cohortTableName)
 
       private$.cohortDatabaseSchema <- cohortDatabaseSchema
+      # add timestamp to cohortTableName if it contains <timestamp>
+      timestamp <- as.character(as.numeric(format(Sys.time(), "%d%m%Y%H%M%OS2")) * 100)
+      if (cohortTableName |> stringr::str_detect("<timestamp>")) {
+        cohortTableName <- cohortTableName |> stringr::str_replace("<timestamp>", timestamp)
+      }
       private$.cohortTableNames <- CohortGenerator::getCohortTableNames(cohortTableName)
-      private$.incrementalFolder <- file.path(tempdir(),stringr::str_remove_all(Sys.time(),"-|:|\\.|\\s"))
+      private$.incrementalFolder <- file.path(tempdir(), timestamp)
 
       private$.cohortDefinitionSet <- tibble::tibble(
-        cohortId=0,   cohortName="", sql="",        json="",
-        subsetParent=0, isSubset=TRUE, subsetDefinitionId=0,
-        .rows = 0 )
+        cohortId = 0,
+        cohortName = "", shortName = "",
+        sql = "", json = "",
+        subsetParent = 0, isSubset = TRUE, subsetDefinitionId = 0,
+        .rows = 0
+      )
 
-      private$.cohortGeneratorResults <- tibble::tibble(cohortId=0, buildInfo=list(), .rows = 0)
-      private$.cohortDemograpics <- tibble::tibble(cohortId=0, cohortEntries=0L, cohortSubjects=0L, .rows = 0)
+      private$.cohortGeneratorResults <- tibble::tibble(cohortId = 0, buildInfo = list(), .rows = 0)
+      private$.cohortDemograpics <- tibble::tibble(cohortId = 0, cohortEntries = 0L, cohortSubjects = 0L, .rows = 0)
+      private$.cohortsOverlap <- tibble::tibble(numberOfSubjects = 0, .rows = 0)
 
-      #self$loadConnection()
+      # self$loadConnection()
       # super$initialize is calling self$loadConnection(), self$loadConnection() is calling super$loadConnection()
 
       super$initialize(
-        databaseId = databseId,
+        databaseId = databaseId,
         databaseName = databaseName,
         databaseDescription = databaseDescription,
         connectionHandler = connectionHandler,
         cdmDatabaseSchema = cdmDatabaseSchema,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-       loadConnectionChecksLevel = loadConnectionChecksLevel
+        loadConnectionChecksLevel = loadConnectionChecksLevel
       )
     },
     #' Finalize method
     #' @description
     #' Closes the connection if active.
     finalize = function() {
-
-      CohortGenerator::dropCohortStatsTables(
+      CohortGenerator_dropCohortStatsTables(
         connection = self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
-        cohortTableNames = self$cohortTableNames,
-        dropCohortTable = TRUE
+        cohortTableNames = self$cohortTableNames
       )
       unlink(private$.incrementalFolder, recursive = TRUE)
 
@@ -118,7 +148,6 @@ CohortTableHandler <- R6::R6Class(
     #' @description
     #' Reloads the connection with the initial setting and updates connection status
     loadConnection = function(loadConnectionChecksLevel) {
-
       if (loadConnectionChecksLevel == "dontConnect") {
         private$.connectionStatusLog <- connectionStatusLog
         return()
@@ -130,7 +159,7 @@ CohortTableHandler <- R6::R6Class(
       errorMessage <- ""
       tryCatch(
         {
-          CohortGenerator::createCohortTables(
+          CohortGenerator_createCohortTables(
             connection = self$connectionHandler$getConnection(),
             cohortDatabaseSchema = self$cohortDatabaseSchema,
             cohortTableNames = self$cohortTableNames
@@ -140,7 +169,6 @@ CohortTableHandler <- R6::R6Class(
           errorMessage <<- error$message
         }
       )
-
       if (errorMessage != "") {
         private$.connectionStatusLog$ERROR("Create cohort tables", errorMessage)
       } else {
@@ -159,12 +187,19 @@ CohortTableHandler <- R6::R6Class(
       #
       # Check parameters
       #
-      if(!CohortGenerator::isCohortDefinitionSet(cohortDefinitionSet)){
-       stop("Provided table is not of cohortDefinitionSet format")
+      if (!CohortGenerator::isCohortDefinitionSet(cohortDefinitionSet)) {
+        stop("Provided table is not of cohortDefinitionSet format")
       }
 
-      cohortIdsExists <- intersect( private$.cohortDefinitionSet$cohortId,  cohortDefinitionSet$cohortId  )
-      if(length(cohortIdsExists)!=0){
+      # if not shortName, create it
+      if (!"shortName" %in% names(cohortDefinitionSet)) {
+        cohortDefinitionSet$shortName <- paste0("C", cohortDefinitionSet$cohortId)
+      } else {
+        cohortDefinitionSet$shortName <- dplyr::if_else(is.na(cohortDefinitionSet$shortName), paste0("C", cohortDefinitionSet$cohortId), cohortDefinitionSet$shortName)
+      }
+
+      cohortIdsExists <- intersect(private$.cohortDefinitionSet$cohortId, cohortDefinitionSet$cohortId)
+      if (length(cohortIdsExists) != 0) {
         warning("Following cohort ids already exists on the cohort table and will be updated: ", paste(cohortIdsExists, collapse = ", "))
       }
 
@@ -176,24 +211,27 @@ CohortTableHandler <- R6::R6Class(
       cohortDefinitionSet <- dplyr::bind_rows(
         private$.cohortDefinitionSet |> dplyr::filter(!(cohortId %in% cohortIdsExists)),
         cohortDefinitionSet
-      )|>
+      ) |>
         dplyr::arrange(cohortId)
 
-      # fix cohortDefinitionSet for subsets using
+      # TODO: fix cohortDefinitionSet for subsets using
       cohortDefinitionSet <- cohortDefinitionSet |>
-        dplyr::mutate(subsetParent = dplyr::if_else( is.na(isSubset) | isSubset==FALSE, cohortId, subsetParent))
+        dplyr::mutate(
+          subsetParent = dplyr::if_else( is.na(isSubset) | isSubset==FALSE, cohortId, subsetParent),
+          isSubset=dplyr::if_else(is.na(isSubset), FALSE,isSubset)
+        )
       attr(cohortDefinitionSet, "hasSubsetDefinitions") <- hasSubSets
 
       # generate cohorts in incremental mode
       cohortGeneratorResults <- CohortGenerator_generateCohortSet(
-        connection= self$connectionHandler$getConnection(),
+        connection = self$connectionHandler$getConnection(),
         cdmDatabaseSchema = self$cdmDatabaseSchema,
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
-        cohortDefinitionSet = cohortDefinitionSet ,
+        cohortDefinitionSet = cohortDefinitionSet,
         incremental = TRUE,
         incrementalFolder = private$.incrementalFolder
-      )|>
+      ) |>
         dplyr::arrange(cohortId)
 
       # keep only these that have changed
@@ -201,10 +239,10 @@ CohortTableHandler <- R6::R6Class(
         dplyr::filter(generationStatus == "COMPLETE")
 
       # Update cohortDemograpics
-      cohortDemograpicsToUpdate <- tibble::tibble(cohortId=0, .rows = 0)
-      if(length(cohortGeneratorResultsToUpdate$cohortId)!=0){
+      cohortDemograpicsToUpdate <- tibble::tibble(cohortId = 0, .rows = 0)
+      if (length(cohortGeneratorResultsToUpdate$cohortId) != 0) {
         cohortDemograpicsToUpdate <- CohortGenerator_getCohortDemograpics(
-          connection= self$connectionHandler$getConnection(),
+          connection = self$connectionHandler$getConnection(),
           cdmDatabaseSchema = self$cdmDatabaseSchema,
           vocabularyDatabaseSchema = self$vocabularyDatabaseSchema,
           cohortDatabaseSchema = self$cohortDatabaseSchema,
@@ -214,8 +252,6 @@ CohortTableHandler <- R6::R6Class(
       }
 
       # update changes
-      #browser()
-      # update
       cohortGeneratorResults <- dplyr::bind_rows(
         private$.cohortGeneratorResults |> dplyr::filter(!(cohortId %in% cohortGeneratorResultsToUpdate$cohortId)),
         cohortGeneratorResultsToUpdate
@@ -229,11 +265,18 @@ CohortTableHandler <- R6::R6Class(
       ) |>
         dplyr::arrange(cohortId)
 
+      # update cohortsOverlap
+      cohortsOverlap <- CohortGenerator_getCohortsOverlaps(
+        connection = self$connectionHandler$getConnection(),
+        cohortDatabaseSchema = self$cohortDatabaseSchema,
+        cohortTable = self$cohortTableNames$cohortTable
+      )
+
       # if no errors save
       private$.cohortDefinitionSet <- cohortDefinitionSet
       private$.cohortGeneratorResults <- cohortGeneratorResults
       private$.cohortDemograpics <- cohortDemograpics
-
+      private$.cohortsOverlap <- cohortsOverlap
     },
     #'
     #' deleteCohorts
@@ -242,18 +285,19 @@ CohortTableHandler <- R6::R6Class(
     #'
     #' @param cohortIds The cohort ids to delete.
     deleteCohorts = function(cohortIds) {
-      #check parameters
+      # check parameters
       cohortIdsNotExists <- setdiff(cohortIds, private$.cohortDefinitionSet$cohortId)
-      if(length(cohortIdsNotExists)!=0){
+      if (length(cohortIdsNotExists) != 0) {
         stop("Following cohort ids dont exists on the cohort table: ", paste(cohortIdsNotExists, collapse = ", "))
       }
 
       # function
       CohortGenerator_deleteCohortFromCohortTable(
-        connection= self$connectionHandler$getConnection(),
+        connection = self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
-        cohortIds = cohortIds
+        cohortIds = cohortIds,
+        incrementalFolder = private$.incrementalFolder
       )
 
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
@@ -265,6 +309,8 @@ CohortTableHandler <- R6::R6Class(
       private$.cohortDemograpics <- private$.cohortDemograpics |>
         dplyr::filter(cohortId != cohortIds)
 
+      private$.cohortsOverlap <- private$.cohortsOverlap |>
+        removeCohortIdsFromCohortOverlapsTable(cohortIds)
     },
     #'
     #' getCohortCounts
@@ -273,10 +319,11 @@ CohortTableHandler <- R6::R6Class(
     #'
     #' @return A tibble containing the cohort counts with names.
     getCohortCounts = function() {
-      cohortCountsWithNames <- private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId) |>
+      cohortCountsWithNames <- private$.cohortDefinitionSet |>
+        dplyr::select(cohortName, cohortId) |>
         dplyr::left_join(
           private$.cohortDemograpics |> dplyr::select(cohortId, cohortEntries, cohortSubjects),
-          by= "cohortId"
+          by = "cohortId"
         )
       return(cohortCountsWithNames)
     },
@@ -286,21 +333,20 @@ CohortTableHandler <- R6::R6Class(
     #' Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.
     #'
     #' @return A tibble containing cohort summary.
-    getCohortsSummary  = function(){
-
-      cohortsSummaryWithNames <- private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId) |>
+    getCohortsSummary = function() {
+      cohortsSummaryWithNames <- private$.cohortDefinitionSet |>
+        dplyr::select(cohortName, shortName, cohortId) |>
         dplyr::mutate(
           databaseId = super$databaseId,
-          databaseName = super$databaseName,
-          shortName = paste0("C", cohortId)
+          databaseName = super$databaseName
         ) |>
         dplyr::left_join(
           private$.cohortDemograpics,
-          by= "cohortId"
+          by = "cohortId"
         ) |>
         dplyr::left_join(
-          private$.cohortGeneratorResults |>  dplyr::select(cohortId, buildInfo),
-          by= "cohortId"
+          private$.cohortGeneratorResults |> dplyr::select(cohortId, buildInfo),
+          by = "cohortId"
         ) |>
         correctEmptyCohortsInCohortsSummary()
 
@@ -312,10 +358,39 @@ CohortTableHandler <- R6::R6Class(
     #' Retrieves the cohort names.
     #'
     #' @return A vector with the name of the cohorts
-    getCohortIdAndNames  = function(){
-      return(private$.cohortDefinitionSet |> dplyr::select(cohortName, cohortId, subsetDefinitionId))
-    }
+    getCohortIdAndNames = function() {
+      return(private$.cohortDefinitionSet |> dplyr::select(cohortName, shortName, cohortId, subsetDefinitionId))
+    },
+    #'
+    #' updateCohortNames
+    #' @description
+    #' Updates the cohort name and short name.
+    #' @param cohortId The cohort id to update.
+    #' @param cohortName The new cohort name.
+    #' @param shortName The new short name.
+    #'
+    updateCohortNames = function(cohortId, newCohortName, newShortName) {
+      # check parameters
+      if (!cohortId %in% private$.cohortDefinitionSet$cohortId) {
+        stop("Cohort id ", cohortId, " does not exist in the cohort table")
+      }
 
+      # function
+      private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
+        dplyr::mutate(
+          cohortName = dplyr::if_else(cohortId == {{ cohortId }}, newCohortName, cohortName),
+          shortName = dplyr::if_else(cohortId == {{ cohortId }}, newShortName, shortName)
+        )
+    },
+    #'
+    #' getCohortsOverlap
+    #' @description
+    #' Retrieves the number of subjects that are in more than one cohort.
+    #' @return A tibble containing one logical column for each cohort with name a cohort id,
+    #' and an additional column `numberOfSubjects` with the number of subjects in the cohorts combination.
+    getCohortsOverlap = function() {
+      return(private$.cohortsOverlap)
+    }
   )
 )
 
@@ -333,25 +408,24 @@ CohortTableHandler <- R6::R6Class(
 #'
 #' @return A CohortTableHandler object.
 #'
-#' @importFrom checkmate assertList assertSubset
+#' @importFrom checkmate assertList assertNames
 #'
 #' @export
 createCohortTableHandlerFromList <- function(
     cohortTableHandlerConfig,
-    loadConnectionChecksLevel = "allChecks"
-) {
-
+    loadConnectionChecksLevel = "allChecks") {
   cohortTableHandlerConfig |> checkmate::assertList()
-  cohortTableHandlerConfig |> names() |> checkmate::assertSubset(c("database", "connection", "cdm", "cohortTable" ))
+  cohortTableHandlerConfig |>
+    names() |>
+    checkmate::assertSubset(c("database", "connection", "cdm", "cohortTable"))
 
-  connectionHandler <- ResultModelManager_createConnectionHandler(
-    connectionDetailsSettings = cohortTableHandlerConfig$connection$connectionDetailsSettings,
-    tempEmulationSchema = cohortTableHandlerConfig$connection$tempEmulationSchema,
-    useBigrqueryUpload = cohortTableHandlerConfig$connection$useBigrqueryUpload
-  )
+  # create connectionHandler
+  connectionHandler <- connectionHandlerFromList(cohortTableHandlerConfig$connection)
+
+  # create cohortTableHandler
   cohortTableHandler <- CohortTableHandler$new(
     connectionHandler = connectionHandler,
-    databseId = cohortTableHandlerConfig$database$databaseId,
+    databaseId = cohortTableHandlerConfig$database$databaseId,
     databaseName = cohortTableHandlerConfig$database$databaseName,
     databaseDescription = cohortTableHandlerConfig$database$databaseDescription,
     cdmDatabaseSchema = cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
@@ -362,26 +436,5 @@ createCohortTableHandlerFromList <- function(
   )
 
   return(cohortTableHandler)
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -10,35 +10,22 @@ Inherits from CDMdbHandler.
 \section{Super class}{
 \code{\link[HadesExtras:CDMdbHandler]{HadesExtras::CDMdbHandler}} -> \code{CohortTableHandler}
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{databaseId}}{A text id for the database the it connects to (read-only).}
-
-\item{\code{databaseName}}{A text id for the database the it connects to (read-only).}
-
-\item{\code{databaseDescription}}{A text description for the database the it connects to (read-only).}
-}
-\if{html}{\out{</div>}}
-}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{cohortDatabaseSchema}}{Name of the cohort database schema (read-only).}
+\item{\code{cohortDatabaseSchema}}{Schema where cohort tables are stored}
 
-\item{\code{databaseId}}{A text id for the database the it connects to (read-only).}
+\item{\code{cohortTableNames}}{Names of the cohort tables in the database}
 
-\item{\code{databaseName}}{A text id for the database the it connects to (read-only).}
+\item{\code{incrementalFolder}}{Path to folder for incremental operations}
 
-\item{\code{databaseDescription}}{A text description for the database the it connects to (read-only).}
+\item{\code{cohortDefinitionSet}}{Set of cohort definitions}
 
-\item{\code{incrementalFolder}}{Path to folder used by CohortGenerator in inclemetnal mode (read-only).}
+\item{\code{cohortGeneratorResults}}{Results from cohort generation process}
 
-\item{\code{cohortDefinitionSet}}{Table in cohortDefinitionSet with the current cohorts in the cohortTable (read-only).}
+\item{\code{cohortDemograpics}}{Demographic information for cohorts}
 
-\item{\code{cohortGeneratorResults}}{Table with results from CohortGenerator_generateCohortSet with the current cohorts in the cohortTable(read-only).}
-
-\item{\code{cohortDemograpics}}{Table with results from CohortGenerator_getCohortDemograpics with the current cohorts in the cohortTable(read-only).}
+\item{\code{cohortsOverlap}}{Information about overlapping cohorts}
 }
 \if{html}{\out{</div>}}
 }
@@ -53,6 +40,8 @@ Inherits from CDMdbHandler.
 \item \href{#method-CohortTableHandler-getCohortCounts}{\code{CohortTableHandler$getCohortCounts()}}
 \item \href{#method-CohortTableHandler-getCohortsSummary}{\code{CohortTableHandler$getCohortsSummary()}}
 \item \href{#method-CohortTableHandler-getCohortIdAndNames}{\code{CohortTableHandler$getCohortIdAndNames()}}
+\item \href{#method-CohortTableHandler-updateCohortNames}{\code{CohortTableHandler$updateCohortNames()}}
+\item \href{#method-CohortTableHandler-getCohortsOverlap}{\code{CohortTableHandler$getCohortsOverlap()}}
 \item \href{#method-CohortTableHandler-clone}{\code{CohortTableHandler$clone()}}
 }
 }
@@ -64,7 +53,7 @@ Initialize the CohortTableHandler object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$new(
   connectionHandler,
-  databseId,
+  databaseId,
   databaseName,
   databaseDescription,
   cdmDatabaseSchema,
@@ -80,6 +69,8 @@ Initialize the CohortTableHandler object
 \describe{
 \item{\code{connectionHandler}}{The connection handler object.}
 
+\item{\code{databaseId}}{A text id for the database the it connects to}
+
 \item{\code{databaseName}}{A text name for the database the it connects to}
 
 \item{\code{databaseDescription}}{A text description for the database the it connects to}
@@ -94,8 +85,6 @@ Initialize the CohortTableHandler object
 
 \item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
 Finalize method}
-
-\item{\code{databaseId}}{A text id for the database the it connects to}
 }
 \if{html}{\out{</div>}}
 }
@@ -123,6 +112,13 @@ insertOrUpdateCohorts
 \if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$loadConnection(loadConnectionChecksLevel)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{loadConnectionChecksLevel}}{Level of checks to perform during connection}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CohortTableHandler-insertOrUpdateCohorts"></a>}}
@@ -205,6 +201,49 @@ Retrieves the cohort names.
 
 \subsection{Returns}{
 A vector with the name of the cohorts
+
+updateCohortNames
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-updateCohortNames"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-updateCohortNames}{}}}
+\subsection{Method \code{updateCohortNames()}}{
+Updates the cohort name and short name.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$updateCohortNames(cohortId, newCohortName, newShortName)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{cohortId}}{The cohort id to update.}
+
+\item{\code{newCohortName}}{New name to assign to the cohort}
+
+\item{\code{newShortName}}{New short name to assign to the cohort}
+
+\item{\code{cohortName}}{The new cohort name.}
+
+\item{\code{shortName}}{The new short name.
+
+getCohortsOverlap}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getCohortsOverlap"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getCohortsOverlap}{}}}
+\subsection{Method \code{getCohortsOverlap()}}{
+Retrieves the number of subjects that are in more than one cohort.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getCohortsOverlap()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A tibble containing one logical column for each cohort with name a cohort id,
+and an additional column \code{numberOfSubjects} with the number of subjects in the cohorts combination.
 }
 }
 \if{html}{\out{<hr>}}

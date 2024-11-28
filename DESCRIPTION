@@ -7,11 +7,11 @@ Authors@R:
 Description: Functions to complement Hades packages
 License: MIT + file LICENSE
 Encoding: UTF-8
-Language: en
+Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
-URL: https://github.com/javier-gracia-tabuenca-tuni/HadesExtras
-BugReports: https://github.com/javier-gracia-tabuenca-tuni/HadesExtras/issues
+RoxygenNote: 7.3.2
+URL: https://github.com/FINNGEN/HadesExtras
+BugReports: https://github.com/FINNGEN/HadesExtras/issues
 Imports: 
     apexcharter,
     bigrquery,
@@ -34,22 +34,32 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    tippy,
     validate,
     DatabaseConnector,
     FeatureExtraction,
     CohortGenerator,
     ResultModelManager,
-    CohortDiagnostics,
-    Eunomia
+    Eunomia, 
+    tippy,
+    yaml,
+    Andromeda
+Remotes:  
+    OHDSI/CohortGenerator,
+    OHDSI/ResultModelManager, 
+    OHDSI/ROhdsiWebApi,
+    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI
 Suggests: 
     devtools,
     ROhdsiWebApi,
     ggplot2,
     knitr,
+    quarto,
     rmarkdown,
     testthat (>= 3.0.0),
     here,
-    yaml
+    yaml, 
+    usethis,
+    withr,
+    spelling
 Config/testthat/edition: 3
-VignetteBuilder: knitr
+VignetteBuilder: quarto

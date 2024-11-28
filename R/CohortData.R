@@ -28,8 +28,7 @@ createEmptyCohortData <- function() {
 #' @importFrom checkmate assertFile
 #'
 #' @export
-readCohortData <- function(pathCohortDataFile, delim = "," ){
-
+readCohortData <- function(pathCohortDataFile, delim = ",") {
   checkmate::assertFile(pathCohortDataFile)
 
   col_types <- readr::cols(
@@ -42,7 +41,8 @@ readCohortData <- function(pathCohortDataFile, delim = "," ){
   cohortData <- readr::read_delim(
     pathCohortDataFile,
     delim = delim,
-    col_types = col_types )
+    col_types = col_types
+  )
 
   return(cohortData)
 }
@@ -62,7 +62,7 @@ readCohortData <- function(pathCohortDataFile, delim = "," ){
 #' @return TRUE if the tibble is of cohortData format, an array of strings with the failed checks
 #' @export
 #'
-checkCohortData  <- function(tibble) {
+checkCohortData <- function(tibble) {
   collection <- .assertCollectionCohortData(tibble)
   if (collection$isEmpty()) {
     return(TRUE)
@@ -75,7 +75,7 @@ checkCohortData  <- function(tibble) {
 #' @export
 #' @importFrom checkmate reportAssertions
 #' @rdname checkCohortData
-assertCohortData  <- function(tibble) {
+assertCohortData <- function(tibble) {
   collection <- .assertCollectionCohortData(tibble)
   if (!collection$isEmpty()) {
     checkmate::reportAssertions(collection)
@@ -92,8 +92,7 @@ assertCohortData  <- function(tibble) {
 #' @importFrom purrr map
 #' @importFrom stringr str_replace_all
 .assertCollectionCohortData <- function(cohortData) {
-
-  collection = checkmate::makeAssertCollection()
+  collection <- checkmate::makeAssertCollection()
 
   cohortData |> checkmate::assertTibble()
   # check column names
@@ -101,34 +100,34 @@ assertCohortData  <- function(tibble) {
     c("cohort_name", "person_source_value", "cohort_start_date", "cohort_end_date"),
     cohortData |> names()
   )
-  if(length(missingCollumnNames)){
+  if (length(missingCollumnNames)) {
     paste("Table is missing the following columns: ", paste0(missingCollumnNames, collapse = ", ")) |>
       collection$push()
   }
   # validate
-  failsNames <- cohortData |> validate::check_that(
-    # type
-    cohort_name.is.not.of.type.character = is.character(cohort_name),
-    person_source_value.is.not.of.type.character = is.character(person_source_value),
-    cohort_start_date.is.not.of.type.date = class(cohort_start_date)=="Date",
-    cohort_end_date.is.not.of.type.date = class(cohort_end_date)=="Date",
-    # missing
-    rows.are.missing.cohort_name = !is.na(cohort_name),
-    rows.are.missing.person_source_value = !is.na(person_source_value),
-    # order
-    rows.have.cohort_start_date.older.than.cohort_end_date = cohort_start_date < cohort_end_date
-  ) |>
+  failsNames <- cohortData |>
+    validate::check_that(
+      # type
+      cohort_name.is.not.of.type.character = is.character(cohort_name),
+      person_source_value.is.not.of.type.character = is.character(person_source_value),
+      cohort_start_date.is.not.of.type.date = class(cohort_start_date) == "Date",
+      cohort_end_date.is.not.of.type.date = class(cohort_end_date) == "Date",
+      # missing
+      rows.are.missing.cohort_name = !is.na(cohort_name),
+      rows.are.missing.person_source_value = !is.na(person_source_value),
+      # order
+      rows.have.cohort_start_date.older.than.cohort_end_date = cohort_start_date < cohort_end_date
+    ) |>
     validate::summary() |>
-    dplyr::filter(fails!=0) |>
+    dplyr::filter(fails != 0) |>
     dplyr::mutate(msg = dplyr::if_else(items > 1, as.character(fails), "")) |>
-    dplyr::mutate(msg = paste(msg, stringr::str_replace_all(name ,"\\.", " "))) |>
+    dplyr::mutate(msg = paste(msg, stringr::str_replace_all(name, "\\.", " "))) |>
     dplyr::pull(msg)
 
   # add to collection
-  failsNames |> purrr::map(.f=~collection$push(.x))
+  failsNames |> purrr::map(.f = ~ collection$push(.x))
 
   return(collection)
-
 }
 
 
@@ -137,7 +136,7 @@ assertCohortData  <- function(tibble) {
 #' Convert a cohortData tibble into a cohortDefinitionSet
 #'
 #' @param cohortData The tibble in cohortData format.
-#' @param cohortIdOffset An integer offset for cohort IDs (default is 0L).
+#' @param newCohortIds A vector of new cohort IDs to be assigned to the cohort data.
 #' @param skipCohortDataCheck Logical value indicating whether to skip cohort data validation (default is FALSE).
 #'
 #' @importFrom checkmate assertInt assertLogical
@@ -152,19 +151,24 @@ assertCohortData  <- function(tibble) {
 #' @export
 cohortDataToCohortDefinitionSet <- function(
     cohortData,
-    cohortIdOffset = 0L,
-    skipCohortDataCheck = FALSE
-    ){
-
+    newCohortIds = NULL,
+    skipCohortDataCheck = FALSE) {
   #
   # Validate parameters
   #
-  checkmate::assertInt(cohortIdOffset)
-  checkmate::assertLogical(skipCohortDataCheck)
 
-  if(skipCohortDataCheck == TRUE){
+  if (skipCohortDataCheck == TRUE) {
     assertCohortData(cohortData)
   }
+
+  numberCohorts <- cohortData |>
+    distinct(cohort_name) |>
+    nrow()
+  if (is.null(newCohortIds)) {
+    newCohortIds <- 1:numberCohorts
+  }
+  checkmate::assertIntegerish(newCohortIds, len = numberCohorts)
+  checkmate::assertLogical(skipCohortDataCheck)
 
   #
   # Function
@@ -174,19 +178,22 @@ cohortDataToCohortDefinitionSet <- function(
   cohortDefinitionSet <- cohortData |>
     tidyr::nest(.key = "cohort", .by = c("cohort_name")) |>
     dplyr::transmute(
-      cohortId = as.double(dplyr::row_number()+cohortIdOffset),
+      cohortId = as.double(newCohortIds),
       cohortName = cohort_name,
-      json = purrr::map_chr(.x = cohort, .f=.cohortDataToJson),
+      json = purrr::map_chr(.x = cohort, .f = .cohortDataToJson),
       sql = purrr::map2_chr(
         .x = cohortId,
         .y = cohort,
-        .f=~{paste0("--",  digest::digest(.y), "\n",
-                   SqlRender::render(
-                     sql = sqlToRender,
-                     source_cohort_table = getOption("cohortDataImportTmpTableName", "tmp_cohortdata"),
-                     source_cohort_id = .x,
-                     is_temp_table = TRUE
-                   ))}
+        .f = ~ {
+          paste0(
+            "--", digest::digest(.y), "\n", # Digest inserted for incremental mode to detect changes in cohortData
+            SqlRender::render(
+              sql = sqlToRender,
+              source_cohort_id = .x,
+              is_temp_table = TRUE
+            )
+          )
+        }
       )
     )
 
@@ -194,7 +201,7 @@ cohortDataToCohortDefinitionSet <- function(
 }
 
 
-.cohortDataToJson <- function(cohortData){
+.cohortDataToJson <- function(cohortData) {
   RJSONIO::toJSON(
     list(
       cohortType = "FromCohortData",
@@ -204,23 +211,21 @@ cohortDataToCohortDefinitionSet <- function(
 }
 
 .jsonToCohortData <- function(cohortDefinitionSet) {
-
   cohortData <- cohortDefinitionSet |>
     dplyr::mutate(
-      data = purrr::map(.x=json, .f = ~{
+      data = purrr::map(.x = json, .f = ~ {
         l <- RJSONIO::fromJSON(.x, nullValue = as.character(NA), simplify = TRUE)
         l$cohortData |>
           tibble::as_tibble() |>
           dplyr::mutate(
-            cohort_start_date = as.Date(cohort_start_date),
-            cohort_end_date = as.Date(cohort_end_date)
+            cohort_start_date = as.Date(cohort_start_date, origin = "1970-01-01"),
+            cohort_end_date = as.Date(cohort_end_date, origin = "1970-01-01")
           )
       })
     ) |>
     dplyr::select(cohortId, data) |>
     tidyr::unnest(data) |>
     dplyr::rename(cohort_definition_id = cohortId)
-
 }
 
 
@@ -254,7 +259,7 @@ getCohortDataFromCohortTable <- function(
     cdmDatabaseSchema,
     cohortDatabaseSchema,
     cohortTable,
-    cohortNameIds){
+    cohortNameIds) {
   #
   # Validate parameters
   #
@@ -271,7 +276,9 @@ getCohortDataFromCohortTable <- function(
   cohortDatabaseSchema |> checkmate::assertString()
   cohortTable |> checkmate::assertString()
   cohortNameIds |> checkmate::assertDataFrame()
-  cohortNameIds |> names() |> checkmate::assertNames(must.include = c("cohortId", "cohortName"))
+  cohortNameIds |>
+    names() |>
+    checkmate::assertNames(must.include = c("cohortId", "cohortName"))
 
   #
   # Function
@@ -292,26 +299,8 @@ getCohortDataFromCohortTable <- function(
     tibble::as_tibble()
 
   cohortData <- cohortTable |>
-    dplyr::left_join(cohortNameIds, by=c("cohort_definition_id"="cohortId")) |>
+    dplyr::left_join(cohortNameIds, by = c("cohort_definition_id" = "cohortId")) |>
     dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date)
 
   return(cohortData)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

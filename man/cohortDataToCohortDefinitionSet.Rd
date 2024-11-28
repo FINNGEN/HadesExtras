@@ -6,14 +6,14 @@
 \usage{
 cohortDataToCohortDefinitionSet(
   cohortData,
-  cohortIdOffset = 0L,
+  newCohortIds = NULL,
   skipCohortDataCheck = FALSE
 )
 }
 \arguments{
 \item{cohortData}{The tibble in cohortData format.}
 
-\item{cohortIdOffset}{An integer offset for cohort IDs (default is 0L).}
+\item{newCohortIds}{A vector of new cohort IDs to be assigned to the cohort data.}
 
 \item{skipCohortDataCheck}{Logical value indicating whether to skip cohort data validation (default is FALSE).}
 }
