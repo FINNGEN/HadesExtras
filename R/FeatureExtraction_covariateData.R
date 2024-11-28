@@ -1,7 +1,7 @@
-
-
 #' covariateData_YearOfBirth
 #'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
 #'
 #' @export
 #'
@@ -14,12 +14,29 @@ covariateData_YearOfBirth <- function() {
 
 #' YearOfBirth
 #'
+#' @param connection A database connection object created using \code{DatabaseConnector::connect}.
+#' @param tempEmulationSchema The temp schema where the covariate tables will be created.
+#' @param cdmDatabaseSchema The schema where the cdm tables are located.
+#' @param cdmVersion The version of the cdm.
+#' @param cohortTable The table where the cohort data is located.
+#' @param cohortIds The cohort ids to include.
+#' @param rowIdField The field in the cohort table that is the row id.
+#' @param covariateSettings A list of settings for the covariate data.
+#' @param aggregated Logical. If TRUE, the covariate data is aggregated.
+#' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
+#' @importFrom dplyr select mutate
+#' @importFrom tidyr nest unnest
+#' @importFrom purrr map
+#' @importFrom Andromeda andromeda
 #'
 #' @export
 #'
 YearOfBirth <- function(
     connection,
-    oracleTempSchema = NULL,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     cdmVersion = "5",
     cohortTable = "#cohort_person",
@@ -27,26 +44,27 @@ YearOfBirth <- function(
     rowIdField = "subject_id",
     covariateSettings,
     aggregated = FALSE,
-    minCharacterizationMean = 0
-    ) {
-
+    minCharacterizationMean = 0) {
   writeLines("Constructing YearOfBirth covariate")
 
   # Some SQL to construct the covariate:
-  sql <- paste("SELECT
+  sql <- paste(
+    "SELECT
                cohort_definition_id AS cohort_definition_id,
                @row_id_field AS row_id,
                1041 AS covariate_id,
                p.year_of_birth AS covariate_value",
-               "FROM @cohort_table c",
-               "INNER JOIN @cdm_database_schema.person p",
-               "ON p.person_id = c.subject_id",
-               "{@cohort_ids != -1} ? {WHERE cohort_definition_id IN (@cohort_ids)}")
+    "FROM @cohort_table c",
+    "INNER JOIN @cdm_database_schema.person p",
+    "ON p.person_id = c.subject_id",
+    "{@cohort_ids != -1} ? {WHERE cohort_definition_id IN (@cohort_ids)}"
+  )
   sql <- SqlRender::render(sql,
-                           cohort_table = cohortTable,
-                           cohort_ids = cohortIds,
-                           row_id_field = rowIdField,
-                           cdm_database_schema = cdmDatabaseSchema)
+    cohort_table = cohortTable,
+    cohort_ids = cohortIds,
+    row_id_field = rowIdField,
+    cdm_database_schema = cdmDatabaseSchema
+  )
   sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
 
   # Retrieve the covariate:
@@ -77,14 +95,14 @@ YearOfBirth <- function(
       covariateRef = covariateRef,
       analysisRef = analysisRef
     )
-  }else{
+  } else {
     result <- Andromeda::andromeda(
-      covariates = tibble::tibble(covariateId=NA_real_, sumValue=NA_integer_, averageValue=NA_integer_, .rows = 0),
+      covariates = tibble::tibble(covariateId = NA_real_, sumValue = NA_integer_, averageValue = NA_integer_, .rows = 0),
       covariateRef = covariateRef,
       analysisRef = analysisRef,
-      covariatesContinuous = covariates   |>
-        tidyr::nest(data=-cohortDefinitionId)   |>
-        dplyr::mutate(data=purrr::map(data,.computeStats)) |>
+      covariatesContinuous = covariates |>
+        tidyr::nest(data = -cohortDefinitionId) |>
+        dplyr::mutate(data = purrr::map(data, .computeStats)) |>
         tidyr::unnest(data)
     )
   }
@@ -116,14 +134,3 @@ YearOfBirth <- function(
   )
   return(result)
 }
-
-
-
-
-
-
-
-
-
-
-

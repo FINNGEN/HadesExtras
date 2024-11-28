@@ -1,5 +1,3 @@
-
-
 #' Create Temporal Source Covariate Settings
 #'
 #' This function generates settings for temporal source covariates to be used in feature extraction, DEPRECATED use FeatureExtraction_createTemporalCovariateSettingsFromList.
@@ -24,15 +22,13 @@
 #'
 FeatureExtraction_createTemporalSourceCovariateSettings <- function(
     useConditionOccurrenceSourceConcept = TRUE,
-    useDrugExposureSourceConcept =  TRUE,
+    useDrugExposureSourceConcept = TRUE,
     useProcedureOccurrenceSourceConcept = TRUE,
     useMeasurementSourceConcept = TRUE,
     useDeviceExposureSourceConcept = TRUE,
     useObservationSourceConcept = TRUE,
     temporalStartDays = -365:-1,
-    temporalEndDays =   -365:-1
-) {
-
+    temporalEndDays = -365:-1) {
   checkmate::assertLogical(useConditionOccurrenceSourceConcept)
   checkmate::assertLogical(useDrugExposureSourceConcept)
   checkmate::assertLogical(useProcedureOccurrenceSourceConcept)
@@ -45,22 +41,21 @@ FeatureExtraction_createTemporalSourceCovariateSettings <- function(
   checkmate::assertTRUE(useConditionOccurrenceSourceConcept | useDrugExposureSourceConcept | useProcedureOccurrenceSourceConcept | useMeasurementSourceConcept | useDeviceExposureSourceConcept | useObservationSourceConcept)
 
   listAnalyses <- list(
-    if(useConditionOccurrenceSourceConcept) analysisDetails_ConditionOccurrenceSourceConcept,
-    if(useDrugExposureSourceConcept) analysisDetails_DrugExposureSourceConcept,
-    if(useProcedureOccurrenceSourceConcept) analysisDetails_ProcedureOccurrenceSourceConcept,
-    if(useMeasurementSourceConcept) analysisDetails_MeasurementSourceConcept,
-    if(useDeviceExposureSourceConcept) analysisDetails_DeviceExposureSourceConcept,
-    if(useObservationSourceConcept) analysisDetails_ObservationSourceConcept
+    if (useConditionOccurrenceSourceConcept) analysisDetails_ConditionOccurrenceSourceConcept,
+    if (useDrugExposureSourceConcept) analysisDetails_DrugExposureSourceConcept,
+    if (useProcedureOccurrenceSourceConcept) analysisDetails_ProcedureOccurrenceSourceConcept,
+    if (useMeasurementSourceConcept) analysisDetails_MeasurementSourceConcept,
+    if (useDeviceExposureSourceConcept) analysisDetails_DeviceExposureSourceConcept,
+    if (useObservationSourceConcept) analysisDetails_ObservationSourceConcept
   )
 
   settings <- FeatureExtraction::createDetailedTemporalCovariateSettings(
     analyses = listAnalyses,
     temporalStartDays = temporalStartDays,
-    temporalEndDays =   temporalEndDays
+    temporalEndDays = temporalEndDays
   )
 
   return(settings)
-
 }
 
 
@@ -110,7 +105,7 @@ analysisDetails_ProcedureOccurrenceSourceConcept <- FeatureExtraction::createAna
   analysisId = 541,
   sqlFileName = "DomainConcept.sql",
   parameters = list(
-    analysisId = 514,
+    analysisId = 541,
     analysisName = "ProcedureOccurrenceSourceConcept",
     domainId = "Procedure",
     domainTable = "procedure_occurrence",

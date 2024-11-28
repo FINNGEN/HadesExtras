@@ -52,20 +52,19 @@ operationStringToSQL <- function(operationString) {
 #' @importFrom checkmate assertString assertSubset assertInteger
 #'
 ..binaryTreeToSQL <- function(binaryTree, side, depth) {
-
   side |> checkmate::assertString()
   side |> checkmate::assertSubset(c("left", "right", "root"))
   depth |> checkmate::assertInteger()
 
   positionId <- paste0(side, depth)
   position <- paste0("depth = ", depth, "; side = ", side, "; positionId = ", positionId)
-  tabs <- paste(rep("  ", depth+2), collapse = "")
+  tabs <- paste(rep("  ", depth + 2), collapse = "")
 
   # if leaf, return the sql that reads the cohort table with the number as cohort_id
   if (is.numeric(binaryTree)) {
-    sql  <- paste0(
+    sql <- paste0(
       tabs, "-- ", position, "\n",
-      tabs, "SELECT subject_id, cohort_start_date, cohort_end_date FROM @cohort_database_schema.@cohort_table WHERE cohort_definition_id = ", binaryTree , "\n"
+      tabs, "SELECT subject_id, cohort_start_date, cohort_end_date FROM @cohort_database_schema.@cohort_table WHERE cohort_definition_id = ", binaryTree, "\n"
     )
     return(list(
       sql = sql,
@@ -75,7 +74,9 @@ operationStringToSQL <- function(operationString) {
 
   # if not leaf, check if the binary tree has the correct structure
   binaryTree |> checkmate::assertList()
-  binaryTree |> names() |>  checkmate::assertSubset(c("left", "operation", "right"))
+  binaryTree |>
+    names() |>
+    checkmate::assertSubset(c("left", "operation", "right"))
 
   left <- ..binaryTreeToSQL(binaryTree$left, "left", depth + 1L)
   right <- ..binaryTreeToSQL(binaryTree$right, "right", depth + 1L)
@@ -83,7 +84,7 @@ operationStringToSQL <- function(operationString) {
   # operations
   if (binaryTree$operation == "Upd") {
     # Ip
-    sql  <- paste0(
+    sql <- paste0(
       tabs, "-- Operation Ip: ", position, "\n",
       tabs, "SELECT \n",
       tabs, "   subject_id AS subject_id, \n",
@@ -97,10 +98,9 @@ operationStringToSQL <- function(operationString) {
       tabs, ")\n",
       tabs, "GROUP BY subject_id \n"
     )
-
   } else if (binaryTree$operation == "Ip") {
     # Ip
-    sql  <- paste0(
+    sql <- paste0(
       tabs, "-- Operation Ip: ", position, "\n",
       tabs, "SELECT ", positionId, "left.* FROM \n",
       tabs, "(\n",
@@ -112,10 +112,9 @@ operationStringToSQL <- function(operationString) {
       tabs, ") AS ", positionId, "right\n",
       tabs, "ON ", positionId, "left.subject_id = ", positionId, "right.subject_id \n"
     )
-
   } else {
     # Mp
-    sql  <- paste0(
+    sql <- paste0(
       tabs, "-- Operation Mp: ", position, "\n",
       tabs, "SELECT ", positionId, "left.* FROM \n",
       tabs, "(\n",
@@ -135,7 +134,6 @@ operationStringToSQL <- function(operationString) {
     sql = sql,
     positionId = positionId
   ))
-
 }
 
 
@@ -148,7 +146,7 @@ operationStringToSQL <- function(operationString) {
 #'
 #' @return A list representing the binary tree structure of the operation string.
 #'
-.operationStringToBinaryTree<- function(operationString) {
+.operationStringToBinaryTree <- function(operationString) {
   # valid operators
   operators <- c("Upd", "Ip", "Mp")
 
@@ -171,10 +169,10 @@ operationStringToSQL <- function(operationString) {
 
   # if the list has only one element
   if (length(splitString) == 1) {
-    if (is.na(suppressWarnings(as.integer(splitString)))){
+    if (is.na(suppressWarnings(as.integer(splitString)))) {
       # and is not a number, it was in parenthesis, run as operation
       return(.operationStringToBinaryTree(splitString))
-    }else{
+    } else {
       # and is a number, return as number
       return(as.integer(splitString))
     }
@@ -206,8 +204,8 @@ operationStringToSQL <- function(operationString) {
     return(list(
       left = .operationStringToBinaryTree(paste(leftSide, collapse = "")),
       operation = operator,
-      right = .operationStringToBinaryTree(paste(rightSide, collapse = "")))
-    )
+      right = .operationStringToBinaryTree(paste(rightSide, collapse = ""))
+    ))
   }
 }
 
@@ -236,7 +234,7 @@ splitString <- function(string) {
   string <- gsub(" ", "", string)
 
   # split the string into a list of characters un less they are between parentheses
-  splitString <-unlist(strsplit(string, "(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)|(?<=\\()|(?=\\()|(?<=\\))|(?=\\))", perl = TRUE))
+  splitString <- unlist(strsplit(string, "(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)|(?<=\\()|(?=\\()|(?<=\\))|(?=\\))", perl = TRUE))
 
   wrongTokens <- c()
   for (i in 1:length(splitString)) {
@@ -254,14 +252,13 @@ splitString <- function(string) {
   nOpenParenthesis <- 0
   buffer <- c()
   for (i in 1:length(splitString)) {
-
     if (splitString[i] == "(") {
       nOpenParenthesis <- nOpenParenthesis + 1
     }
 
-    if(nOpenParenthesis > 0){
+    if (nOpenParenthesis > 0) {
       buffer <- c(buffer, splitString[i])
-    }else{
+    } else {
       splitStringJoinedParenthesis <- c(splitStringJoinedParenthesis, paste0(buffer, collapse = ""), splitString[i])
       buffer <- c()
     }
@@ -269,21 +266,17 @@ splitString <- function(string) {
     if (splitString[i] == ")") {
       nOpenParenthesis <- nOpenParenthesis - 1
     }
-
   }
   # if buffer still full append, (typically bcs a close parenthesis at the end)
-  if(length(buffer)!=0){
+  if (length(buffer) != 0) {
     splitStringJoinedParenthesis <- c(splitStringJoinedParenthesis, paste0(buffer, collapse = ""))
   }
 
-  splitStringJoinedParenthesis <- splitStringJoinedParenthesis[setdiff(1:length(splitStringJoinedParenthesis),which(splitStringJoinedParenthesis==""))]
+  splitStringJoinedParenthesis <- splitStringJoinedParenthesis[setdiff(1:length(splitStringJoinedParenthesis), which(splitStringJoinedParenthesis == ""))]
 
-  if (nOpenParenthesis !=0 ) {
+  if (nOpenParenthesis != 0) {
     stop(" Missing closing brackets")
   }
 
   return(splitStringJoinedParenthesis)
 }
-
-
-

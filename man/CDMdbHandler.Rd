@@ -2,34 +2,42 @@
 % Please edit documentation in R/CDMdbHandler.R
 \name{CDMdbHandler}
 \alias{CDMdbHandler}
-\title{CDMdbHandler}
+\title{CDM Database Handler Class}
 \description{
-Class for handling database connection and schema information for a CDM database
+A class for handling CDM database connections and operations
 }
+\section{Methods}{
+
+\describe{
+\item{\code{initialize(databaseId)}}{Initialize a new CDM database handler}
+\item{\code{loadConnection(loadConnectionChecksLevel)}}{Load database connection with specified check level}
+}
+}
+
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{databaseId}}{A text id for the database the it connects to (read-only).}
+\item{\code{databaseId}}{The ID of the database}
 
-\item{\code{databaseName}}{A text id for the database the it connects to (read-only).}
+\item{\code{databaseName}}{The name of the database}
 
-\item{\code{databaseDescription}}{A text description for the database the it connects to (read-only).}
+\item{\code{databaseDescription}}{Description of the database}
 
-\item{\code{connectionHandler}}{ConnectionHandler object for managing the database connection (read-only).}
+\item{\code{connectionHandler}}{Handler for database connections}
 
-\item{\code{vocabularyDatabaseSchema}}{Name of the vocabulary database schema (read-only).}
+\item{\code{vocabularyDatabaseSchema}}{Schema name for the vocabulary database}
 
-\item{\code{cdmDatabaseSchema}}{Name of the CDM database schema (read-only).}
+\item{\code{cdmDatabaseSchema}}{Schema name for the CDM database}
 
-\item{\code{connectionStatusLog}}{Log tibble object for storing connection status information (read-only).}
+\item{\code{connectionStatusLog}}{Log of connection status and operations}
 
-\item{\code{vocabularyInfo}}{Data frame containing information about the vocabulary database (read-only).}
+\item{\code{vocabularyInfo}}{Information about the vocabulary tables}
 
-\item{\code{CDMInfo}}{Data frame containing information about the CDM database (read-only).}
+\item{\code{CDMInfo}}{Information about the CDM structure}
 
-\item{\code{getTblVocabularySchema}}{List of functions that create dbplyr table for the vocabulary tables (read-only).}
+\item{\code{getTblVocabularySchema}}{Function to get vocabulary schema table}
 
-\item{\code{getTblCDMSchema}}{List of functions that create dbplyr table for the CDM tables (read-only).}
+\item{\code{getTblCDMSchema}}{Function to get CDM schema table}
 }
 \if{html}{\out{</div>}}
 }
@@ -99,6 +107,13 @@ Updates the connection status by checking the database connection, vocabulary da
 \if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$loadConnection(loadConnectionChecksLevel)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{loadConnectionChecksLevel}}{Level of connection checks to perform}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CDMdbHandler-clone"></a>}}

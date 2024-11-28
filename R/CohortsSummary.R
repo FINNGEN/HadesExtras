@@ -5,7 +5,6 @@
 #' @export
 #'
 createEmptyCohortsSummary <- function() {
-
   emptyCohortsSummary <- tibble::tibble(
     databaseId = as.character(NA),
     databaseName = as.character(NA),
@@ -18,29 +17,35 @@ createEmptyCohortsSummary <- function() {
       tibble::tibble(
         year = as.integer(NA),
         n = as.integer(NA),
-        .rows = 0)
-      ),
+        .rows = 0
+      )
+    ),
     histogramCohortEndYear = list(
       tibble::tibble(
         year = as.integer(NA),
         n = as.integer(NA),
-        .rows = 0)
-      ),
+        .rows = 0
+      )
+    ),
     histogramBirthYear = list(
       tibble::tibble(
         year = as.integer(NA),
         n = as.integer(NA),
-        .rows = 0)
+        .rows = 0
+      )
     ),
     sexCounts = list(
       tibble::tibble(
         sex = as.character(NA),
         n = as.integer(NA),
-        .rows = 0)),
+        .rows = 0
+      )
+    ),
     buildInfo = list(
       LogTibble$new()
     ),
-    .rows = 0 )
+    .rows = 0
+  )
 
   return(emptyCohortsSummary)
 }
@@ -55,22 +60,24 @@ createEmptyCohortsSummary <- function() {
 #' @export
 #'
 correctEmptyCohortsInCohortsSummary <- function(cohortsSummary) {
-
-  if(nrow(cohortsSummary)==0){
+  if (nrow(cohortsSummary) == 0) {
     return(createEmptyCohortsSummary())
   }
 
-  emptyHistogram = list(
+  emptyHistogram <- list(
     tibble::tibble(
       year = as.integer(NA),
       n = as.integer(NA),
-      .rows = 0)
+      .rows = 0
+    )
   )
-  emptysexCounts = list(
+  emptysexCounts <- list(
     tibble::tibble(
       sex = as.character(NA),
       n = as.integer(NA),
-      .rows = 0))
+      .rows = 0
+    )
+  )
 
   log <- LogTibble$new()
   log$ERROR("", "Cohort is empty")
@@ -87,7 +94,7 @@ correctEmptyCohortsInCohortsSummary <- function(cohortsSummary) {
     ) |>
     dplyr::select(
       databaseId, databaseName,
-      cohortId, cohortName,  shortName,
+      cohortId, cohortName, shortName,
       cohortEntries, cohortSubjects,
       histogramCohortStartYear, histogramCohortEndYear, histogramBirthYear, sexCounts,
       buildInfo
@@ -110,7 +117,7 @@ correctEmptyCohortsInCohortsSummary <- function(cohortsSummary) {
 #' @return TRUE if the tibble is of CohortsSummary format, an array of strings with the failed checks
 #' @export
 #'
-checkCohortsSummary  <- function(tibble) {
+checkCohortsSummary <- function(tibble) {
   collection <- .assertCollectionCohortsSummary(tibble)
   if (collection$isEmpty()) {
     return(TRUE)
@@ -123,7 +130,7 @@ checkCohortsSummary  <- function(tibble) {
 #' @export
 #' @importFrom checkmate reportAssertions
 #' @rdname checkCohortsSummary
-assertCohortsSummary  <- function(tibble) {
+assertCohortsSummary <- function(tibble) {
   collection <- .assertCollectionCohortsSummary(tibble)
   if (!collection$isEmpty()) {
     checkmate::reportAssertions(collection)
@@ -140,44 +147,42 @@ assertCohortsSummary  <- function(tibble) {
 #' @importFrom purrr map
 #' @importFrom stringr str_replace_all
 .assertCollectionCohortsSummary <- function(CohortsSummary) {
-
-  collection = checkmate::makeAssertCollection()
+  collection <- checkmate::makeAssertCollection()
 
   CohortsSummary |> checkmate::assertTibble()
   # check column names
   missingCollumnNames <- setdiff(
-    createEmptyCohortsSummary() |>  names(),
+    createEmptyCohortsSummary() |> names(),
     CohortsSummary |> names()
   )
-  if(length(missingCollumnNames)){
+  if (length(missingCollumnNames)) {
     paste("Table is missing the following columns: ", paste0(missingCollumnNames, collapse = ", ")) |>
       collection$push()
   }
   # validate
-  failsNames <- CohortsSummary |> validate::check_that(
-    # type
-    cohortName.is.not.of.type.character = is.character(cohortName),
-    cohortId.is.not.of.type.double = is.double(cohortId),
-    sourceCohortId.is.not.of.type.double = is.double(sourceCohortId),
-    cohortDescription.is.not.of.type.character = is.character(cohortDescription),
-    cohortEntries.is.not.of.type.integer = is.integer(cohortEntries),
-    cohortSubjects.is.not.of.type.integer = is.integer(cohortSubjects),
-    histogram_cohort_start_year.is.not.of.type.list = is.list(histogram_cohort_start_year),
-    histogram_cohort_end_year.is.not.of.type.list  = is.list(histogram_cohort_end_year),
-    count_sex.is.not.of.type.list = is.list(count_sex)
-    # missing
-    # TODO
-  ) |>
+  failsNames <- CohortsSummary |>
+    validate::check_that(
+      # type
+      cohortName.is.not.of.type.character = is.character(cohortName),
+      cohortId.is.not.of.type.double = is.double(cohortId),
+      sourceCohortId.is.not.of.type.double = is.double(sourceCohortId),
+      cohortDescription.is.not.of.type.character = is.character(cohortDescription),
+      cohortEntries.is.not.of.type.integer = is.integer(cohortEntries),
+      cohortSubjects.is.not.of.type.integer = is.integer(cohortSubjects),
+      histogram_cohort_start_year.is.not.of.type.list = is.list(histogram_cohort_start_year),
+      histogram_cohort_end_year.is.not.of.type.list = is.list(histogram_cohort_end_year),
+      count_sex.is.not.of.type.list = is.list(count_sex)
+      # missing
+      # TODO
+    ) |>
     validate::summary() |>
-    dplyr::filter(fails!=0) |>
+    dplyr::filter(fails != 0) |>
     dplyr::mutate(msg = dplyr::if_else(items > 1, as.character(fails), "")) |>
-    dplyr::mutate(msg = paste(msg, stringr::str_replace_all(name ,"\\.", " "))) |>
+    dplyr::mutate(msg = paste(msg, stringr::str_replace_all(name, "\\.", " "))) |>
     dplyr::pull(msg)
 
   # add to collection
-  failsNames |> purrr::map(.f=~collection$push(.x))
+  failsNames |> purrr::map(.f = ~ collection$push(.x))
 
   return(collection)
-
 }
-

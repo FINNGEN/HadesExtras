@@ -1,4 +1,3 @@
-
 #
 # createMatchingSubset
 #
@@ -17,24 +16,31 @@ test_that("Operation subset naming and instantitation", {
 
 
 test_that("Operation Subset works", {
-
+  testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "Eunomia-GiBleed")
+  
   connection <- helper_createNewConnection()
-  #on.exit({DatabaseConnector::dropEmulatedTempTables(connection); DatabaseConnector::disconnect(connection)})
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
-  CohortGenerator::createCohortTables(
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- 'test_cohort'
+
+  CohortGenerator_createCohortTables(
     connection = connection,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName)
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName)
   )
-
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
     settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
     jsonFolder = here::here("inst/testdata/matching/cohorts"),
     sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
-    cohortFileNameValue = c("cohortName"),
-    #packageName = "HadesExtras",
+    cohortFileNameValue = c("cohortId"),
+    # packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -56,23 +62,28 @@ test_that("Operation Subset works", {
 
   generatedCohorts <- CohortGenerator::generateCohortSet(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(testSelectedConfiguration$cohortTable$cohortTableName),
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSetWithSubsetDef,
     incremental = FALSE
   )
 
-    cohortDemographics <- CohortGenerator_getCohortDemograpics(
+  cohortDemographics <- CohortGenerator_getCohortDemograpics(
     connection = connection,
-    cdmDatabaseSchema = testSelectedConfiguration$cdm$cdmDatabaseSchema,
-    cohortDatabaseSchema = testSelectedConfiguration$cohortTable$cohortDatabaseSchema,
-    cohortTable = testSelectedConfiguration$cohortTable$cohortTableName
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName
   )
 
   checkmate::expect_tibble(cohortDemographics)
-  cohortDemographics |> dplyr::pull(cohortId) |> expect_equal(c(10, 20, 20300))
-  cohortDemographics |> dplyr::pull(cohortEntries) |> expect_equal(c(2, 40, 42))
-  cohortDemographics |> dplyr::pull(cohortSubjects) |> expect_equal(c(2, 40, 42))
-
+  cohortDemographics |>
+    dplyr::pull(cohortId) |>
+    expect_equal(c(10, 20, 20300))
+  cohortDemographics |>
+    dplyr::pull(cohortEntries) |>
+    expect_equal(c(2, 40, 42))
+  cohortDemographics |>
+    dplyr::pull(cohortSubjects) |>
+    expect_equal(c(2, 40, 42))
 })

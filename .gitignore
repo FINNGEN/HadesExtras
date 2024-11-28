@@ -14,3 +14,8 @@ export*
 *.sqlite
 *.log
 .quarto
+
+renv/*
+renv.lock
+.Rprofile
+docs

@@ -1,4 +1,3 @@
-
 #' Check Existence of Cohort Definition Tables
 #'
 #' Validates the existence of the specified cohort definition and cohort tables within a given database schema.
@@ -22,9 +21,7 @@ checkCohortDefinitionTables <- function(
     connection = NULL,
     cohortDatabaseSchema,
     cohortDefinitionTable = "cohort_definition",
-    cohortTable = "cohort"
-    ){
-
+    cohortTable = "cohort") {
   #
   # Validate parameters
   #
@@ -47,12 +44,12 @@ checkCohortDefinitionTables <- function(
   connectionStatusLog <- LogTibble$new()
 
   existCohortDefinitionTable <- DatabaseConnector::existsTable(connection, cohortDatabaseSchema, cohortDefinitionTable)
-  if(!existCohortDefinitionTable){
+  if (!existCohortDefinitionTable) {
     connectionStatusLog$ERROR(
       step = "check cohortDefinitionTable",
       message = "Cohort definition table does not exist."
     )
-  }else{
+  } else {
     connectionStatusLog$SUCCESS(
       step = "check cohortDefinitionTable",
       message = "Cohort definition table exists."
@@ -60,12 +57,12 @@ checkCohortDefinitionTables <- function(
   }
 
   existCohortTable <- DatabaseConnector::existsTable(connection, cohortDatabaseSchema, cohortTable)
-  if(!existCohortTable){
+  if (!existCohortTable) {
     connectionStatusLog$ERROR(
       step = "check cohortTable",
       message = "Cohort table does not exist."
     )
-  }else{
+  } else {
     connectionStatusLog$SUCCESS(
       step = "check cohortTable",
       message = "Cohort table exists."
@@ -97,8 +94,7 @@ getCohortNamesFromCohortDefinitionTable <- function(
     connectionDetails = NULL,
     connection = NULL,
     cohortDatabaseSchema,
-    cohortDefinitionTable = "cohort_definition"){
-
+    cohortDefinitionTable = "cohort_definition") {
   #
   # Validate parameters
   #
@@ -118,7 +114,7 @@ getCohortNamesFromCohortDefinitionTable <- function(
   #
   # Function
   #
-  sql  <- "SELECT cohort_definition_id, cohort_definition_name, cohort_definition_description FROM @cohort_database_schema.@cohort_definition_table"
+  sql <- "SELECT cohort_definition_id, cohort_definition_name, cohort_definition_description FROM @cohort_database_schema.@cohort_definition_table"
   sql <- SqlRender::render(
     sql = sql,
     cohort_database_schema = cohortDatabaseSchema,
@@ -133,7 +129,6 @@ getCohortNamesFromCohortDefinitionTable <- function(
     tibble::as_tibble()
 
   return(cohortDefinitionTable)
-
 }
 
 #' Convert Cohort Table to Cohort Definition Settings
@@ -159,9 +154,7 @@ cohortTableToCohortDefinitionSettings <- function(
     cohortTable = "cohort",
     cohortDefinitionTable,
     cohortDefinitionIds,
-    newCohortDefinitionIds = cohortDefinitionIds
-){
-
+    newCohortDefinitionIds = cohortDefinitionIds) {
   #
   # Validate parameters
   #
@@ -173,28 +166,26 @@ cohortTableToCohortDefinitionSettings <- function(
   #
   # Function
   #
-  cohortDefinitionTable  |>
+  cohortDefinitionTable |>
     dplyr::filter(cohort_definition_id %in% cohortDefinitionIds) |>
     dplyr::transmute(
       cohortId = as.double(cohort_definition_id),
       cohortName = cohort_definition_name,
-      json =  paste0(
+      json = paste0(
         "{\"cohortDefinitionId\":", cohort_definition_id,
         ",\"cohortDefinitionName\":\"", cohort_definition_name,
         "\",\"cohortDefinitionDescription\":\"", cohort_definition_description, "\"}"
       ),
-      sql = purrr::pmap_chr(.l = list(cohortDatabaseSchema, cohortTable, cohortId), .f=.cohortTableToSql)
-    )  |>
+      sql = purrr::pmap_chr(.l = list(cohortDatabaseSchema, cohortTable, cohortId), .f = .cohortTableToSql)
+    ) |>
     dplyr::mutate(
       cohortId = newCohortDefinitionIds
     )
-
 }
 
 
-.cohortTableToSql <- function(cohortDatabaseSchema, cohortTable, cohortDefinitionId){
-
-  sql  <- c(
+.cohortTableToSql <- function(cohortDatabaseSchema, cohortTable, cohortDefinitionId) {
+  sql <- c(
     "-- This code inserts records from an external cohort table into the cohort table of the cohort database schema.",
     "DELETE FROM @target_database_schema.@target_cohort_table where cohort_definition_id = @target_cohort_id;",
     "INSERT INTO @target_database_schema.@target_cohort_table (cohort_definition_id, subject_id, cohort_start_date, cohort_end_date)",
@@ -213,25 +204,3 @@ cohortTableToCohortDefinitionSettings <- function(
 
   return(sql)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,7 +6,7 @@
 \usage{
 YearOfBirth(
   connection,
-  oracleTempSchema = NULL,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
   cdmVersion = "5",
   cohortTable = "#cohort_person",
@@ -16,6 +16,27 @@ YearOfBirth(
   aggregated = FALSE,
   minCharacterizationMean = 0
 )
+}
+\arguments{
+\item{connection}{A database connection object created using \code{DatabaseConnector::connect}.}
+
+\item{tempEmulationSchema}{The temp schema where the covariate tables will be created.}
+
+\item{cdmDatabaseSchema}{The schema where the cdm tables are located.}
+
+\item{cdmVersion}{The version of the cdm.}
+
+\item{cohortTable}{The table where the cohort data is located.}
+
+\item{cohortIds}{The cohort ids to include.}
+
+\item{rowIdField}{The field in the cohort table that is the row id.}
+
+\item{covariateSettings}{A list of settings for the covariate data.}
+
+\item{aggregated}{Logical. If TRUE, the covariate data is aggregated.}
+
+\item{minCharacterizationMean}{The minimum mean for the covariate to be included.}
 }
 \description{
 YearOfBirth

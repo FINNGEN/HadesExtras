@@ -18,7 +18,6 @@ LogTibble <- R6::R6Class(
   private = list(
     log = NULL
   ),
-
   public = list(
     #'
     #' @description
@@ -41,7 +40,7 @@ LogTibble <- R6::R6Class(
     #' @param message  Log message content
     #' @param ...      Additional parameters for message formatting
     addLog = function(type, step, message, ...) {
-      private$log <- private$log  |>
+      private$log <- private$log |>
         dplyr::add_row(
           type = factor(type, levels = c("INFO", "WARNING", "ERROR", "SUCCESS")),
           step = step,
@@ -96,13 +95,13 @@ LogTibble <- R6::R6Class(
     #' print
     #' @description
     #' prints log.
-    print = function(){
+    print = function() {
       print(private$log)
     }
   ),
-
   active = list(
-    logTibble = function(){ return(private$log)
+    logTibble = function() {
+      return(private$log)
     }
   )
 )

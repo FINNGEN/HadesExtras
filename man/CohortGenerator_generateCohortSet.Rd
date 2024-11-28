@@ -39,7 +39,7 @@ CohortGenerator_generateCohortSet(
 \item{incrementalFolder}{as in CohortGenerator::generateCohortSet.}
 }
 \value{
-resutls from CohortGenerator::generateCohortSet with additional column 'buildInfo'
+results from CohortGenerator::generateCohortSet with additional column 'buildInfo'
 }
 \description{
 Wrap around CohortGenerator::generateCohortSet to be able to build cohorts based on cohortData.
@@ -47,5 +47,5 @@ Checks if cohortDefinitionSet contais a cohort based on cohortData.
 If so, uploads cohortData found in the json column to the database and transforms that data in to a temporal table with cohortTable format.
 CohortGenerator::generateCohortSet is called and processes the sql column that will copy the contents of the temporal cohortTable to the
 target cohortTable.
-It adds a column to the restuls tibble, 'buildInfo' with a LogTibble with information on the cohort construction.
+It adds a column to the results tibble, 'buildInfo' with a LogTibble with information on the cohort construction.
 }

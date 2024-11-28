@@ -2,3 +2,5 @@
 *.R
 errorReportSql.txt
 asthma.csv
+
+/.quarto/
