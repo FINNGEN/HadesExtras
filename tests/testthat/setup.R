@@ -3,6 +3,7 @@
 #
 
 # Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Eunomia-GiBleed")
+# Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "AtlasDevelopment-DBI")
 testingDatabase <- Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT")
 
 # check correct settings

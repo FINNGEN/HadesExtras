@@ -16,7 +16,7 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }}) - ${{ matrix.env_config.name }}
 
     strategy:
       fail-fast: false
@@ -37,6 +37,7 @@ jobs:
       GCP_SERVICE_KEY_JSON: ${{ secrets.GCP_SERVICE_KEY_JSON }}
       GCP_SERVICE_KEY: /tmp/gcp-credentials.json
       R_KEEP_PKG_SOURCE: yes
+      HADESEXTAS_TESTING_ENVIRONMENT: ${{ matrix.env_config.HADESEXTAS_TESTING_ENVIRONMENT }}
 
     steps:
       - uses: actions/checkout@v4
