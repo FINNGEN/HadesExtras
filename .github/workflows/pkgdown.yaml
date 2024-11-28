@@ -35,14 +35,18 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            any::pkgdown
-            any::knitr
-            any::rmarkdown
+          extra-packages: any::pkgdown
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = TRUE)
+        run: |
+          # First try to render any Quarto files directly
+          find . -name "*.qmd" -exec echo "Rendering {}" \; -exec quarto render {} --debug \;
+          
+          # Then attempt the pkgdown build with verbose output
+          options(pkgdown.quiet = FALSE)
+          options(verbose = TRUE)
+          pkgdown::build_site_github_pages(new_process = FALSE, install = TRUE)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
