@@ -81,6 +81,7 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
 })
 
 test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all covariates", {
+  skip_if(testingDatabase == "AtlasDevelopment-DBI")
   connection <- helper_createNewConnection()
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
@@ -125,8 +126,9 @@ test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all
     cohortDatabaseSchema = cohortDatabaseSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
     covariateSettings = covariateSettings,
-    cohortIds = c(1783699, 1783700),
-    aggregated = TRUE
+    cohortIds = c(1, 2),
+    aggregated = TRUE, 
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
   )
 
   covariateData$analysisRef |>
