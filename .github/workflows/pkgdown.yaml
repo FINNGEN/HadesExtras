@@ -38,12 +38,12 @@ jobs:
           extra-packages: any::pkgdown
           needs: website
 
+      - name: Check Quarto files
+        run: find . -name "*.qmd" -exec echo "Rendering {}" \; -exec quarto render {} --debug \;
+        shell: bash
+
       - name: Build site
         run: |
-          # First try to render any Quarto files directly
-          find . -name "*.qmd" -exec echo "Rendering {}" \; -exec quarto render {} --debug \;
-          
-          # Then attempt the pkgdown build with verbose output
           options(pkgdown.quiet = FALSE)
           options(verbose = TRUE)
           pkgdown::build_site_github_pages(new_process = FALSE, install = TRUE)
