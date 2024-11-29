@@ -9,3 +9,5 @@
 library(testthat)
 library(checkmate)
 library(HadesExtras)
+
+test_check("HadesExtras")

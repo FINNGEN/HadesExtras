@@ -38,6 +38,7 @@ jobs:
       GCP_SERVICE_KEY: /tmp/gcp-credentials.json
       R_KEEP_PKG_SOURCE: yes
       HADESEXTAS_TESTING_ENVIRONMENT: ${{ matrix.env_config.HADESEXTAS_TESTING_ENVIRONMENT }}
+      EUNOMIA_DATA_FOLDER: ${{ github.workspace }}/eunomia_data
 
     steps:
       - uses: actions/checkout@v4
