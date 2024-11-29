@@ -1,10 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   using_CDMHandler: using_CDMHandler.html
   using_CohortTableHandler: using_CohortTableHandler.html
   using_Matching_Subsets: using_Matching_Subsets.html
-  using_TimeCodeWAS: using_TimeCodeWAS.html
-last_built: 2024-04-09T07:28Z
-
+last_built: 2024-11-29T09:10Z
+urls:
+  reference: https://finngen.github.io/HadesExtras/reference
+  article: https://finngen.github.io/HadesExtras/articles

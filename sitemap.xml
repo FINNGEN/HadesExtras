@@ -1,183 +1,64 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/using_CDMHandler.html</loc>
-  </url>
-  <url>
-    <loc>/articles/using_CohortTableHandler.html</loc>
-  </url>
-  <url>
-    <loc>/articles/using_Matching_Subsets.html</loc>
-  </url>
-  <url>
-    <loc>/articles/using_TimeCodeWAS.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CDMdbHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortDiagnostics_mergeCsvResults.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortGenerator_MatchingSubsetOperator.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortGenerator_OperationSubsetOperator.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortGenerator_deleteCohortFromCohortTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortGenerator_generateCohortSet.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortGenerator_getCohortDemograpics.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortGenerator_getCohortsOverlaps.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CohortTableHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FeatureExtraction_createTemporalSourceCovariateSettings.html</loc>
-  </url>
-  <url>
-    <loc>/reference/HadesExtras-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/LogTibble.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ResultModelManager_createConnectionHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkCohortData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkCohortDefinitionTables.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkCohortsSummary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cohortDataToCohortDefinitionSet.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cohortTableToCohortDefinitionSettings.html</loc>
-  </url>
-  <url>
-    <loc>/reference/correctEmptyCohortsInCohortsSummary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createCDMdbHandlerFromList.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createCohortTableHandlerFromList.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createEmptyCohortData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createEmptyCohortsSummary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createMatchingSubset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createOperationSubset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/csvFilesToSqlite.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-.binaryTreeToSQL.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-addFisherTestToCodeCounts.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-assertCollectionCohortData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-assertCollectionCohortsSummary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-barStyle.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-buildInfoStr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-buildInfoToTooltipStr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-operationStringToBinaryTree.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-render_apex_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-sexTibbleToStr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-sexTibbleToTooltipStr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-tippyText.html</loc>
-  </url>
-  <url>
-    <loc>/reference/executeTimeCodeWAS.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getCohortDataFromCohortTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getCohortNamesFromCohortDefinitionTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/operationStringToSQL.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactable_connectionStatus.html</loc>
-  </url>
-  <url>
-    <loc>/reference/readCohortData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rectable_cohortsSummary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/splitString.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tmp_ConnectionHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tmp_dplyr_copy_to.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tmp_inDatabaseSchema.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://finngen.github.io/HadesExtras/404.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/LICENSE-text.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/LICENSE.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/articles/index.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/articles/using_CDMHandler.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/articles/using_CohortTableHandler.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/articles/using_Matching_Subsets.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/authors.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/index.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/news/index.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CDMdbHandler.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_MatchingSubsetOperator.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_OperationSubsetOperator.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_createCohortTables.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_deleteCohortFromCohortTable.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_dropCohortStatsTables.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_generateCohortSet.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_getCohortDemograpics.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_getCohortsOverlaps.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortTableHandler.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/FeatureExtraction_createTemporalCovariateSettingsFromList.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/FeatureExtraction_createTemporalSourceCovariateSettings.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/HadesExtras-package.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/LogTibble.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/YearOfBirth.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/checkCohortData.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/checkCohortDefinitionTables.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/checkCohortsSummary.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/cohortDataToCohortDefinitionSet.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/cohortTableToCohortDefinitionSettings.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/connectionHandlerFromList.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/correctEmptyCohortsInCohortsSummary.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/covariateData_YearOfBirth.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createCDMdbHandlerFromList.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createCohortTableHandlerFromList.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createEmptyCohortData.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createEmptyCohortsSummary.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createMatchingSubset.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createOperationSubset.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-.binaryTreeToSQL.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-assertCollectionCohortData.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-assertCollectionCohortsSummary.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-barStyle.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-buildInfoStr.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-buildInfoToTooltipStr.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-operationStringToBinaryTree.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-render_apex_plot.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-sexTibbleToStr.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-sexTibbleToTooltipStr.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-tippyText.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/getCohortDataFromCohortTable.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/getCohortNamesFromCohortDefinitionTable.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/getListOfAnalysis.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/index.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/operationStringToSQL.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/reactable_connectionStatus.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/readAndParseYaml.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/readCohortData.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/rectable_cohortsSummary.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/removeCohortIdsFromCohortOverlapsTable.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/splitString.html</loc></url>
 </urlset>
+
