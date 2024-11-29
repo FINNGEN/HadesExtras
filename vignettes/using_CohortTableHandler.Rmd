@@ -1,9 +1,10 @@
 ---
 title: "Using CohortTableHandler"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using CohortTableHandler}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---

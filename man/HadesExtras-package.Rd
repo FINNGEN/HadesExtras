@@ -12,6 +12,7 @@ Functions to complement Hades packages
 Useful links:
 \itemize{
   \item \url{https://github.com/FINNGEN/HadesExtras}
+  \item \url{https://finngen.github.io/HadesExtras/}
   \item Report bugs at \url{https://github.com/FINNGEN/HadesExtras/issues}
 }
 

@@ -1,9 +1,10 @@
 ---
 title: "Using Matching Subset"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using Matching Subset}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
