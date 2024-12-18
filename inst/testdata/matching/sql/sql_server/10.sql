@@ -17,5 +17,5 @@ FROM (
   ON p.person_id = op.person_id
   WHERE p.year_of_birth = 1970 AND p.gender_concept_id=8507 --M
   OR    p.year_of_birth = 1971 AND p.gender_concept_id=8532 --F
-)
+) AS foo
 WHERE row_num = 1;
