@@ -29,11 +29,13 @@ test_that("covariateData_YearOfBirth works", {
     subject_id = as.integer(subject_id)
   )
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    table = cohortTableName,
-    data = testTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      table = cohortTableName,
+      data = testTable
+    )
+  })
 
   covariateSettings <- covariateData_YearOfBirth()
 

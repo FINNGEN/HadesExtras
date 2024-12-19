@@ -115,11 +115,13 @@ testthat::test_that("test that operationStringToSQL works", {
     cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4)) |> as.Date()
   )
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    table = cohortTableName,
-    data = testTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      table = cohortTableName,
+      data = testTable
+    )
+  })
 
   # function
   sql <- operationStringToSQL("1Ip2")
@@ -172,11 +174,13 @@ testthat::test_that("test that operationStringToSQL works", {
     cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4))
   )
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    table = cohortTableName,
-    data = testTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      table = cohortTableName,
+      data = testTable
+    )
+  })
 
   # function
   sql <- operationStringToSQL("1Mp2")
@@ -234,11 +238,13 @@ testthat::test_that("test that operationStringToSQL works", {
     cohort_end_date = c(rep(as.Date("2000-12-01"), 4), rep(as.Date("2010-12-01"), 4), rep(as.Date("2020-12-01"), 4)) 
   )
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    table = cohortTableName,
-    data = testTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      table = cohortTableName,
+      data = testTable
+    )
+  })
 
   # function
   sql <- operationStringToSQL("1Ip2Mp3")
@@ -304,12 +310,13 @@ testthat::test_that("test that operationStringToSQL works", {
     subject_id = as.integer(subject_id)
   )
 
-
-  DatabaseConnector::insertTable(
-    connection = connection,
-    table = cohortTableName,
-    data = testTable
-  )
+  suppressWarnings({  
+    DatabaseConnector::insertTable(
+      connection = connection,
+      table = cohortTableName,
+      data = testTable
+    )
+  })
 
   # function
   sql <- operationStringToSQL("1Upd2")

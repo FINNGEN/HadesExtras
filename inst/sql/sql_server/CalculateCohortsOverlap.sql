@@ -6,7 +6,7 @@ SELECT
 FROM (
   SELECT
     subject_id,
-    STRING_AGG( CAST(CAST(cohort_definition_id AS INT) AS STRING), '-') AS cohort_id_combinations
+    STRING_AGG( CAST(CAST(cohort_definition_id AS INT) AS VARCHAR), '-') AS cohort_id_combinations
   FROM (
     SELECT DISTINCT
       cohort_definition_id,
@@ -14,8 +14,7 @@ FROM (
     FROM @cohort_database_schema.@cohort_table
     {@cohort_ids != ''}  ? {WHERE cohort_definition_id IN (@cohort_ids)}
     ORDER BY cohort_definition_id
-  )
+  ) AS ct
   GROUP BY subject_id
-)
+) AS ctc
 GROUP BY cohort_id_combinations
-

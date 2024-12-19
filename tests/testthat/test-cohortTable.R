@@ -17,12 +17,13 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
     3, "Obesity Cohort", "Cohort of patients diagnosed with obesity", 1234, 'SELECT * FROM patients WHERE diagnosis = "Obesity"', 5678, as.Date("2022-01-01")
   )
 
-
-  DatabaseConnector::insertTable(
-    connection = connection,
-    table = cohortTableName,
-    data = testCohortDefinitionTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      table = cohortTableName,
+      data = testCohortDefinitionTable
+    )
+  })
 
   cohortNames <- getCohortNamesFromCohortDefinitionTable(
     connection = connection,
@@ -67,11 +68,13 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
       subject_id = as.integer(subject_id)
     )
 
-  DatabaseConnector::insertTable(
-    connection = cohortTableHandler$connectionHandler$getConnection(),
-    table = cohortTableName,
-    data = testCohortTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = cohortTableHandler$connectionHandler$getConnection(),
+      table = cohortTableName,
+      data = testCohortTable
+    )
+  })
 
   testCohortDefinitionTable <- tibble::tribble(
     ~cohort_definition_id, ~cohort_definition_name, ~cohort_definition_description, ~definition_type_concept_id, ~cohort_definition_syntax, ~subject_concept_id, ~cohort_initiation_date,
@@ -121,11 +124,13 @@ test_that(" change cohort ids", {
       subject_id = as.integer(subject_id)
     )
 
-  DatabaseConnector::insertTable(
-    connection = cohortTableHandler$connectionHandler$getConnection(),
-    table = "cohort",
-    data = testCohortTable
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = cohortTableHandler$connectionHandler$getConnection(),
+      table = "cohort",
+      data = testCohortTable
+    )
+  })
 
   testCohortDefinitionTable <- tibble::tribble(
     ~cohort_definition_id, ~cohort_definition_name, ~cohort_definition_description, ~definition_type_concept_id, ~cohort_definition_syntax, ~subject_concept_id, ~cohort_initiation_date,
