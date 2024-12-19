@@ -4,10 +4,11 @@
 
 # Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Eunomia-GiBleed")
 # Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "AtlasDevelopment-DBI")
+# Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Broadsea")
 testingDatabase <- Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT")
 
 # check correct settings
-possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment", "AtlasDevelopment-DBI")
+possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment", "AtlasDevelopment-DBI", "Broadsea")
 if (!(testingDatabase %in% possibleDatabases)) {
   message("Please set a valid testing environment in envar HADESEXTAS_TESTING_ENVIRONMENT, from: ", paste(possibleDatabases, collapse = ", "))
   stop()
@@ -76,6 +77,35 @@ if (testingDatabase %in% c("AtlasDevelopment-DBI")) {
 
   test_databasesConfig <- readAndParseYaml(
     pathToYalmFile = testthat::test_path("config", "atlasDev_DBI_databasesConfig.yml")
+  )
+
+  test_cohortTableHandlerConfig <- test_databasesConfig[[1]]$cohortTableHandler
+}
+
+#
+# Broadsea Database
+#
+
+# DatabaseConnector::downloadJdbcDrivers(dbms = "postgresql")
+# connectionDetails <- DatabaseConnector::createConnectionDetails(dbms="postgresql", 
+#                                              server="localhost/postgres",
+#                                              user="postgres",
+#                                              password="mypass")
+# conn <- DatabaseConnector::connect(connectionDetails)
+# DatabaseConnector::querySql(conn,"SELECT COUNT(*) FROM demo_cdm.person")
+# dDatabaseConnector::disconnect(conn)
+#
+# ROhdsiWebApi::getCdmSources(baseUrl = "http://127.0.0.1/WebAPI")
+
+if (testingDatabase %in% c("Broadsea")) {
+  if ( Sys.getenv("DATABASECONNECTOR_JAR_FOLDER") == "") {
+    message("DATABASECONNECTOR_JAR_FOLDER not set. Please set this environment and download the JDBC drivers for postgres.")
+    message("DatabaseConnector::downloadJdbcDrivers(dbms = 'postgresql')")
+    stop()
+  }
+
+  test_databasesConfig <- HadesExtras::readAndParseYaml(
+    pathToYalmFile = testthat::test_path("config", "broadsea_databasesConfig.yml")
   )
 
   test_cohortTableHandlerConfig <- test_databasesConfig[[1]]$cohortTableHandler

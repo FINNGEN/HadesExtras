@@ -1,7 +1,9 @@
 test_that("createConnectionHandler works", {
   config <- test_cohortTableHandlerConfig
 
-  CDMdb <- createCDMdbHandlerFromList(config)
+  suppressWarnings({
+    CDMdb <- createCDMdbHandlerFromList(config)
+  })
 
   withr::defer({
     CDMdb$finalize()
