@@ -14,7 +14,7 @@ FROM (
     FROM @cohort_database_schema.@cohort_table
     {@cohort_ids != ''}  ? {WHERE cohort_definition_id IN (@cohort_ids)}
     ORDER BY cohort_definition_id
-  ) AS foo
+  ) AS ct
   GROUP BY subject_id
-) AS foo
+) AS ctc
 GROUP BY cohort_id_combinations
