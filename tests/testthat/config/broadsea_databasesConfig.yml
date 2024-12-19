@@ -1,0 +1,19 @@
+
+Eunomia:
+  cohortTableHandler:
+    database:
+      databaseId: Eunomia
+      databaseName: eunomia
+      databaseDescription: Eunomia database
+    connection:
+      connectionDetailsSettings:
+          dbms: postgresql
+          server: localhost/postgres
+          user: postgres
+          password: mypass
+    cdm:
+        cdmDatabaseSchema: demo_cdm
+        vocabularyDatabaseSchema: demo_cdm
+    cohortTable:
+        cohortDatabaseSchema: public
+        cohortTableName: hadesextras_test_cohort_table_<timestamp>

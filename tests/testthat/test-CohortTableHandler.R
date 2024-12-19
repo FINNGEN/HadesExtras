@@ -1,5 +1,7 @@
 test_that("CohortTableHandler creates object with correct params", {
+  suppressWarnings({
   cohortTableHandler <- helper_createNewCohortTableHandler(loadConnectionChecksLevel = "allChecks")
+  })
   withr::defer({
     rm(cohortTableHandler)
     gc()
@@ -343,3 +345,4 @@ test_that("CohortTableHandler$updateCohortNames crates shortName one is NA", {
     pull(shortName) |>
     expect_equal("C20")
 })
+

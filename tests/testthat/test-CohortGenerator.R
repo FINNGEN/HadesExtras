@@ -1,9 +1,7 @@
-
 #
-# CohortGenerator_createCohortTables        
+# CohortGenerator_createCohortTables
 #
 test_that("CohortGenerator_createCohortTables creates a cohort table", {
-
   testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
 
   connection <- helper_createNewConnection()
@@ -13,7 +11,7 @@ test_that("CohortGenerator_createCohortTables creates a cohort table", {
   })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- 'test_cohort2'
+  cohortTableName <- "test_cohort2"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -26,7 +24,7 @@ test_that("CohortGenerator_createCohortTables creates a cohort table", {
   bq_dataset <- strings[[1]][2]
 
   bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
-  bigrquery::bq_table_exists(bq_table) |> expect_true() 
+  bigrquery::bq_table_exists(bq_table) |> expect_true()
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -36,8 +34,7 @@ test_that("CohortGenerator_createCohortTables creates a cohort table", {
   )
 
   bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
-  bigrquery::bq_table_exists(bq_table) |> expect_true() 
-
+  bigrquery::bq_table_exists(bq_table) |> expect_true()
 })
 
 #
@@ -52,7 +49,7 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -113,7 +110,7 @@ test_that("cohortDataToCohortDefinitionSet works", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -121,7 +118,7 @@ test_that("cohortDataToCohortDefinitionSet works", {
     cohortTableNames = getCohortTableNames(cohortTableName)
   )
 
-  # test paramssd 
+  # test paramssd
   sourcePersonToPersonId <- helper_getParedSourcePersonAndPersonIds(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -148,7 +145,7 @@ test_that("cohortDataToCohortDefinitionSet works", {
     cohortTableNames = getCohortTableNames(cohortTableName),
     incremental = FALSE
   )
-  
+
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
   cohortGeneratorResults |>
@@ -171,7 +168,7 @@ test_that("cohortDataToCohortDefinitionSet reports missing source person id", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -229,7 +226,7 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_start_date", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -288,7 +285,7 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_end_date", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -348,7 +345,7 @@ test_that("cohortDataToCohortDefinitionSet also works from imported files", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -428,7 +425,7 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -521,7 +518,7 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   # test params
   cohort_data <- tibble::tibble(
@@ -531,12 +528,14 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
     cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
   )
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    databaseSchema = cohortDatabaseSchema,
-    tableName = cohortTableName,
-    data = cohort_data
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = cohort_data
+    )
+  })
 
   # function
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
@@ -588,7 +587,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   # test params
   cohort_data <- tibble::tibble(
@@ -597,13 +596,14 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
     cohort_start_date = rep(as.Date(c("2020-01-01", "2020-01-01")), 5),
     cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
   )
-
-  DatabaseConnector::insertTable(
-    connection = connection,
-    databaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
-    tableName = cohortTableName,
-    data = cohort_data
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      databaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = cohort_data
+    )
+  })
 
   # function
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
@@ -649,7 +649,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   # test params
   cohort_data <- tibble::tibble(
@@ -659,12 +659,14 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
     cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
   )
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    databaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
-    tableName = cohortTableName,
-    data = cohort_data
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      databaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = cohort_data
+    )
+  })
 
   # function
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
@@ -718,7 +720,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- "test_cohort"
 
   # test params
   cohort_data <- tibble::tibble(
@@ -728,12 +730,14 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
     cohort_end_date = rep(as.Date(c("2020-01-03")), 15)
   ) |> dplyr::sample_n(15)
 
-  DatabaseConnector::insertTable(
-    connection = connection,
-    databaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
-    tableName = cohortTableName,
-    data = cohort_data
-  )
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      databaseSchema = test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = cohort_data
+    )
+  })
 
   # function
   cohortOverlaps <- CohortGenerator_getCohortsOverlaps(
@@ -816,7 +820,6 @@ test_that("removeCohortIdsFromCohortOverlapsTable works", {
 # CohortGenerator_dropCohortStatsTables
 #
 test_that("CohortGenerator_dropCohortStatsTables works", {
-  
   testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
 
   connection <- helper_createNewConnection()
@@ -826,7 +829,7 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
   })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- 'test_cohort2'
+  cohortTableName <- "test_cohort2"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -839,7 +842,7 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
   bq_dataset <- strings[[1]][2]
 
   bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
-  bigrquery::bq_table_exists(bq_table) |> expect_true() 
+  bigrquery::bq_table_exists(bq_table) |> expect_true()
 
   CohortGenerator_dropCohortStatsTables(
     connection = connection,
@@ -848,5 +851,5 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
   )
 
   bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
-  bigrquery::bq_table_exists(bq_table) |> expect_false() 
+  bigrquery::bq_table_exists(bq_table) |> expect_false()
 })

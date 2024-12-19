@@ -9,7 +9,7 @@ SELECT
 	COUNT(*) AS cohort_count
 FROM (
 	SELECT *
-	FROM @cohort_database_schema.@cohort_table
+	FROM @cohort_database_schema.@cohort_table AS cohort_table
 	WHERE cohort_definition_id IN (@cohort_ids)
 	) cohort
 INNER JOIN @cdm_database_schema.person

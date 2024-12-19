@@ -27,8 +27,8 @@ operationStringToSQL <- function(operationString) {
     "  ROW_NUMBER() OVER (PARTITION BY subject_id, cohort_start_date, cohort_end_date)  repeated\n",
     "  FROM(\n",
     res$sql,
-    "  )\n",
-    ")\n",
+    "  ) AS foo\n",
+    ") AS foo\n",
     "WHERE repeated = 1\n"
   )
 
@@ -64,7 +64,7 @@ operationStringToSQL <- function(operationString) {
   if (is.numeric(binaryTree)) {
     sql <- paste0(
       tabs, "-- ", position, "\n",
-      tabs, "SELECT subject_id, cohort_start_date, cohort_end_date FROM @cohort_database_schema.@cohort_table WHERE cohort_definition_id = ", binaryTree, "\n"
+      tabs, "SELECT subject_id, cohort_start_date, cohort_end_date FROM @cohort_database_schema.@cohort_table AS foo WHERE cohort_definition_id = ", binaryTree, "\n"
     )
     return(list(
       sql = sql,
@@ -95,7 +95,7 @@ operationStringToSQL <- function(operationString) {
       left$sql,
       tabs, "UNION ALL\n",
       right$sql,
-      tabs, ")\n",
+      tabs, ") AS foo\n",
       tabs, "GROUP BY subject_id \n"
     )
   } else if (binaryTree$operation == "Ip") {
