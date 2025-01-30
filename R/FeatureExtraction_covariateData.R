@@ -109,9 +109,6 @@ YearOfBirth <- function(
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 
-
-
-
   return(result)
 }
 
@@ -132,5 +129,136 @@ YearOfBirth <- function(
     p75Value = quants[5],
     p90Value = quants[6]
   )
+  return(result)
+}
+
+
+#
+# ATC groups 
+#
+
+#' covariateData_ATCgroups
+#'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
+#'
+#' @export
+#'
+covariateData_ATCgroups <- function(
+  temporalStartDays = -99999,
+  temporalEndDays = 99999
+) {
+  covariateSettings <- list(
+    temporal = TRUE,
+    temporalSequence = FALSE,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays = temporalEndDays
+  )
+  attr(covariateSettings, "fun") <- "ATCgroups"
+  class(covariateSettings) <- "covariateSettings"
+  return(covariateSettings)
+}
+
+#' ATCgroups
+#'
+#' @param connection A database connection object created using \code{DatabaseConnector::connect}.
+#' @param tempEmulationSchema The temp schema where the covariate tables will be created.
+#' @param cdmDatabaseSchema The schema where the cdm tables are located.
+#' @param cdmVersion The version of the cdm.
+#' @param cohortTable The table where the cohort data is located.
+#' @param cohortIds The cohort ids to include.
+#' @param rowIdField The field in the cohort table that is the row id.
+#' @param covariateSettings A list of settings for the covariate data.
+#' @param aggregated Logical. If TRUE, the covariate data is aggregated.
+#' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
+#' @importFrom dplyr select mutate
+#' @importFrom tidyr nest unnest
+#' @importFrom purrr map
+#' @importFrom Andromeda andromeda
+#'
+#' @export
+#'
+ATCgroups <- function(
+    connection,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    cdmDatabaseSchema,
+    cdmVersion = "5",
+    cohortTable = "#cohort_person",
+    cohortIds = c(-1),
+    rowIdField = "subject_id",
+    covariateSettings,
+    aggregated = FALSE,
+    minCharacterizationMean = 0) {
+  writeLines("Constructing ATCgroups covariate")
+
+  # Some SQL to construct the covariate:
+  sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+
+  sql <- SqlRender::render(sql,
+    cdm_database_schema = cdmDatabaseSchema,
+    domain_table = "drug_exposure",
+    domain_start_date = "drug_exposure_start_date",
+    domain_end_date = "drug_exposure_end_date",
+    domain_concept_id = "Drug",
+    analysis_id = 341,
+    aggregated = aggregated,
+    start_day = covariateSettings$temporalStartDays,
+    end_day = covariateSettings$temporalEndDays, 
+    row_id_field = 'subject_id',
+    cohort_definition_id = paste0(cohortIds, collapse = ','),
+    analysis_name = 'ATCgroups',
+    domain_id = 'Drug',
+    cohort_table = cohortTable
+  )
+  sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
+
+  browser()
+  # Retrieve the covariate:
+  DatabaseConnector::executeSql(connection, sql)
+
+
+
+  # Construct covariate reference:
+  covariateRef <- data.frame(
+    covariateId = 1341,
+    covariateName = "ATC groups",
+    analysisId = 341,
+    conceptId = 0
+  )
+
+  # Construct analysis reference:
+  analysisRef <- data.frame(
+    analysisId = 42,
+    analysisName = "ATCgroups",
+    domainId = "Drug",
+    isBinary = "N",
+    missingMeansZero = "Y"
+  )
+
+  # Construct analysis reference:
+  metaData <- list(sql = sql, call = match.call())
+  if (!aggregated) {
+    result <- Andromeda::andromeda(
+      covariates = covariates |> dplyr::select(-cohortDefinitionId),
+      covariateRef = covariateRef,
+      analysisRef = analysisRef
+    )
+  } else {
+    result <- Andromeda::andromeda(
+      covariates = tibble::tibble(covariateId = NA_real_, sumValue = NA_integer_, averageValue = NA_integer_, .rows = 0),
+      covariateRef = covariateRef,
+      analysisRef = analysisRef,
+      covariatesContinuous = covariates |>
+        tidyr::nest(data = -cohortDefinitionId) |>
+        dplyr::mutate(data = purrr::map(data, .computeStats)) |>
+        tidyr::unnest(data)
+    )
+  }
+  attr(result, "metaData") <- metaData
+  class(result) <- "CovariateData"
+
   return(result)
 }
