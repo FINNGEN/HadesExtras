@@ -155,6 +155,11 @@ FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
   if ("YearOfBirth" %in% selectedAnalysis$analysisName) {
     listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_YearOfBirth()
   }
+ 
+  if ("ATCgroups" %in% selectedAnalysis$analysisName) {
+  
+    listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_ATCgroups()
+  }
 
 
 
