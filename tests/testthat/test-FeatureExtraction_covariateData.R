@@ -93,9 +93,6 @@ test_that("covariateData_YearOfBirth works", {
 })
 
 
-
-
-
 test_that("covariateData_ATCgroups works", {
   connection <- helper_createNewConnection()
   withr::defer({
@@ -155,9 +152,10 @@ test_that("covariateData_ATCgroups works", {
   covariate_control$covariateRef |>
     dplyr::collect() |>
     names() |>
-    expect_equal(c("covariateId", "covariateName", "analysisId",  "conceptId"))
+    expect_equal(c("covariateId", "covariateName", "analysisId", "conceptId"))
   covariate_control$analysisRef |>
     dplyr::collect() |>
     names() |>
     expect_equal(c("analysisId", "analysisName", "domainId", "isBinary", "missingMeansZero"))
 })
+

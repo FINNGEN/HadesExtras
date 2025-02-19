@@ -156,10 +156,11 @@ test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all
     aggregated = TRUE, 
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
   )
-
+  covariateData$covariates 
   covariateData$analysisRef |>
     dplyr::collect() |> 
     dplyr::pull(analysisId) |>
     setdiff(analysisIds)  |> 
     expect_length(0)
 })
+

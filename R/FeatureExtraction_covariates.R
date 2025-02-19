@@ -165,3 +165,4 @@ FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
 
   return(listOfCovariateSetings)
 }
+

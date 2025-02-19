@@ -5,10 +5,11 @@
 # Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Eunomia-GiBleed")
 # Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "AtlasDevelopment-DBI")
 # Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Broadsea")
+# Sys.setenv(HADESEXTAS_TESTING_ENVIRONMENT = "Eunomia-FinnGen")
 testingDatabase <- Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT")
 
 # check correct settings
-possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment", "AtlasDevelopment-DBI", "Broadsea")
+possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "AtlasDevelopment", "AtlasDevelopment-DBI", "Broadsea", "Eunomia-FinnGen")
 if (!(testingDatabase %in% possibleDatabases)) {
   message("Please set a valid testing environment in envar HADESEXTAS_TESTING_ENVIRONMENT, from: ", paste(possibleDatabases, collapse = ", "))
   stop()
@@ -29,7 +30,8 @@ if (testingDatabase |> stringr::str_starts("Eunomia")) {
   test_databasesConfig <- readAndParseYaml(
     pathToYalmFile = testthat::test_path("config", "eunomia_databasesConfig.yml"),
     pathToGiBleedEunomiaSqlite = pathToGiBleedEunomiaSqlite,
-    pathToMIMICEunomiaSqlite = pathToMIMICEunomiaSqlite
+    pathToMIMICEunomiaSqlite = pathToMIMICEunomiaSqlite,
+    pathToFinnGenEunomiaSqlite = helper_FinnGen_getDatabaseFile()
   )
 
   if (testingDatabase |> stringr::str_ends("GiBleed")) {
@@ -37,6 +39,9 @@ if (testingDatabase |> stringr::str_starts("Eunomia")) {
   }
   if (testingDatabase |> stringr::str_ends("MIMIC")) {
     test_cohortTableHandlerConfig <- test_databasesConfig[[2]]$cohortTableHandle
+  }
+  if (testingDatabase |> stringr::str_ends("FinnGen")) {
+    test_cohortTableHandlerConfig <- test_databasesConfig[[4]]$cohortTableHandle
   }
 }
 

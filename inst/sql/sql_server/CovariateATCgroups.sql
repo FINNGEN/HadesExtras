@@ -84,29 +84,18 @@ GROUP BY cohort_definition_id,
     ,time_id
 }
 ;
+
 TRUNCATE TABLE #atc_groups;
 DROP TABLE #atc_groups;
 TRUNCATE TABLE #atc_time_period;
 DROP TABLE #atc_time_period;
 
--- Reference construction
-CREATE TABLE #atc_covariate_ref (
-	covariate_id BIGINT,
-	covariate_name VARCHAR(512),
-	analysis_id INT,
-	concept_id INT
-);
-
-INSERT INTO #atc_covariate_ref (
-	covariate_id,
-	covariate_name,
-	analysis_id,
-	concept_id
-	)
+-- Reference constructiond
 SELECT covariate_id,
 	CAST(CONCAT('@domain_table ATC group: ', CASE WHEN concept_name IS NULL THEN 'Unknown concept' ELSE concept_name END) AS VARCHAR(512)) AS covariate_name,
 	@analysis_id AS analysis_id,
 	CAST((covariate_id - @analysis_id) / 1000 AS INT) AS concept_id
+INTO #atc_covariate_ref
 FROM (
 	SELECT DISTINCT covariate_id
 	FROM #atc_covariate_table
