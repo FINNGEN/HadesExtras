@@ -134,7 +134,7 @@ YearOfBirth <- function(
 
 
 #
-# ATC groups 
+# ATC groups
 #
 
 #' covariateData_ATCgroups
@@ -145,9 +145,8 @@ YearOfBirth <- function(
 #' @export
 #'
 covariateData_ATCgroups <- function(
-  temporalStartDays = -99999,
-  temporalEndDays = 99999
-) {
+    temporalStartDays = -99999,
+    temporalEndDays = 99999) {
   covariateSettings <- list(
     temporal = TRUE,
     temporalSequence = FALSE,
@@ -197,41 +196,35 @@ ATCgroups <- function(
   # Some SQL to construct the covariate:
   sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
 
+  ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
+
   sql <- SqlRender::render(sql,
     cdm_database_schema = cdmDatabaseSchema,
     domain_table = "drug_exposure",
     domain_start_date = "drug_exposure_start_date",
     domain_end_date = "drug_exposure_end_date",
-    domain_concept_id = "Drug",
+    domain_concept_id = "drug_concept_id",
     analysis_id = 341,
     aggregated = aggregated,
-    start_day = covariateSettings$temporalStartDays,
-    end_day = covariateSettings$temporalEndDays, 
-    row_id_field = 'subject_id',
-    cohort_definition_id = paste0(cohortIds, collapse = ','),
-    analysis_name = 'ATCgroups',
-    domain_id = 'Drug',
+    atc_time_period_values = ATCTimePeriodsValuesStr,
+    row_id_field = "subject_id",
+    cohort_definition_id = paste0(cohortIds, collapse = ","),
     cohort_table = cohortTable
   )
   sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
 
-  browser()
   # Retrieve the covariate:
   DatabaseConnector::executeSql(connection, sql)
 
-
-
   # Construct covariate reference:
-  covariateRef <- data.frame(
-    covariateId = 1341,
-    covariateName = "ATC groups",
-    analysisId = 341,
-    conceptId = 0
-  )
+  covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
+  SqlRender::snakeCaseToCamelCaseNames()
+  covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
+  SqlRender::snakeCaseToCamelCaseNames()
 
   # Construct analysis reference:
   analysisRef <- data.frame(
-    analysisId = 42,
+    analysisId = 341,
     analysisName = "ATCgroups",
     domainId = "Drug",
     isBinary = "N",
@@ -240,23 +233,13 @@ ATCgroups <- function(
 
   # Construct analysis reference:
   metaData <- list(sql = sql, call = match.call())
-  if (!aggregated) {
-    result <- Andromeda::andromeda(
-      covariates = covariates |> dplyr::select(-cohortDefinitionId),
-      covariateRef = covariateRef,
-      analysisRef = analysisRef
-    )
-  } else {
-    result <- Andromeda::andromeda(
-      covariates = tibble::tibble(covariateId = NA_real_, sumValue = NA_integer_, averageValue = NA_integer_, .rows = 0),
-      covariateRef = covariateRef,
-      analysisRef = analysisRef,
-      covariatesContinuous = covariates |>
-        tidyr::nest(data = -cohortDefinitionId) |>
-        dplyr::mutate(data = purrr::map(data, .computeStats)) |>
-        tidyr::unnest(data)
-    )
-  }
+
+  result <- Andromeda::andromeda(
+    covariates = covariates,
+    covariateRef = covariateRef,
+    analysisRef = analysisRef
+  )
+
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 

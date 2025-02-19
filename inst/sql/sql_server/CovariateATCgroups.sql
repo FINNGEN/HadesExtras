@@ -2,12 +2,25 @@
 -- Modified from FeatureExtraction 
 -- https://github.com/OHDSI/FeatureExtraction/blob/main/inst/sql/sql_server/DomainConceptGroup.sql
 
-IF OBJECT_ID('tempdb..#groups', 'U') IS NOT NULL
-	DROP TABLE #groups;
+IF OBJECT_ID('tempdb..#atc_groups', 'U') IS NOT NULL
+	DROP TABLE #atc_groups;
 
+IF OBJECT_ID('tempdb..#atc_time_period', 'U') IS NOT NULL
+	DROP TABLE #atc_time_period;
+
+IF OBJECT_ID('tempdb..#atc_covariate_table', 'U') IS NOT NULL
+	DROP TABLE #atc_covariate_table;
+
+IF OBJECT_ID('tempdb..#atc_covariate_ref', 'U') IS NOT NULL
+	DROP TABLE #atc_covariate_ref;
+
+IF OBJECT_ID('tempdb..#atc_analysis_ref', 'U') IS NOT NULL
+	DROP TABLE #atc_analysis_ref;
+
+-- atc_groups construction
 SELECT DISTINCT descendant_concept_id,
   ancestor_concept_id
-INTO #groups
+INTO #atc_groups
 FROM @cdm_database_schema.concept_ancestor
 INNER JOIN @cdm_database_schema.concept
 	ON ancestor_concept_id = concept_id
@@ -16,19 +29,20 @@ WHERE vocabulary_id = 'ATC'
 	AND concept_id != 0
 ;
 
--- time_period construction
-CREATE TABLE #time_period (
+-- atc_time_period construction
+CREATE TABLE #atc_time_period (
+	time_id INT,
 	start_day INT,
 	end_day INT
 );
-INSERT INTO #time_period (
+INSERT INTO #atc_time_period (
+	time_id,
 	start_day,
 	end_day
 )
-VALUES (
-	@start_day,
-	@end_day
-);
+VALUES 
+	@atc_time_period_values
+;
 
 -- Feature construction
 SELECT 
@@ -41,7 +55,7 @@ SELECT
 	row_id,
 	1 AS covariate_value 
 }
-INTO #covariate_table
+INTO #atc_covariate_table
 FROM (
 	SELECT DISTINCT ancestor_concept_id,
 		time_id,
@@ -55,9 +69,9 @@ FROM (
 	FROM @cohort_table cohort
 	INNER JOIN @cdm_database_schema.@domain_table
 		ON cohort.subject_id = @domain_table.person_id
-	INNER JOIN #groups
+	INNER JOIN #atc_groups
 		ON @domain_concept_id = descendant_concept_id
-	INNER JOIN #time_period time_period
+	INNER JOIN #atc_time_period time_period
 		ON @domain_start_date <= DATEADD(DAY, time_period.end_day, cohort.cohort_start_date)
 		AND @domain_end_date >= DATEADD(DAY, time_period.start_day, cohort.cohort_start_date)
 	WHERE @domain_concept_id != 0
@@ -70,39 +84,37 @@ GROUP BY cohort_definition_id,
     ,time_id
 }
 ;
-TRUNCATE TABLE #groups;
-
-DROP TABLE #groups;
+TRUNCATE TABLE #atc_groups;
+DROP TABLE #atc_groups;
+TRUNCATE TABLE #atc_time_period;
+DROP TABLE #atc_time_period;
 
 -- Reference construction
-INSERT INTO #cov_ref (
+CREATE TABLE #atc_covariate_ref (
+	covariate_id BIGINT,
+	covariate_name VARCHAR(512),
+	analysis_id INT,
+	concept_id INT
+);
+
+INSERT INTO #atc_covariate_ref (
 	covariate_id,
 	covariate_name,
 	analysis_id,
 	concept_id
 	)
 SELECT covariate_id,
-	CAST(CONCAT('@domain_table group: ', CASE WHEN concept_name IS NULL THEN 'Unknown concept' ELSE concept_name END) AS VARCHAR(512)) AS covariate_name,
+	CAST(CONCAT('@domain_table ATC group: ', CASE WHEN concept_name IS NULL THEN 'Unknown concept' ELSE concept_name END) AS VARCHAR(512)) AS covariate_name,
 	@analysis_id AS analysis_id,
 	CAST((covariate_id - @analysis_id) / 1000 AS INT) AS concept_id
 FROM (
 	SELECT DISTINCT covariate_id
-	FROM #covariate_table
+	FROM #atc_covariate_table
 	) t1
 LEFT JOIN @cdm_database_schema.concept
 	ON concept_id = CAST((covariate_id - @analysis_id) / 1000 AS INT);
-	
-INSERT INTO #analysis_ref (
-	analysis_id,
-	analysis_name,
-	domain_id,
-	start_day,
-	end_day,
-	is_binary,
-	missing_means_zero
-	)
-SELECT @analysis_id AS analysis_id,
-	CAST('@analysis_name' AS VARCHAR(512)) AS analysis_name,
-	CAST('@domain_id' AS VARCHAR(20)) AS domain_id,
-	CAST('Y' AS VARCHAR(1)) AS is_binary,
-	CAST(NULL AS VARCHAR(1)) AS missing_means_zero;	
+
+
+
+
+

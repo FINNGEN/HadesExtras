@@ -147,45 +147,17 @@ test_that("covariateData_ATCgroups works", {
     aggregated = FALSE
   )
 
-  yearOfBirthValues <- covariate_control$covariates |> dplyr::pull(covariateValue)
-  expect_true(all(yearOfBirthValues >= 1900 & yearOfBirthValues < 2000))
+
   covariate_control$covariates |>
     dplyr::collect() |>
     names() |>
-    expect_equal(c("rowId", "covariateId", "covariateValue"))
-  covariate_control$covariates |>
-    dplyr::collect() |>
-    dplyr::distinct(covariateId) |>
-    dplyr::pull(covariateId) |>
-    expect_equal(1041)
-
-  # aggregated data
-  covariateSettings <- covariateData_YearOfBirth()
-
-  covariate_control <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    cohortTable = cohortTableName,
-    cohortDatabaseSchema = cohortDatabaseSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    covariateSettings = covariateSettings,
-    cohortIds = 1,
-    aggregated = TRUE
-  )
-
-  covariate_control$covariates |>
-    dplyr::collect() |>
-    nrow() |>
-    expect_equal(0)
-  covariate_control$covariatesContinuous |>
-    dplyr::collect() |>
-    nrow() |>
-    expect_equal(1)
-  covariate_control$covariatesContinuous |>
+    expect_equal(c("covariateId", "timeId", "rowId", "covariateValue"))
+  covariate_control$covariateRef |>
     dplyr::collect() |>
     names() |>
-    expect_equal(c("cohortDefinitionId", "covariateId", "countValue", "minValue", "maxValue", "averageValue", "standardDeviation", "medianValue", "p10Value", "p25Value", "p75Value", "p90Value"))
-  covariate_control$covariatesContinuous |>
+    expect_equal(c("covariateId", "covariateName", "analysisId",  "conceptId"))
+  covariate_control$analysisRef |>
     dplyr::collect() |>
-    dplyr::pull(covariateId) |>
-    expect_equal(1041)
+    names() |>
+    expect_equal(c("analysisId", "analysisName", "domainId", "isBinary", "missingMeansZero"))
 })
