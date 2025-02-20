@@ -29,6 +29,7 @@ analysisId,analysisName,domainId,isBinary,isStandard,isSourceConcept
 641,DeviceExposureSourceConcept,Device,TRUE,FALSE,TRUE
 301,DrugExposure,Drug,TRUE,TRUE,FALSE
 341,DrugExposureSourceConcept,Drug,TRUE,FALSE,TRUE
+342,ATCgroups,Drug,TRUE,FALSE,FALSE
 401,DrugEraStart,Drug,TRUE,TRUE,FALSE
 402,DrugEraOverlap,Drug,TRUE,TRUE,FALSE
 403,DrugEraGroupStart,Drug,TRUE,TRUE,FALSE
