@@ -153,7 +153,7 @@ covariateData_ATCgroups <- function(
     temporalStartDays = temporalStartDays,
     temporalEndDays = temporalEndDays
   )
-  attr(covariateSettings, "fun") <- "ATCgroups"
+  attr(covariateSettings, "fun") <- "HadesExtras::ATCgroups"
   class(covariateSettings) <- "covariateSettings"
   return(covariateSettings)
 }
