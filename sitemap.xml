@@ -9,6 +9,7 @@
 <url><loc>https://finngen.github.io/HadesExtras/authors.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/index.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/news/index.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/ATCgroups.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CDMdbHandler.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_MatchingSubsetOperator.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_OperationSubsetOperator.html</loc></url>
@@ -31,6 +32,7 @@
 <url><loc>https://finngen.github.io/HadesExtras/reference/cohortTableToCohortDefinitionSettings.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/connectionHandlerFromList.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/correctEmptyCohortsInCohortsSummary.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/covariateData_ATCgroups.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/covariateData_YearOfBirth.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/createCDMdbHandlerFromList.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/createCohortTableHandlerFromList.html</loc></url>
