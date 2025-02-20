@@ -49,7 +49,12 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
   result[[1]]$temporalEndDays |> expect_equal(temporalEndDays)
 })
 
-test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with custom", {
+
+#
+# custom covariate settings
+#
+
+test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with custom YearOfBirth", {
   analysisIds <- c(41)
   temporalStartDays <- c(1, 2, 3)
   temporalEndDays <- c(4, 5, 6)
@@ -66,6 +71,23 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
     expect_equal("HadesExtras::YearOfBirth")
 })
 
+test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with custom ATCgroups", {
+  analysisIds <- c(342)
+  temporalStartDays <- c(1, 2, 3)
+  temporalEndDays <- c(4, 5, 6)
+
+  result <- FeatureExtraction_createTemporalCovariateSettingsFromList(analysisIds, temporalStartDays, temporalEndDays)
+
+  result |>
+    length() |>
+    expect_equal(1)
+
+
+  result[[1]] |>
+    attr("fun") |>
+    expect_equal("HadesExtras::ATCgroups")
+})
+
 test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with atribute", {
   analysisIds <- c(141)
   temporalStartDays <- c(1, 2, 3)
@@ -79,6 +101,10 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
 
   result[[1]]$analyses[[1]]$analysisId |> expect_equal(141)
 })
+
+#
+# all are computed
+#
 
 test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all covariates", {
   skip_if(testingDatabase == "AtlasDevelopment-DBI")
@@ -130,10 +156,11 @@ test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all
     aggregated = TRUE, 
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
   )
-
+  covariateData$covariates 
   covariateData$analysisRef |>
     dplyr::collect() |> 
     dplyr::pull(analysisId) |>
     setdiff(analysisIds)  |> 
     expect_length(0)
 })
+

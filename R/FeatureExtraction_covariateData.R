@@ -109,9 +109,6 @@ YearOfBirth <- function(
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 
-
-
-
   return(result)
 }
 
@@ -132,5 +129,125 @@ YearOfBirth <- function(
     p75Value = quants[5],
     p90Value = quants[6]
   )
+  return(result)
+}
+
+
+#
+# ATC groups
+#
+
+#' covariateData_ATCgroups
+#'
+#' @description Creates covariate settings for ATC drug groups
+#' @param temporalStartDays Start day relative to index (-99999 by default)
+#' @param temporalEndDays End day relative to index (99999 by default)
+#' 
+#' @return A covariate settings object for ATC drug groups
+#' 
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
+#'
+#' @export
+#'
+covariateData_ATCgroups <- function(
+    temporalStartDays = -99999,
+    temporalEndDays = 99999) {
+  covariateSettings <- list(
+    temporal = TRUE,
+    temporalSequence = FALSE,
+    temporalStartDays = temporalStartDays,
+    temporalEndDays = temporalEndDays
+  )
+  attr(covariateSettings, "fun") <- "HadesExtras::ATCgroups"
+  class(covariateSettings) <- "covariateSettings"
+  return(covariateSettings)
+}
+
+#' ATCgroups
+#'
+#' @param connection A database connection object created using \code{DatabaseConnector::connect}.
+#' @param tempEmulationSchema The temp schema where the covariate tables will be created.
+#' @param cdmDatabaseSchema The schema where the cdm tables are located.
+#' @param cdmVersion The version of the cdm.
+#' @param cohortTable The table where the cohort data is located.
+#' @param cohortIds The cohort ids to include.
+#' @param rowIdField The field in the cohort table that is the row id.
+#' @param covariateSettings A list of settings for the covariate data.
+#' @param aggregated Logical. If TRUE, the covariate data is aggregated.
+#' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#'
+#' @importFrom DatabaseConnector querySql
+#' @importFrom SqlRender render translate
+#' @importFrom dplyr select mutate
+#' @importFrom tidyr nest unnest
+#' @importFrom purrr map
+#' @importFrom Andromeda andromeda
+#'
+#' @export
+#'
+ATCgroups <- function(
+    connection,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    cdmDatabaseSchema,
+    cdmVersion = "5",
+    cohortTable = "#cohort_person",
+    cohortIds = c(-1),
+    rowIdField = "subject_id",
+    covariateSettings,
+    aggregated = FALSE,
+    minCharacterizationMean = 0) {
+  writeLines("Constructing ATCgroups covariate")
+
+  # Some SQL to construct the covariate:
+  sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+
+  ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
+
+  sql <- SqlRender::render(sql,
+    cdm_database_schema = cdmDatabaseSchema,
+    domain_table = "drug_era",
+    domain_start_date = "drug_era_start_date",
+    domain_end_date = "drug_era_end_date",
+    domain_concept_id = "drug_concept_id",
+    analysis_id = 341,
+    aggregated = aggregated,
+    atc_time_period_values = ATCTimePeriodsValuesStr,
+    row_id_field = "subject_id",
+    cohort_definition_id = paste0(cohortIds, collapse = ","),
+    cohort_table = cohortTable
+  )
+  sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
+
+  # Retrieve the covariate:
+  DatabaseConnector::executeSql(connection, sql)
+
+  # Construct covariate reference:
+  covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
+  SqlRender::snakeCaseToCamelCaseNames()
+  covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
+  SqlRender::snakeCaseToCamelCaseNames()
+
+  # Construct analysis reference:
+  analysisRef <- data.frame(
+    analysisId = 341,
+    analysisName = "ATCgroups",
+    domainId = "Drug",
+    isBinary = "N",
+    missingMeansZero = "Y"
+  )
+
+  # Construct analysis reference:
+  metaData <- list(sql = sql, call = match.call())
+
+  result <- Andromeda::andromeda(
+    covariates = covariates,
+    covariateRef = covariateRef,
+    analysisRef = analysisRef
+  )
+
+  attr(result, "metaData") <- metaData
+  class(result) <- "CovariateData"
+
   return(result)
 }
