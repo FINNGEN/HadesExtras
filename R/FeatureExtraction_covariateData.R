@@ -139,6 +139,12 @@ YearOfBirth <- function(
 
 #' covariateData_ATCgroups
 #'
+#' @description Creates covariate settings for ATC drug groups
+#' @param temporalStartDays Start day relative to index (-99999 by default)
+#' @param temporalEndDays End day relative to index (99999 by default)
+#' 
+#' @return A covariate settings object for ATC drug groups
+#' 
 #' @importFrom DatabaseConnector querySql
 #' @importFrom SqlRender render translate
 #'
