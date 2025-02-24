@@ -301,13 +301,13 @@ CohortTableHandler <- R6::R6Class(
       )
 
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
-        dplyr::filter(cohortId != cohortIds)
+        dplyr::filter(!(cohortId %in% cohortIds))
 
       private$.cohortGeneratorResults <- private$.cohortGeneratorResults |>
-        dplyr::filter(cohortId != cohortIds)
+        dplyr::filter(!(cohortId %in% cohortIds))
 
       private$.cohortDemograpics <- private$.cohortDemograpics |>
-        dplyr::filter(cohortId != cohortIds)
+        dplyr::filter(!(cohortId %in% cohortIds))
 
       private$.cohortsOverlap <- private$.cohortsOverlap |>
         removeCohortIdsFromCohortOverlapsTable(cohortIds)

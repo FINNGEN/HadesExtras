@@ -244,6 +244,41 @@ test_that("CohortTableHandler$deleteCohorts deletes a cohort and cohortsSummary"
 })
 
 
+test_that("CohortTableHandler$deleteCohorts deletes more thatn one cohort and cohortsSummary", {
+  cohortTableHandler <- helper_createNewCohortTableHandler()
+  withr::defer({
+    rm(cohortTableHandler)
+    gc()
+  })
+
+  cohortDefinitionSet <- tibble::tibble(
+    cohortId = c(10, 20),
+    cohortName = c("cohort1", "cohort2"),
+    sql = "DELETE FROM @target_database_schema.@target_cohort_table where cohort_definition_id = @target_cohort_id;
+    INSERT INTO @target_database_schema.@target_cohort_table (cohort_definition_id, subject_id, cohort_start_date, cohort_end_date)
+    VALUES (@target_cohort_id, 1, CAST('20000101' AS DATE), CAST('20220101' AS DATE)  );",
+    json = ""
+  )
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
+
+  cohortTableHandler$getCohortsSummary() |>
+    checkCohortsSummary() |>
+    expect_true()
+  cohortTableHandler$getCohortsSummary()$cohortId |> expect_equal(c(10, 20))
+  cohortTableHandler$cohortDefinitionSet$cohortId |> expect_equal(c(10, 20))
+  cohortTableHandler$cohortGeneratorResults$cohortId |> expect_equal(c(10, 20))
+  cohortTableHandler$cohortDemograpics$cohortId |> expect_equal(c(10, 20))
+  cohortTableHandler$getCohortsOverlap()$cohortIdCombinations |> expect_equal(c("-10-20-"))
+
+  cohortTableHandler$deleteCohorts(c(10L, 20L))
+
+  cohortTableHandler$getCohortsSummary() |>
+    checkCohortsSummary() |>
+    expect_true()
+  cohortTableHandler$getCohortsSummary() |> nrow() |> expect_equal(0)
+})
+
+
 
 #
 # cohort summary
