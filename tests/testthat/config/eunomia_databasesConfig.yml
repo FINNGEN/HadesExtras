@@ -62,4 +62,25 @@ E3:
     webapiurl: https://api.ohdsi.org/wrong
     sourcekey:
     resultsshchema:
+# FinnGen
+E4:
+  cohortTableHandler:
+    database:
+      databaseId: E4
+      databaseName: FinnGen
+      databaseDescription: Eunomia database FinnGen
+    connection:
+      connectionDetailsSettings:
+          dbms: sqlite
+          server: <pathToFinnGenEunomiaSqlite>
+    cdm:
+        cdmDatabaseSchema: main
+        vocabularyDatabaseSchema: main
+    cohortTable:
+        cohortDatabaseSchema: main
+        cohortTableName: test_cohort_table_<timestamp>
+  atlasConfig:
+    webapiurl: https://api.ohdsi.org/wrong
+    sourcekey:
+    resultsshchema:
 
