@@ -47,3 +47,14 @@ test_that("createCDMdbHandlerFromList works with basicChecks", {
   CDMdb$getTblCDMSchema$person() |> checkmate::expect_class("tbl_dbi")
   CDMdb$getTblVocabularySchema$vocabulary() |> checkmate::expect_class("tbl_dbi")
 })
+
+
+test_that("createCDMdbHandlerFromList includes resultsDatabaseSchema", {
+  config <- test_cohortTableHandlerConfig
+
+  CDMdb <- createCDMdbHandlerFromList(config)
+  
+  CDMdb$resultsDatabaseSchema |> checkmate::assertString()
+  CDMdb$resultsDatabaseSchema |> expect_equal(CDMdb$cdmDatabaseSchema)
+  
+})
