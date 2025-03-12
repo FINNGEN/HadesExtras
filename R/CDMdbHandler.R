@@ -36,6 +36,7 @@ CDMdbHandler <- R6::R6Class(
     .connectionHandler = NULL,
     .vocabularyDatabaseSchema = NULL,
     .cdmDatabaseSchema = NULL,
+    .resultsDatabaseSchema = NULL,
     .connectionStatusLog = NULL,
     #
     .vocabularyInfo = NULL,
@@ -63,6 +64,9 @@ CDMdbHandler <- R6::R6Class(
     },
     cdmDatabaseSchema = function() {
       return(private$.cdmDatabaseSchema)
+    },
+    resultsDatabaseSchema = function() {
+      return(private$.resultsDatabaseSchema)
     },
     connectionStatusLog = function() {
       return(private$.connectionStatusLog$logTibble |>
@@ -99,6 +103,7 @@ CDMdbHandler <- R6::R6Class(
                           connectionHandler,
                           cdmDatabaseSchema,
                           vocabularyDatabaseSchema = cdmDatabaseSchema,
+                          resultsDatabaseSchema = cdmDatabaseSchema,
                           loadConnectionChecksLevel = "allChecks") {
       checkmate::assertString(databaseId)
       checkmate::assertString(databaseName, )
@@ -106,13 +111,14 @@ CDMdbHandler <- R6::R6Class(
       checkmate::assertClass(connectionHandler, "ConnectionHandler")
       checkmate::assertString(cdmDatabaseSchema)
       checkmate::assertString(vocabularyDatabaseSchema)
-
+      checkmate::assertString(resultsDatabaseSchema)
       private$.databaseId <- databaseId
       private$.databaseName <- databaseName
       private$.databaseDescription <- databaseDescription
       private$.connectionHandler <- connectionHandler
       private$.vocabularyDatabaseSchema <- vocabularyDatabaseSchema
       private$.cdmDatabaseSchema <- cdmDatabaseSchema
+      private$.resultsDatabaseSchema <- resultsDatabaseSchema
 
       self$loadConnection(loadConnectionChecksLevel)
     },
@@ -345,6 +351,7 @@ createCDMdbHandlerFromList <- function(
     connectionHandler = connectionHandler,
     cdmDatabaseSchema = config$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = config$cdm$vocabularyDatabaseSchema,
+    resultsDatabaseSchema = if (!is.null(config$cdm$resultsDatabaseSchema)) config$cdm$resultsDatabaseSchema else config$cdm$cdmDatabaseSchema,
     loadConnectionChecksLevel = loadConnectionChecksLevel
   )
 
