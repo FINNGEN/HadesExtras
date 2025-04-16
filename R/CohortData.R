@@ -240,6 +240,7 @@ cohortDataToCohortDefinitionSet <- function(
 #' @param cohortDatabaseSchema The schema name for the cohort database.
 #' @param cohortTable The name of the cohort table.
 #' @param cohortNameIds A data frame containing cohort name IDs.
+#' @param includeBirthAndDeathDates Logical indicating whether to include birth and death dates (default is FALSE).
 #'
 #' @details
 #' This function retrieves cohort data from a specified cohort table in a database.
@@ -248,9 +249,9 @@ cohortDataToCohortDefinitionSet <- function(
 #'
 #' @importFrom DatabaseConnector connect disconnect dbGetQuery
 #' @importFrom SqlRender readSql render translate
-#' @importFrom checkmate assertString assertDataFrame assertNames
+#' @importFrom checkmate assertString assertDataFrame assertNames assertLogical
 #'
-#' @return Returns TRUE if the cohort data is successfully retrieved.
+#' @return Returns a tibble with cohort data, optionally including birth and death dates.
 #'
 #' @export
 getCohortDataFromCohortTable <- function(
@@ -259,7 +260,8 @@ getCohortDataFromCohortTable <- function(
     cdmDatabaseSchema,
     cohortDatabaseSchema,
     cohortTable,
-    cohortNameIds) {
+    cohortNameIds,
+    includeBirthAndDeathDates = FALSE) {
   #
   # Validate parameters
   #
@@ -279,6 +281,7 @@ getCohortDataFromCohortTable <- function(
   cohortNameIds |>
     names() |>
     checkmate::assertNames(must.include = c("cohortId", "cohortName"))
+  includeBirthAndDeathDates |> checkmate::assertLogical()
 
   #
   # Function
@@ -289,6 +292,7 @@ getCohortDataFromCohortTable <- function(
     cohort_database_schema = cohortDatabaseSchema,
     cohort_table = cohortTable,
     cohort_ids = paste0("(", paste0(cohortNameIds$cohortId, collapse = " ,"), ")"),
+    includeBirthAndDeathDates = includeBirthAndDeathDates,
     warnOnMissingParameters = TRUE
   )
   sql <- SqlRender::translate(
@@ -299,8 +303,21 @@ getCohortDataFromCohortTable <- function(
     tibble::as_tibble()
 
   cohortData <- cohortTable |>
-    dplyr::left_join(cohortNameIds, by = c("cohort_definition_id" = "cohortId")) |>
-    dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date)
+    dplyr::left_join(cohortNameIds, by = c("cohort_definition_id" = "cohortId")) 
+
+
+  if (includeBirthAndDeathDates) {
+    cohortData <- cohortData |>
+      dplyr::mutate(
+        birth_date = as.Date(cohortTable$birth_date),
+        death_date = as.Date(cohortTable$death_date)
+      )|>
+    dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date, birth_date, death_date)
+  }else{
+    cohortData <- cohortData |>
+      dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date)
+  }
 
   return(cohortData)
 }
+

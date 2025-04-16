@@ -195,3 +195,86 @@ test_that("getCohortDataFromCohortTable returns a cohort", {
     nrow() |>
     expect_gt(0)
 })
+
+test_that("getCohortDataFromCohortTable returns a cohort with birth and death dates", {
+  connection <- helper_createNewConnection()
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- "test_cohort"
+
+  CohortGenerator_createCohortTables(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+  )
+
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
+    jsonFolder = here::here("inst/testdata/matching/cohorts"),
+    sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
+    cohortFileNameFormat = "%s",
+    cohortFileNameValue = c("cohortId"),
+    verbose = FALSE
+  )
+
+  generatedCohorts <- CohortGenerator::generateCohortSet(
+    connection = connection,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+    cohortDefinitionSet = cohortDefinitionSet,
+    incremental = FALSE
+  )
+
+  # ignore warnings displayed every 8 hours
+  suppressWarnings({
+    cohortData <- getCohortDataFromCohortTable(
+      connection = connection,
+      cdmDatabaseSchema = cdmDatabaseSchema,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTable = cohortTableName,
+      cohortNameIds = generatedCohorts |> dplyr::select(cohortId, cohortName),
+      includeBirthAndDeathDates = TRUE
+    )
+  })
+
+  cohortData |> View()
+
+  # Check basic cohort data structure
+  cohortData |>
+    checkCohortData() |>
+    expect_true()
+  cohortData |>
+    nrow() |>
+    expect_gt(0)
+
+  # Check that birth_date and death_date columns exist and are of type Date
+  cohortData |>
+    names() |>
+    checkmate::expect_names(must.include = c("birth_date", "death_date"))
+  
+  cohortData$birth_date |>
+    class() |>
+    expect_identical("Date")
+  
+  cohortData$death_date |>
+    class() |>
+    expect_identical("Date")
+
+  # Check that birth_date is not NA for all rows
+  cohortData$birth_date |>
+    is.na() |>
+    all() |>
+    expect_false()
+
+  # Check that death_date can be NA (since not everyone has died)
+  cohortData$death_date |>
+    is.na() |>
+    any() |>
+    expect_true()
+})
