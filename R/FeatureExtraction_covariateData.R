@@ -206,8 +206,10 @@ ATCgroups <- function(
   # Some SQL to construct the covariate:
   if (continuous) {
     sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateDDDATCgroups.sql", package = "HadesExtras"))
+    analysisId <- 343
   } else {
     sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+    analysisId <- 342
   }
 
   ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
@@ -218,7 +220,7 @@ ATCgroups <- function(
     domain_start_date = "drug_era_start_date",
     domain_end_date = "drug_era_end_date",
     domain_concept_id = "drug_concept_id",
-    analysis_id = 341,
+    analysis_id = analysisId,
     aggregated = aggregated,
     atc_time_period_values = ATCTimePeriodsValuesStr,
     row_id_field = "subject_id",
@@ -246,7 +248,7 @@ ATCgroups <- function(
 
   # Construct analysis reference:
   analysisRef <- data.frame(
-    analysisId = 341,
+    analysisId = analysisId,
     analysisName = "ATCgroups",
     domainId = "Drug",
     isBinary = "N",
