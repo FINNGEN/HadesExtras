@@ -62,6 +62,7 @@ A class for handling CDM database connections and operations
   connectionHandler,
   cdmDatabaseSchema,
   vocabularyDatabaseSchema = cdmDatabaseSchema,
+  resultsDatabaseSchema = cdmDatabaseSchema,
   loadConnectionChecksLevel = "allChecks"
 )}\if{html}{\out{</div>}}
 }

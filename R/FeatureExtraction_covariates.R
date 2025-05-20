@@ -164,6 +164,15 @@ FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
     )
   }
 
+  if ("DDDATCgroups" %in% selectedAnalysis$analysisName) {
+  
+    listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_ATCgroups(
+      temporalStartDays = temporalStartDays,
+      temporalEndDays = temporalEndDays,
+      continuous = TRUE
+    )
+  }
+
 
 
   return(listOfCovariateSetings)
