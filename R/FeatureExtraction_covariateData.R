@@ -142,6 +142,7 @@ YearOfBirth <- function(
 #' @description Creates covariate settings for ATC drug groups
 #' @param temporalStartDays Start day relative to index (-99999 by default)
 #' @param temporalEndDays End day relative to index (99999 by default)
+#' @param continuous Logical. If TRUE, the covariate data is continuous.
 #' 
 #' @return A covariate settings object for ATC drug groups
 #' 
