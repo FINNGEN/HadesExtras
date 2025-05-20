@@ -4,12 +4,18 @@
 \alias{covariateData_ATCgroups}
 \title{covariateData_ATCgroups}
 \usage{
-covariateData_ATCgroups(temporalStartDays = -99999, temporalEndDays = 99999)
+covariateData_ATCgroups(
+  temporalStartDays = -99999,
+  temporalEndDays = 99999,
+  continuous = FALSE
+)
 }
 \arguments{
 \item{temporalStartDays}{Start day relative to index (-99999 by default)}
 
 \item{temporalEndDays}{End day relative to index (99999 by default)}
+
+\item{continuous}{Logical. If TRUE, the covariate data is continuous.}
 }
 \value{
 A covariate settings object for ATC drug groups

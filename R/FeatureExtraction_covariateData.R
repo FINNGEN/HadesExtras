@@ -142,6 +142,7 @@ YearOfBirth <- function(
 #' @description Creates covariate settings for ATC drug groups
 #' @param temporalStartDays Start day relative to index (-99999 by default)
 #' @param temporalEndDays End day relative to index (99999 by default)
+#' @param continuous Logical. If TRUE, the covariate data is continuous.
 #' 
 #' @return A covariate settings object for ATC drug groups
 #' 
@@ -152,12 +153,14 @@ YearOfBirth <- function(
 #'
 covariateData_ATCgroups <- function(
     temporalStartDays = -99999,
-    temporalEndDays = 99999) {
+    temporalEndDays = 99999,
+    continuous = FALSE) {
   covariateSettings <- list(
     temporal = TRUE,
     temporalSequence = FALSE,
     temporalStartDays = temporalStartDays,
-    temporalEndDays = temporalEndDays
+    temporalEndDays = temporalEndDays,
+    continuous = continuous
   )
   attr(covariateSettings, "fun") <- "HadesExtras::ATCgroups"
   class(covariateSettings) <- "covariateSettings"
@@ -199,8 +202,16 @@ ATCgroups <- function(
     minCharacterizationMean = 0) {
   writeLines("Constructing ATCgroups covariate")
 
+  continuous <- covariateSettings$continuous
+
   # Some SQL to construct the covariate:
-  sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+  if (continuous) {
+    sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateDDDATCgroups.sql", package = "HadesExtras"))
+    analysisId <- 343
+  } else {
+    sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+    analysisId <- 342
+  }
 
   ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
 
@@ -210,7 +221,7 @@ ATCgroups <- function(
     domain_start_date = "drug_era_start_date",
     domain_end_date = "drug_era_end_date",
     domain_concept_id = "drug_concept_id",
-    analysis_id = 341,
+    analysis_id = analysisId,
     aggregated = aggregated,
     atc_time_period_values = ATCTimePeriodsValuesStr,
     row_id_field = "subject_id",
@@ -223,14 +234,22 @@ ATCgroups <- function(
   DatabaseConnector::executeSql(connection, sql)
 
   # Construct covariate reference:
-  covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
-  SqlRender::snakeCaseToCamelCaseNames()
-  covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
-  SqlRender::snakeCaseToCamelCaseNames()
+  if (continuous) {
+    covariatesContinuous <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_table")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_ref")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+  } else {
+    covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+  }
+  
 
   # Construct analysis reference:
   analysisRef <- data.frame(
-    analysisId = 341,
+    analysisId = analysisId,
     analysisName = "ATCgroups",
     domainId = "Drug",
     isBinary = "N",
@@ -240,11 +259,19 @@ ATCgroups <- function(
   # Construct analysis reference:
   metaData <- list(sql = sql, call = match.call())
 
-  result <- Andromeda::andromeda(
-    covariates = covariates,
-    covariateRef = covariateRef,
-    analysisRef = analysisRef
-  )
+  if (continuous) {
+    result <- Andromeda::andromeda(
+      covariatesContinuous = covariatesContinuous,
+      covariateRef = covariateRef,
+      analysisRef = analysisRef
+    )
+  } else {
+    result <- Andromeda::andromeda(
+      covariates = covariates,
+      covariateRef = covariateRef,
+      analysisRef = analysisRef
+    )
+  }
 
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
