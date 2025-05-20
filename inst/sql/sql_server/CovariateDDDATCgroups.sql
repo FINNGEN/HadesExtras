@@ -53,7 +53,7 @@ SELECT
 	MIN(period_ddds) AS min_value,
 	MAX(period_ddds) AS max_value,
 	AVG(period_ddds) AS average_value,
-	STDDEV(period_ddds) AS standard_deviation,
+	STDEV(period_ddds) AS standard_deviation,
 	-- TODO: add median, p10, p25, p75, p90
 	0 AS median_value,
 	0 AS p10_value,
