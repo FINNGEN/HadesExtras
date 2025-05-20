@@ -152,12 +152,14 @@ YearOfBirth <- function(
 #'
 covariateData_ATCgroups <- function(
     temporalStartDays = -99999,
-    temporalEndDays = 99999) {
+    temporalEndDays = 99999,
+    continuous = FALSE) {
   covariateSettings <- list(
     temporal = TRUE,
     temporalSequence = FALSE,
     temporalStartDays = temporalStartDays,
-    temporalEndDays = temporalEndDays
+    temporalEndDays = temporalEndDays,
+    continuous = continuous
   )
   attr(covariateSettings, "fun") <- "HadesExtras::ATCgroups"
   class(covariateSettings) <- "covariateSettings"
@@ -199,8 +201,14 @@ ATCgroups <- function(
     minCharacterizationMean = 0) {
   writeLines("Constructing ATCgroups covariate")
 
+  continuous <- covariateSettings$continuous
+
   # Some SQL to construct the covariate:
-  sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+  if (continuous) {
+    sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateDDDATCgroups.sql", package = "HadesExtras"))
+  } else {
+    sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
+  }
 
   ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
 
@@ -223,10 +231,18 @@ ATCgroups <- function(
   DatabaseConnector::executeSql(connection, sql)
 
   # Construct covariate reference:
-  covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
-  SqlRender::snakeCaseToCamelCaseNames()
-  covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
-  SqlRender::snakeCaseToCamelCaseNames()
+  if (continuous) {
+    covariatesContinuous <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_table")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_ref")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+  } else {
+    covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
+    SqlRender::snakeCaseToCamelCaseNames()
+  }
+  
 
   # Construct analysis reference:
   analysisRef <- data.frame(
@@ -240,11 +256,19 @@ ATCgroups <- function(
   # Construct analysis reference:
   metaData <- list(sql = sql, call = match.call())
 
-  result <- Andromeda::andromeda(
-    covariates = covariates,
-    covariateRef = covariateRef,
-    analysisRef = analysisRef
-  )
+  if (continuous) {
+    result <- Andromeda::andromeda(
+      covariatesContinuous = covariatesContinuous,
+      covariateRef = covariateRef,
+      analysisRef = analysisRef
+    )
+  } else {
+    result <- Andromeda::andromeda(
+      covariates = covariates,
+      covariateRef = covariateRef,
+      analysisRef = analysisRef
+    )
+  }
 
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
