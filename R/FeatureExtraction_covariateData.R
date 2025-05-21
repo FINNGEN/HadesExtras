@@ -208,9 +208,14 @@ ATCgroups <- function(
   if (continuous) {
     sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateDDDATCgroups.sql", package = "HadesExtras"))
     analysisId <- 343
+    analysisName <- "DDDATCgroups"
+    isBinary <- "Y"
+    missingMeansZero <- "N"
   } else {
     sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
     analysisId <- 342
+    analysisName <- "ATCgroups"
+    isBinary <- "N"
   }
 
   ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
@@ -250,10 +255,10 @@ ATCgroups <- function(
   # Construct analysis reference:
   analysisRef <- data.frame(
     analysisId = analysisId,
-    analysisName = "ATCgroups",
+    analysisName = analysisName,
     domainId = "Drug",
-    isBinary = "N",
-    missingMeansZero = "Y"
+    isBinary = isBinary,
+    missingMeansZero = missingMeansZero
   )
 
   # Construct analysis reference:
