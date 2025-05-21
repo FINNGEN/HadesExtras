@@ -216,6 +216,7 @@ ATCgroups <- function(
     analysisId <- 342
     analysisName <- "ATCgroups"
     isBinary <- "N"
+    missingMeansZero <- "Y"
   }
 
   ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")

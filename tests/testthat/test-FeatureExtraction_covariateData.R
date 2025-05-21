@@ -199,7 +199,10 @@ test_that("covariateData_DDD_ATCgroups works", {
     )
   })
 
-  covariateSettings <- covariateData_ATCgroups(continuous = TRUE)
+  covariateSettings <- list(
+    covariateData_ATCgroups(continuous = TRUE),
+    covariateData_ATCgroups(continuous = FALSE)
+  )
 
   covariate_control <- FeatureExtraction::getDbCovariateData(
     connection = connection,
@@ -211,6 +214,10 @@ test_that("covariateData_DDD_ATCgroups works", {
     aggregated = TRUE
   )
 
+  covariate_control$covariates |>
+    dplyr::collect() |>
+    names() |>
+    expect_equal(c("covariateId", "timeId", "cohortDefinitionId", "sumValue"))
 
   covariate_control$covariatesContinuous |>
     dplyr::collect() |>
