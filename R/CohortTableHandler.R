@@ -40,17 +40,7 @@ CohortTableHandler <- R6::R6Class(
     .cohortDefinitionSet = NULL,
     .cohortGeneratorResults = NULL,
     .cohortDemograpics = NULL,
-    .cohortsOverlap = NULL,
-    finalize = function() {
-      CohortGenerator_dropCohortStatsTables(
-        connection = self$connectionHandler$getConnection(),
-        cohortDatabaseSchema = self$cohortDatabaseSchema,
-        cohortTableNames = self$cohortTableNames
-      )
-      unlink(private$.incrementalFolder, recursive = TRUE)
-      # Call parent finalize
-      super$finalize()
-    }
+    .cohortsOverlap = NULL
   ),
   active = list(
     # Read-only parameters
@@ -139,6 +129,19 @@ CohortTableHandler <- R6::R6Class(
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         loadConnectionChecksLevel = loadConnectionChecksLevel
       )
+    },
+    #' Finalize method
+    #' @description
+    #' Closes the connection if active.
+    finalize = function() {
+      CohortGenerator_dropCohortStatsTables(
+        connection = self$connectionHandler$getConnection(),
+        cohortDatabaseSchema = self$cohortDatabaseSchema,
+        cohortTableNames = self$cohortTableNames
+      )
+      unlink(private$.incrementalFolder, recursive = TRUE)
+
+      super$finalize()
     },
     #'
     #' loadConnection
