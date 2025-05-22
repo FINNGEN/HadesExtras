@@ -200,7 +200,6 @@ ATCgroups <- function(
     covariateSettings,
     aggregated = FALSE,
     minCharacterizationMean = 0) {
-  writeLines("Constructing ATCgroups covariate")
 
   continuous <- covariateSettings$continuous
 
@@ -218,6 +217,8 @@ ATCgroups <- function(
     isBinary <- "N"
     missingMeansZero <- "Y"
   }
+
+  writeLines(paste0("Constructing ", analysisName, " covariate"))
 
   ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
 
