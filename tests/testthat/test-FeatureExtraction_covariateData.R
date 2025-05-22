@@ -161,6 +161,7 @@ test_that("covariateData_ATCgroups works", {
 
 
 test_that("covariateData_DDD_ATCgroups works", {
+  skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
   connection <- helper_createNewConnection()
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
@@ -199,7 +200,10 @@ test_that("covariateData_DDD_ATCgroups works", {
     )
   })
 
-  covariateSettings <- covariateData_ATCgroups(continuous = TRUE)
+  covariateSettings <- list(
+    covariateData_ATCgroups(continuous = FALSE),
+    covariateData_ATCgroups(continuous = TRUE)
+  )
 
   covariate_control <- FeatureExtraction::getDbCovariateData(
     connection = connection,
@@ -211,7 +215,10 @@ test_that("covariateData_DDD_ATCgroups works", {
     aggregated = TRUE
   )
 
-
+  covariate_control$covariates |>
+    dplyr::collect() |>
+    names() |>
+    expect_equal(c("covariateId", "timeId", "cohortDefinitionId", "sumValue"))
   covariate_control$covariatesContinuous |>
     dplyr::collect() |>
     names() |>
