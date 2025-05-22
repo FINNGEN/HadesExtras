@@ -33,6 +33,7 @@ Inherits from CDMdbHandler.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CohortTableHandler-new}{\code{CohortTableHandler$new()}}
+\item \href{#method-CohortTableHandler-finalize}{\code{CohortTableHandler$finalize()}}
 \item \href{#method-CohortTableHandler-loadConnection}{\code{CohortTableHandler$loadConnection()}}
 \item \href{#method-CohortTableHandler-insertOrUpdateCohorts}{\code{CohortTableHandler$insertOrUpdateCohorts()}}
 \item \href{#method-CohortTableHandler-deleteCohorts}{\code{CohortTableHandler$deleteCohorts()}}
@@ -83,11 +84,22 @@ Initialize the CohortTableHandler object
 \item{\code{cohortTableName}}{Name of the cohort table.}
 
 \item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
-
-loadConnection}
+Finalize method}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-finalize"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-finalize}{}}}
+\subsection{Method \code{finalize()}}{
+Closes the connection if active.
+
+loadConnection
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$finalize()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CohortTableHandler-loadConnection"></a>}}

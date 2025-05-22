@@ -45,6 +45,7 @@ A class for handling CDM database connections and operations
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CDMdbHandler-new}{\code{CDMdbHandler$new()}}
+\item \href{#method-CDMdbHandler-finalize}{\code{CDMdbHandler$finalize()}}
 \item \href{#method-CDMdbHandler-loadConnection}{\code{CDMdbHandler$loadConnection()}}
 \item \href{#method-CDMdbHandler-clone}{\code{CDMdbHandler$clone()}}
 }
@@ -82,10 +83,21 @@ A class for handling CDM database connections and operations
 \item{\code{vocabularyDatabaseSchema}}{(Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)}
 
 \item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
-Reload connection}
+Finalize method}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CDMdbHandler-finalize"></a>}}
+\if{latex}{\out{\hypertarget{method-CDMdbHandler-finalize}{}}}
+\subsection{Method \code{finalize()}}{
+Closes the connection if active.
+Reload connection
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$finalize()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CDMdbHandler-loadConnection"></a>}}
