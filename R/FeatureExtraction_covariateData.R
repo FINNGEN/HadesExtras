@@ -224,9 +224,9 @@ ATCgroups <- function(
 
   sql <- SqlRender::render(sql,
     cdm_database_schema = cdmDatabaseSchema,
-    domain_table = "drug_era",
-    domain_start_date = "drug_era_start_date",
-    domain_end_date = "drug_era_end_date",
+    domain_table = "drug_exposure",
+    domain_start_date = "drug_exposure_start_date",
+    domain_end_date = "drug_exposure_end_date",
     domain_concept_id = "drug_concept_id",
     analysis_id = analysisId,
     aggregated = aggregated,
@@ -279,7 +279,7 @@ ATCgroups <- function(
       analysisRef = analysisRef
     )
   }
-
+  
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 
