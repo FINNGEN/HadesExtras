@@ -27,6 +27,7 @@ YAML
 YearOfBirth
 addLog
 allChecks
+analysisRef
 bigquery
 bigrquery
 bq
@@ -50,6 +51,7 @@ createCDMdbHandlerFromList
 createCohortTableHandlerFromList
 createCohortTables
 createTemporalCovariateSettingsFromList
+csv
 databaseName
 dbplyr
 deleteCohortFromCohortTable
