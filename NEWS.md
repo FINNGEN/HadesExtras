@@ -1,3 +1,6 @@
+# HadesExtras 1.1.1
+- Fixed bug in covariate settings for DDD ATC groups
+
 # HadesExtras 1.1.0
 - Added covariate settings for DDD ATC groups
 
