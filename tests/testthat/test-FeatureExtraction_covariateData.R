@@ -216,7 +216,7 @@ test_that("covariateData_ATCgroups returns correct value", {
   # G03AB 21602488 0 patients
   covariates |>
     dplyr::filter(covariateId == 21602488342) |>
-    pull(sumValue) |>
+    nrow() |>
     expect_equal(0)
 
   # G03A 21602472 1419 patients
