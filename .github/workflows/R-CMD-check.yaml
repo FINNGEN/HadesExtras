@@ -27,7 +27,7 @@ jobs:
           # - {os: ubuntu-latest, r: 'devel'}
           # - {os: ubuntu-latest, r: 'oldrel-1'}
           # - {os: macOS-latest, r: 'release'}
-          # - {os: windows-latest, r: 'release'}
+          - {os: windows-latest, r: 'release'}
         env_config:
           - {name: 'Eunomia', HADESEXTAS_TESTING_ENVIRONMENT: 'Eunomia-GiBleed'}
           - {name: 'AtlasDev', HADESEXTAS_TESTING_ENVIRONMENT: 'AtlasDevelopment-DBI'}
