@@ -28,7 +28,7 @@ readAndParseYaml <- function(pathToYalmFile, ...) {
 
   # replace the values in the yaml file
   for (name in names) {
-    yalmFile <- gsub(paste0("<", name, ">"), list(...)[[name]], yalmFile)
+    yalmFile <- gsub(paste0("<", name, ">"), list(...)[[name]], yalmFile,fixed = TRUE)
   }
 
   # parse the yaml file
