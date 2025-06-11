@@ -19,7 +19,7 @@
 #' @param cohortDefinitionSet Set of cohort definitions to use
 #' @param incrementalFolder Path to folder for incremental operations
 #' @param cohortDatabaseSchema Schema name where cohort tables are stored
-#' 
+#'
 #' @importFrom R6 R6Class
 #' @importFrom checkmate assertClass assertString
 #' @importFrom CohortGenerator createEmptyCohortDefinitionSet createCohortTables getCohortTableNames generateCohortSet getCohortCounts dropCohortStatsTables
@@ -328,6 +328,30 @@ CohortTableHandler <- R6::R6Class(
       return(cohortCountsWithNames)
     },
     #'
+    #' getNumberOfSubjects
+    #' @description
+    #'  Retrieves the number of subjects of a cohort ID.
+    #' @param selected_cohortId The cohort id for which number of subjects is sought.
+    #' @return A numeric value of the number of subjects in a cohort.
+    getNumberOfSubjects = function(selected_cohortId) {
+      nSubjectsInCohort <- self$getCohortCounts() |>
+        dplyr::filter(cohortId == selected_cohortId) |>
+        dplyr::pull(cohortSubjects)
+      return(nSubjectsInCohort)
+    },
+    #'
+    #' getNumberOfCohortEntries
+    #' @description
+    #'  Retrieves the number of entries of a cohort ID.
+    #' @param selected_cohortId The cohort id for which number of entries is sought.
+    #' @return A numeric value of the number of entries in a cohort.
+    getNumberOfCohortEntries = function(selected_cohortId) {
+      nEntriesInCohort <- self$getCohortCounts() |>
+        dplyr::filter(cohortId == selected_cohortId) |>
+        dplyr::pull(cohortEntries)
+      return(nEntriesInCohort)
+    },
+    #'
     #' getCohortsSummary
     #' @description
     #' Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.
@@ -388,8 +412,94 @@ CohortTableHandler <- R6::R6Class(
     #' Retrieves the number of subjects that are in more than one cohort.
     #' @return A tibble containing one logical column for each cohort with name a cohort id,
     #' and an additional column `numberOfSubjects` with the number of subjects in the cohorts combination.
+    #'
     getCohortsOverlap = function() {
       return(private$.cohortsOverlap)
+    },
+    #'
+    #' getNumberOfOverlappingSubjects
+    #' @description
+    #' Retrieves the number of subjects that are overlapping between two given cohorts.
+    #' @param selected_cohortId1 The cohort id of the first cohort.
+    #' @param selected_cohortId2 The cohort id of the second cohort.
+    #' @return A numeric value of the number of overlapping subjects between two given cohorts.
+    #'
+    getNumberOfOverlappingSubjects = function(selected_cohortId1,selected_cohortId2) {
+      nSubjectsOverlap <- private$.cohortsOverlap |>
+        dplyr::filter(
+          stringr::str_detect(cohortIdCombinations, paste0("-", selected_cohortId1, "-")) &
+            stringr::str_detect(cohortIdCombinations, paste0("-", selected_cohortId2, "-"))
+        ) |>
+        dplyr::pull(numberOfSubjects)  |>
+        sum()
+
+      return(nSubjectsOverlap)
+    },
+    #'
+    #' getSexFisherTest
+    #' @description
+    #' Compares the proportion of males and females in two cohorts using Fisher's exact test.
+    #' @param selected_cohortId1 The cohort id of the first cohort.
+    #' @param selected_cohortId2 The cohort id of the second cohort.
+    #' @return a list with class R htest class containing components such as p.value and conf.int of the test
+    #'
+    getSexFisherTest = function(selected_cohortId1,selected_cohortId2) {
+
+      sexCase <- self$getCohortsSummary() |>
+        dplyr::filter(cohortId == selected_cohortId1) |>
+        dplyr::pull(sexCounts)
+      sexControl <-  self$getCohortsSummary() |>
+        dplyr::filter(cohortId == selected_cohortId2) |>
+        dplyr::pull(sexCounts)
+
+      nMaleCases <- sexCase[[1]]  |> dplyr::filter(sex == "MALE")  |> dplyr::pull(n)
+      nMaleCases <- ifelse(length(nMaleCases)==0, 0, nMaleCases)
+      nFemaleCases <- sexCase[[1]]  |> dplyr::filter(sex == "FEMALE")  |> dplyr::pull(n)
+      nFemaleCases <- ifelse(length(nFemaleCases)==0, 0, nFemaleCases)
+      nMaleControls <- sexControl[[1]]  |> dplyr::filter(sex == "MALE") |> dplyr::pull(n)
+      nMaleControls <- ifelse(length(nMaleControls)==0, 0, nMaleControls)
+      nFemaleControls <- sexControl[[1]]  |> dplyr::filter(sex == "FEMALE") |> dplyr::pull(n)
+      nFemaleControls <- ifelse(length(nFemaleControls)==0, 0, nFemaleControls)
+
+      data <-matrix(c(nMaleCases,nFemaleCases,nMaleControls,nFemaleControls),ncol=2)
+      fisher_results <- stats::fisher.test(data)
+
+      return(fisher_results)
+    },
+    #'
+    #' getYearOfBirthTests
+    #' @description
+    #' Compares the year of birth distributions between the case and control cohorts using two-sample t-test to compare mean year of birth,
+    #' uses cohen's d to assess effect size of the difference in the mean of the year of births,and the Kolmogorov-Smirnov test
+    #' to evaluate if year of births in the two cohorts have similar distribution.
+    #' @param selected_cohortId1 The cohort id of the first cohort.
+    #' @param selected_cohortId2 The cohort id of the second cohort.
+    #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
+    #'
+    getYearOfBirthTests = function(selected_cohortId1,selected_cohortId2) {
+
+      yearOfBirthCase <- self$getCohortsSummary() |>
+        dplyr::filter(cohortId == selected_cohortId1) |>
+        dplyr::pull(histogramBirthYear)
+      yearOfBirthControl <- self$getCohortsSummary() |>
+        dplyr::filter(cohortId == selected_cohortId2) |>
+        dplyr::pull(histogramBirthYear)
+
+      cases <- unlist(yearOfBirthCase[[1]] |> tidyr::uncount(n))
+      controls <- unlist(yearOfBirthControl[[1]] |> tidyr::uncount(n))
+
+      ttestResult <- t.test(cases[!is.na(cases)], controls[!is.na(controls)])
+      ks_result <- ks.test(cases[!is.na(cases)], controls[!is.na(controls)])
+
+      # Calculate Cohen's d
+      meanCases = mean(cases,na.rm = TRUE)
+      meanControls = mean(controls,na.rm = TRUE)
+      mean_diff <- meanCases - meanControls
+      pooled_sd <- sqrt(((length(cases)-1)*var(cases,na.rm = TRUE) + (length(controls)-1)*var(controls,na.rm = TRUE)) / (length(cases) + length(controls) - 2))
+      cohen_d <- mean_diff / pooled_sd
+      cohendresult =  c(meanInCases = meanCases, meanInControls = meanControls,pooledsd = pooled_sd, cohend=cohen_d)
+
+      return(list(ttestResult = ttestResult, ksResult = ks_result,cohendResult = cohendresult))
     }
   )
 )
