@@ -488,6 +488,20 @@ CohortTableHandler <- R6::R6Class(
       cases <- unlist(yearOfBirthCase[[1]] |> tidyr::uncount(n))
       controls <- unlist(yearOfBirthControl[[1]] |> tidyr::uncount(n))
 
+      # handle small size cases
+      if (length(cases[!is.na(cases)]) < 2 || length(controls[!is.na(controls)]) < 2) {
+        return(list(
+          ttestResult = NA,
+          ksResult = NA,
+          cohendResult = c(
+            meanInCases = NA,
+            meanInControls = NA,
+            pooledsd = NA,
+            cohend = NA
+          )
+        ))
+      }
+
       ttestResult <- t.test(cases[!is.na(cases)], controls[!is.na(controls)])
       ks_result <- ks.test(cases[!is.na(cases)], controls[!is.na(controls)])
 
