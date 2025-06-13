@@ -357,7 +357,14 @@ CohortTableHandler <- R6::R6Class(
     #' Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.
     #'
     #' @return A tibble containing cohort summary.
-    getCohortsSummary = function() {
+    getCohortsSummary = function(includeAllEvents=F) {
+
+      cohortDemographics <- private$.cohortDemograpics
+      if (!includeAllEvents) {
+        cohortDemographics <- cohortDemographics |>
+          dplyr::select(-dplyr::any_of(c("histogramBirthYearAllEvents", "sexCountsAllEvents")))
+      }
+
       cohortsSummaryWithNames <- private$.cohortDefinitionSet |>
         dplyr::select(cohortName, shortName, cohortId) |>
         dplyr::mutate(
@@ -365,7 +372,7 @@ CohortTableHandler <- R6::R6Class(
           databaseName = super$databaseName
         ) |>
         dplyr::left_join(
-          private$.cohortDemograpics,
+          cohortDemographics,
           by = "cohortId"
         ) |>
         dplyr::left_join(
@@ -443,14 +450,23 @@ CohortTableHandler <- R6::R6Class(
     #' @param selected_cohortId2 The cohort id of the second cohort.
     #' @return a list with class R htest class containing components such as p.value and conf.int of the test
     #'
-    getSexFisherTest = function(selected_cohortId1,selected_cohortId2) {
+    getSexFisherTest = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
 
-      sexCase <- self$getCohortsSummary() |>
-        dplyr::filter(cohortId == selected_cohortId1) |>
-        dplyr::pull(sexCounts)
-      sexControl <-  self$getCohortsSummary() |>
-        dplyr::filter(cohortId == selected_cohortId2) |>
-        dplyr::pull(sexCounts)
+      if(testFor == "allEvents"){
+         sexCase <- self$getCohortsSummary(includeAllEvents=T) |>
+          dplyr::filter(cohortId == selected_cohortId1) |>
+          dplyr::pull(sexCountsAllEvents)
+        sexControl <-  self$getCohortsSummary(includeAllEvents=T) |>
+          dplyr::filter(cohortId == selected_cohortId2) |>
+          dplyr::pull(sexCountsAllEvents)
+      }else {
+        sexCase <- self$getCohortsSummary() |>
+          dplyr::filter(cohortId == selected_cohortId1) |>
+          dplyr::pull(sexCounts)
+        sexControl <-  self$getCohortsSummary() |>
+          dplyr::filter(cohortId == selected_cohortId2) |>
+          dplyr::pull(sexCounts)
+      }
 
       nMaleCases <- sexCase[[1]]  |> dplyr::filter(sex == "MALE")  |> dplyr::pull(n)
       nMaleCases <- ifelse(length(nMaleCases)==0, 0, nMaleCases)
@@ -476,14 +492,23 @@ CohortTableHandler <- R6::R6Class(
     #' @param selected_cohortId2 The cohort id of the second cohort.
     #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
     #'
-    getYearOfBirthTests = function(selected_cohortId1,selected_cohortId2) {
+    getYearOfBirthTests = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
 
-      yearOfBirthCase <- self$getCohortsSummary() |>
-        dplyr::filter(cohortId == selected_cohortId1) |>
-        dplyr::pull(histogramBirthYear)
-      yearOfBirthControl <- self$getCohortsSummary() |>
-        dplyr::filter(cohortId == selected_cohortId2) |>
-        dplyr::pull(histogramBirthYear)
+      if(testFor == "allEvents"){
+        yearOfBirthCase <- self$getCohortsSummary(includeAllEvents=T) |>
+          dplyr::filter(cohortId == selected_cohortId1) |>
+          dplyr::pull(histogramBirthYearAllEvents)
+        yearOfBirthControl <- self$getCohortsSummary(includeAllEvents=T) |>
+          dplyr::filter(cohortId == selected_cohortId2) |>
+          dplyr::pull(histogramBirthYearAllEvents)
+      }else{
+        yearOfBirthCase <- self$getCohortsSummary() |>
+          dplyr::filter(cohortId == selected_cohortId1) |>
+          dplyr::pull(histogramBirthYear)
+        yearOfBirthControl <- self$getCohortsSummary() |>
+          dplyr::filter(cohortId == selected_cohortId2) |>
+          dplyr::pull(histogramBirthYear)
+      }
 
       cases <- unlist(yearOfBirthCase[[1]] |> tidyr::uncount(n))
       controls <- unlist(yearOfBirthControl[[1]] |> tidyr::uncount(n))
@@ -502,8 +527,14 @@ CohortTableHandler <- R6::R6Class(
         ))
       }
 
-      ttestResult <- t.test(cases[!is.na(cases)], controls[!is.na(controls)])
-      ks_result <- ks.test(cases[!is.na(cases)], controls[!is.na(controls)])
+
+      ttestResult <-  suppressWarnings(suppressMessages(
+        t.test(cases[!is.na(cases)], controls[!is.na(controls)])
+      ))
+
+      ks_result <- suppressWarnings(suppressMessages(
+        ks.test(cases[!is.na(cases)], controls[!is.na(controls)])
+      ))
 
       # Calculate Cohen's d
       meanCases = mean(cases,na.rm = TRUE)

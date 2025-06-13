@@ -82,23 +82,39 @@ correctEmptyCohortsInCohortsSummary <- function(cohortsSummary) {
   log <- LogTibble$new()
   log$ERROR("", "Cohort is empty")
 
+  hasAllEventsCols <- all(c("histogramBirthYearAllEvents", "sexCountsAllEvents") %in% names(cohortsSummary))
+
+  # Always present fields
   cohortsSummary <- cohortsSummary |>
     dplyr::mutate(
       histogramCohortStartYear = dplyr::if_else(is.na(cohortEntries), emptyHistogram, histogramCohortStartYear),
-      histogramCohortEndYear = dplyr::if_else(is.na(cohortEntries), emptyHistogram, histogramCohortEndYear),
-      histogramBirthYear = dplyr::if_else(is.na(cohortEntries), emptyHistogram, histogramBirthYear),
-      sexCounts = dplyr::if_else(is.na(cohortEntries), emptysexCounts, sexCounts),
-      buildInfo = dplyr::if_else(is.na(cohortEntries), list(log$clone()), buildInfo),
-      cohortEntries = dplyr::if_else(is.na(cohortEntries), 0L, as.integer(cohortEntries)),
-      cohortSubjects = dplyr::if_else(is.na(cohortSubjects), 0L, as.integer(cohortSubjects))
-    ) |>
-    dplyr::select(
-      databaseId, databaseName,
-      cohortId, cohortName, shortName,
-      cohortEntries, cohortSubjects,
-      histogramCohortStartYear, histogramCohortEndYear, histogramBirthYear, sexCounts,
-      buildInfo
+      histogramCohortEndYear   = dplyr::if_else(is.na(cohortEntries), emptyHistogram, histogramCohortEndYear),
+      histogramBirthYear       = dplyr::if_else(is.na(cohortEntries), emptyHistogram, histogramBirthYear),
+      sexCounts                = dplyr::if_else(is.na(cohortEntries), emptysexCounts, sexCounts),
+      buildInfo                = dplyr::if_else(is.na(cohortEntries), list(log$clone()), buildInfo),
+      cohortEntries            = dplyr::if_else(is.na(cohortEntries), 0L, as.integer(cohortEntries)),
+      cohortSubjects           = dplyr::if_else(is.na(cohortSubjects), 0L, as.integer(cohortSubjects))
     )
+
+  if (hasAllEventsCols) {
+    cohortsSummary <- cohortsSummary |>
+      dplyr::mutate(
+        histogramBirthYearAllEvents = dplyr::if_else(is.na(cohortEntries), emptyHistogram, histogramBirthYearAllEvents),
+        sexCountsAllEvents          = dplyr::if_else(is.na(cohortEntries), emptysexCounts, sexCountsAllEvents)
+      )
+  }
+
+  cohortsSummary <- cohortsSummary |>
+    dplyr::select(dplyr::any_of(c(
+      "databaseId", "databaseName",
+      "cohortId", "cohortName", "shortName",
+      "cohortEntries", "cohortSubjects",
+      "histogramCohortStartYear", "histogramCohortEndYear",
+      "histogramBirthYear", "histogramBirthYearAllEvents",
+      "sexCounts", "sexCountsAllEvents",
+      "buildInfo"
+    )))
+
 
   return(cohortsSummary)
 }
