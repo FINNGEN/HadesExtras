@@ -89,7 +89,7 @@ CohortGenerator_generateCohortSet <- function(
       dplyr::mutate(currentChecksum = CohortGenerator::computeChecksum(sql))
 
     recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
-    if (file.exists(recordKeepingFile)) {       
+    if (file.exists(recordKeepingFile)) {
       recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE) |>
         dplyr::rename(previousChecksum = checksum)
 
@@ -97,7 +97,7 @@ CohortGenerator_generateCohortSet <- function(
         dplyr::left_join(recordKeeping, by = c("cohortId" = "cohortId")) |>
         dplyr::filter(is.na(previousChecksum) | currentChecksum != previousChecksum) |>
         dplyr::select(cohortId, cohortName, json, sql, cohortType, currentChecksum)
-    } 
+    }
   }
 
   if (nrow(cohortDefinitionSetCohortDataType) != 0) {
@@ -138,7 +138,7 @@ CohortGenerator_generateCohortSet <- function(
         n_missing_cohort_end = sum(ifelse(is.null(cohort_end_date), 1L, 0L), na.rm = TRUE)
       ) |>
       dplyr::collect()
-    
+
     # compute changes in toAppend
     toAppend <- toAppend |>
       dplyr::filter(!is.na(person_id)) |>
@@ -212,7 +212,7 @@ CohortGenerator_generateCohortSet <- function(
     # correct recordKeepingFile
     if (incremental == TRUE) {
       recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
-      recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE) 
+      recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE)
 
       recordKeeping <- recordKeeping |>
         dplyr::left_join(
@@ -441,6 +441,16 @@ CohortGenerator_getCohortDemograpics <- function(
       dplyr::count(cohort_definition_id, year) |>
       dplyr::collect() |>
       dplyr::nest_by(cohort_definition_id, .key = "histogramBirthYear")
+
+    histogramBirthYearAllEvents <- cohortTbl |>
+      dplyr::left_join(
+        personTbl |> dplyr::select(person_id, year_of_birth),
+        by = c("subject_id" = "person_id")
+      ) |>
+      dplyr::rename(year = year_of_birth) |>
+      dplyr::count(cohort_definition_id, year) |>
+      dplyr::collect() |>
+      dplyr::nest_by(cohort_definition_id, .key = "histogramBirthYearAllEvents")
   }
 
   sexCounts <- tibble::tibble(cohort_definition_id = 0, .rows = 0)
@@ -454,16 +464,33 @@ CohortGenerator_getCohortDemograpics <- function(
         conceptTbl |> dplyr::select(concept_id, concept_name),
         by = c("gender_concept_id" = "concept_id")
       ) |>
+      dplyr::distinct(cohort_definition_id, subject_id, concept_name) |>
       dplyr::count(cohort_definition_id, sex = concept_name) |>
       dplyr::collect() |>
       dplyr::nest_by(cohort_definition_id, .key = "sexCounts")
+
+    sexCountsAllEvents <- cohortTbl |>
+      dplyr::left_join(
+        personTbl |> dplyr::select(person_id, gender_concept_id),
+        by = c("subject_id" = "person_id")
+      ) |>
+      dplyr::left_join(
+        conceptTbl |> dplyr::select(concept_id, concept_name),
+        by = c("gender_concept_id" = "concept_id")
+      ) |>
+      dplyr::count(cohort_definition_id, sex = concept_name) |>
+      dplyr::collect() |>
+      dplyr::nest_by(cohort_definition_id, .key = "sexCountsAllEvents")
   }
 
   cohortDemograpics <- cohortCounts |>
     dplyr::left_join(histogramCohortStartYear, by = c("cohortId" = "cohort_definition_id")) |>
     dplyr::left_join(histogramCohortEndYear, by = c("cohortId" = "cohort_definition_id")) |>
     dplyr::left_join(histogramBirthYear, by = c("cohortId" = "cohort_definition_id")) |>
-    dplyr::left_join(sexCounts, by = c("cohortId" = "cohort_definition_id"))
+    dplyr::left_join(histogramBirthYearAllEvents, by = c("cohortId" = "cohort_definition_id")) |>
+    dplyr::left_join(sexCounts, by = c("cohortId" = "cohort_definition_id")) |>
+    dplyr::left_join(sexCountsAllEvents, by = c("cohortId" = "cohort_definition_id"))
+
 
 
   delta <- Sys.time() - start
@@ -585,7 +612,7 @@ removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 #' CohortGenerator_createCohortTables
 #'
 #' Wrapper for CohortGenerator::createCohortTables, where if bigquery is used, the tables are created using bigrquery::bq_table_create.
-#' 
+#'
 #' @param connectionDetails An object of class \code{connectionDetails} containing database connection details.
 #' @param connection A database connection object created using \code{DatabaseConnector::connect}.
 #' @param cohortDatabaseSchema The schema where the cohort tables will be created.
@@ -596,7 +623,7 @@ removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 #' @importFrom tibble tibble
 #' @importFrom DatabaseConnector connect disconnect
 #' @importFrom CohortGenerator createCohortTables getCohortTableNames
-#' 
+#'
 #' @export
 CohortGenerator_createCohortTables <- function(
   connectionDetails = NULL,
@@ -678,10 +705,10 @@ CohortGenerator_createCohortTables <- function(
         "summaryStatsTable" = "_summary_stats",
         "censorStatsTable" = "_censor_stats"
       )
-      
+
       fullTableName <- paste0(cohortTableNames$cohortTable, tableSuffix)
       bq_table <- bigrquery::bq_table(bq_project, bq_dataset, fullTableName)
-      
+
       if (bigrquery::bq_table_exists(bq_table) && !incremental) {
         message(paste("Replacing bigquery table", fullTableName))
         bigrquery::bq_table_delete(bq_table)
@@ -705,9 +732,9 @@ CohortGenerator_createCohortTables <- function(
 }
 
 #' CohortGenerator_dropCohortStatsTables
-#' 
+#'
 #' Wrapper for CohortGenerator::dropCohortStatsTables, where if bigquery is used, the tables are deleted using bigrquery::bq_table_delete.
-#' 
+#'
 #' @param connectionDetails An object of class \code{connectionDetails} containing database connection details.
 #' @param connection A database connection object created using \code{DatabaseConnector::connect}.
 #' @param cohortDatabaseSchema The schema where the cohort tables will be created.
@@ -747,7 +774,7 @@ CohortGenerator_dropCohortStatsTables <- function(
     for (suffix in tableSuffixes) {
       tableName <- paste0(cohortTableNames$cohortTable, suffix)
       bq_table <- bigrquery::bq_table(bq_project, bq_dataset, tableName)
-      
+
       if (bigrquery::bq_table_exists(bq_table)) {
         message(paste("Deleting bigquery table", tableName))
         bigrquery::bq_table_delete(bq_table)
