@@ -1,3 +1,7 @@
+# HadesExtras 1.1.2
+- Added demographic summaries for events to CohortTableHandler
+- Added comparison function to CohortTableHandler
+
 # HadesExtras 1.1.1
 - Fixed bug in covariate settings for DDD ATC groups
 - Fixed analysisRef.csv for ATC groups
