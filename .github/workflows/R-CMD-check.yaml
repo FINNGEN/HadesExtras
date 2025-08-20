@@ -35,7 +35,6 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GCP_SERVICE_KEY_JSON: ${{ secrets.GCP_SERVICE_KEY_JSON }}
-      GCP_SERVICE_KEY: /tmp/gcp-credentials.json
       R_KEEP_PKG_SOURCE: yes
       HADESEXTAS_TESTING_ENVIRONMENT: ${{ matrix.env_config.HADESEXTAS_TESTING_ENVIRONMENT }}
       EUNOMIA_DATA_FOLDER: ${{ github.workspace }}/eunomia_data
@@ -64,8 +63,13 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Create GCP service key 
-        run: echo $GCP_SERVICE_KEY_JSON  > /tmp/gcp-credentials.json
+      - name: Create GCP service key (Unix)
+        if: runner.os != 'Windows'
+        run: echo $GCP_SERVICE_KEY_JSON > /tmp/gcp-credentials.json
+
+      - name: Create GCP service key (Windows)
+        if: runner.os == 'Windows'
+        run: echo $GCP_SERVICE_KEY_JSON > $env:TEMP\gcp-credentials.json
 
       - uses: r-lib/actions/check-r-package@v2
         with:
