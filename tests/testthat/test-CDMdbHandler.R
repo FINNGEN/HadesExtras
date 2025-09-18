@@ -6,7 +6,8 @@ test_that("createConnectionHandler works", {
   })
 
   withr::defer({
-    CDMdb$finalize()
+    CDMdb <- NULL
+    gc()
   })
 
   CDMdb |> checkmate::expect_class("CDMdbHandler")
@@ -30,7 +31,8 @@ test_that("createCDMdbHandlerFromList works with basicChecks", {
   )
 
   withr::defer({
-    CDMdb$finalize()
+    CDMdb <- NULL
+    gc()
   })
 
   CDMdb |> checkmate::expect_class("CDMdbHandler")
@@ -53,8 +55,7 @@ test_that("createCDMdbHandlerFromList includes resultsDatabaseSchema", {
   config <- test_cohortTableHandlerConfig
 
   CDMdb <- createCDMdbHandlerFromList(config)
-  
+
   CDMdb$resultsDatabaseSchema |> checkmate::assertString()
   CDMdb$resultsDatabaseSchema |> expect_equal(CDMdb$cdmDatabaseSchema)
-  
 })

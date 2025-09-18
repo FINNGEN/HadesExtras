@@ -43,7 +43,14 @@ CDMdbHandler <- R6::R6Class(
     .CDMInfo = NULL,
     #
     .getTblVocabularySchema = NULL,
-    .getTblCDMSchema = NULL
+    .getTblCDMSchema = NULL,
+    
+    # Finalize method
+    # @description
+    # Closes the connection if active.
+    finalize = function() {
+      private$.connectionHandler$finalize()
+    }
   ),
   active = list(
     databaseId = function() {
@@ -123,12 +130,6 @@ CDMdbHandler <- R6::R6Class(
       self$loadConnection(loadConnectionChecksLevel)
     },
 
-    #' Finalize method
-    #' @description
-    #' Closes the connection if active.
-    finalize = function() {
-      private$.connectionHandler$finalize()
-    },
 
     #' Reload connection
     #' @description
