@@ -42,7 +42,9 @@ CohortTableHandler <- R6::R6Class(
     .cohortDemograpics = NULL,
     .cohortsOverlap = NULL,
     
-    # Finalize method - closes the connection if active
+    # Finalize method
+    # @description
+    # Closes the connection if active.
     finalize = function() {
       CohortGenerator_dropCohortStatsTables(
         connection = self$connectionHandler$getConnection(),

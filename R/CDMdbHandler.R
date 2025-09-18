@@ -46,9 +46,11 @@ CDMdbHandler <- R6::R6Class(
     .getTblVocabularySchema = NULL,
     .getTblCDMSchema = NULL,
     
-    # Finalize method - closes the connection if active
+    # Finalize method
+    # @description
+    # Closes the connection if active.
     finalize = function() {
-      private$.connectionHandler$closeConnection()
+      private$.connectionHandler$finalize()
     }
   ),
   active = list(

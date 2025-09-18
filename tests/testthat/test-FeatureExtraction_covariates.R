@@ -53,7 +53,6 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
 #
 # custom covariate settings
 #
-
 test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with custom YearOfBirth", {
   analysisIds <- c(41)
   temporalStartDays <- c(1, 2, 3)
@@ -178,3 +177,23 @@ test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all
     expect_length(0)
 })
 
+
+analysisIds <- c(1, 41, 101, 141)
+
+p  <- profvis::profvis({
+  covariateData <- FeatureExtraction::getDbCovariateData(
+    connection = connection,
+    cohortTable = cohortTableName,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    covariateSettings = covariateSettings,
+    cohortIds = c(1, 2),
+    aggregated = TRUE, 
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
+  )
+})
+tempfile <- tempfile(fileext = ".html")
+htmlwidgets::saveWidget(p, tempfile)
+
+# Can open in browser from R
+browseURL(tempfile)
