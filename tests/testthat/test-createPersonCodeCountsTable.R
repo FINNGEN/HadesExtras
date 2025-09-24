@@ -1,3 +1,50 @@
+test_that("createPersonCodeCountsTable", {
+
+  CDMdb <- createCDMdbHandlerFromList(test_cohortTableHandlerConfig)
+  withr::defer({
+    rm(CDMdb)
+    gc()
+  })
+
+  personCodeCountsTable <- "person_code_counts_test"
+
+  createPersonCodeCountsTable(CDMdb, personCodeCountsTable = personCodeCountsTable)
+
+  personCodeCounts <- CDMdb$connectionHandler$tbl(personCodeCountsTable, CDMdb$resultsDatabaseSchema) 
+
+  nRows  <- personCodeCounts |> dplyr::count() |> dplyr::pull(n) 
+  nRows |> expect_gt(0)
+  # analysis_type
+  personCodeCounts |> dplyr::filter(is.na(analysis_type)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # person_id
+  personCodeCounts |> dplyr::filter(is.na(person_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # concept_id
+  personCodeCounts |> dplyr::filter(is.na(concept_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # n_records
+  personCodeCounts |> dplyr::filter(is.na(n_records)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # first_date
+  personCodeCounts |> dplyr::filter(is.na(first_date)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # first_age
+  personCodeCounts |> dplyr::filter(is.na(first_age)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_value
+  personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & analysis_type != 'ATC' & !is.na(aggregated_value)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_value_unit
+  personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & analysis_type != 'ATC' & !is.na(aggregated_value)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_category
+  personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & !is.na(aggregated_category)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+
+  #personCodeCounts |> dplyr::group_by(analysis_type) |> dplyr::summarize(n=dplyr::n_distinct(concept_id))
+})
+
+
+
+
+
+
+
 test_that("createPersonCodeAtomicCountsTable condition", {
 
   CDMdb <- createCDMdbHandlerFromList(test_cohortTableHandlerConfig)
@@ -6,7 +53,7 @@ test_that("createPersonCodeAtomicCountsTable condition", {
     gc()
   })
 
-  personCodeAtomicCountsTable <- "person_code_atomic_counts"
+  personCodeAtomicCountsTable <- "person_code_atomic_counts_test"
 
   domains <- tibble::tribble(
     ~domain_id, ~table_name, ~concept_id_field, ~start_date_field, ~end_date_field, ~maps_to_concept_id_field,
@@ -51,7 +98,7 @@ test_that("createPersonCodeAtomicCountsTable Drug", {
     gc()
   })
 
-  personCodeAtomicCountsTable <- "person_code_atomic_counts"
+  personCodeAtomicCountsTable <- "person_code_atomic_counts_test"
 
   domains <- tibble::tribble(
     ~domain_id, ~table_name, ~concept_id_field, ~start_date_field, ~end_date_field, ~maps_to_concept_id_field,
@@ -96,7 +143,7 @@ test_that("createPersonCodeAtomicCountsTable Measurement", {
     gc()
   })
 
-  personCodeAtomicCountsTable <- "person_code_atomic_counts"
+  personCodeAtomicCountsTable <- "person_code_atomic_counts_test"
 
   domains <- tibble::tribble(
     ~domain_id, ~table_name, ~concept_id_field, ~start_date_field, ~end_date_field, ~maps_to_concept_id_field,
@@ -137,7 +184,7 @@ test_that("createPersonCodeAtomicCountsTable all", {
     gc()
   })
 
-  personCodeAtomicCountsTable <- "person_code_atomic_counts"
+  personCodeAtomicCountsTable <- "person_code_atomic_counts_test"
 
   createPersonCodeAtomicCountsTable(CDMdb, personCodeAtomicCountsTable = personCodeAtomicCountsTable)
 

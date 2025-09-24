@@ -1,9 +1,47 @@
+createPersonCodeCountsTable <- function(
+    CDMdbHandler,
+    personCodeCountsTable = "person_code_counts") {
+    #
+    # VALIDATE
+    #
+    CDMdbHandler |> checkmate::assertClass("CDMdbHandler")
+    connection <- CDMdbHandler$connectionHandler$getConnection()
+    vocabularyDatabaseSchema <- CDMdbHandler$vocabularyDatabaseSchema
+    cdmDatabaseSchema <- CDMdbHandler$cdmDatabaseSchema
+    resultsDatabaseSchema <- CDMdbHandler$resultsDatabaseSchema
+
+    personCodeCountsTable |> checkmate::assertString()
+
+
+    #
+    # FUNCTION
+    #
+
+    # - Create atomic person code counts table
+    personCodeAtomicCountsTable <- paste0("atomic_", personCodeCountsTable)
+
+    createPersonCodeAtomicCountsTable(CDMdbHandler, personCodeAtomicCountsTable = personCodeAtomicCountsTable)
+    
+    # - Create code counts table
+    sqlPath <- system.file("sql", "sql_server", "CreateCodeCountsTable.sql", package = "HadesExtras")
+    baseSql <- SqlRender::readSql(sqlPath)
+    sql <- SqlRender::render(baseSql,
+        resultsDatabaseSchema = resultsDatabaseSchema,
+        personCodeCountsTable = personCodeCountsTable,
+        personCodeAtomicCountsTable = personCodeAtomicCountsTable,
+        cdmDatabaseSchema = cdmDatabaseSchema
+    )
+    sql <- SqlRender::translate(sql, targetDialect = connection@dbms)
+    DatabaseConnector::executeSql(connection, sql)
+
+    
+}
 
 
 createPersonCodeAtomicCountsTable <- function(
     CDMdbHandler,
-    domains = NULL, 
-    personCodeAtomicCountsTable = "person_code_atomic_counts") {
+    domains = NULL,
+    personCodeAtomicCountsTable = "atomic_person_code_counts") {
     #
     # VALIDATE
     #
@@ -27,7 +65,9 @@ createPersonCodeAtomicCountsTable <- function(
     }
 
     domains |> checkmate::assertDataFrame()
-    domains |> names() |> checkmate::assertSetEqual(c("domain_id", "table_name", "concept_id_field", "start_date_field", "end_date_field", "maps_to_concept_id_field"))
+    domains |>
+        names() |>
+        checkmate::assertSetEqual(c("domain_id", "table_name", "concept_id_field", "start_date_field", "end_date_field", "maps_to_concept_id_field"))
 
     #
     # FUNCTION
@@ -40,7 +80,7 @@ createPersonCodeAtomicCountsTable <- function(
         person_id INTEGER,
         concept_id INTEGER,
         maps_to_concept_id INTEGER,
-        n_records INTEGER, 
+        n_records INTEGER,
         first_date DATE,
         first_age INTEGER,
         aggregated_value FLOAT,
@@ -55,7 +95,7 @@ createPersonCodeAtomicCountsTable <- function(
     DatabaseConnector::executeSql(connection, sql)
 
     # - Append to code atomic counts table
-    sqlPath <- system.file("sql", "sql_server", "appendToPersonAtomicCodeCountsTable.sql", package = "HadesExtras")
+    sqlPath <- system.file("sql", "sql_server", "AppendToPersonAtomicCodeCountsTable.sql", package = "HadesExtras")
     baseSql <- SqlRender::readSql(sqlPath)
 
     for (i in 1:nrow(domains)) {
