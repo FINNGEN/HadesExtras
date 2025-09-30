@@ -47,8 +47,7 @@ Remotes:
     OHDSI/CohortGenerator,
     OHDSI/ResultModelManager, 
     OHDSI/ROhdsiWebApi,
-    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI,
-    OHDSI/FeatureExtraction@develop
+    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI
 Suggests: 
     devtools,
     ROhdsiWebApi,
