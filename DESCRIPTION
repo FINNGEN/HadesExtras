@@ -35,7 +35,6 @@ Imports:
     tibble,
     tidyr,
     validate,
-    DatabaseConnector,
     FeatureExtraction,
     CohortGenerator,
     ResultModelManager,
@@ -46,7 +45,8 @@ Imports:
 Remotes: 
     OHDSI/CohortGenerator,
     OHDSI/ResultModelManager, 
-    OHDSI/ROhdsiWebApi
+    OHDSI/ROhdsiWebApi,
+    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI
 Suggests: 
     devtools,
     ROhdsiWebApi,
