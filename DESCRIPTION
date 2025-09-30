@@ -46,8 +46,7 @@ Imports:
 Remotes: 
     OHDSI/CohortGenerator,
     OHDSI/ResultModelManager, 
-    OHDSI/ROhdsiWebApi,
-    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI
+    OHDSI/ROhdsiWebApi
 Suggests: 
     devtools,
     ROhdsiWebApi,
