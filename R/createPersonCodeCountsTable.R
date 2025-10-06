@@ -1,3 +1,18 @@
+#' Create Person Code Counts Table
+#'
+#' Creates a person code counts table by first creating an atomic person code counts table
+#' and then aggregating the data into a final code counts table.
+#'
+#' @param CDMdbHandler A CDMdbHandler object containing database connection details
+#' @param personCodeCountsTable Name of the person code counts table to create (default: "person_code_counts")
+#'
+#' @return No return value, creates tables in the database
+#'
+#' @importFrom checkmate assertClass assertString
+#' @importFrom SqlRender readSql render translate
+#' @importFrom DatabaseConnector executeSql
+#'
+#' @export
 createPersonCodeCountsTable <- function(
     CDMdbHandler,
     personCodeCountsTable = "person_code_counts") {
@@ -38,6 +53,26 @@ createPersonCodeCountsTable <- function(
 }
 
 
+#' Create Person Code Atomic Counts Table
+#'
+#' Creates an atomic person code counts table by processing different domains (Condition, Procedure, 
+#' Measurement, Drug, Observation, Device) and aggregating code counts per person.
+#'
+#' @param CDMdbHandler A CDMdbHandler object containing database connection details
+#' @param domains A data frame specifying domain configurations. If NULL, uses default domains.
+#'   Must contain columns: domain_id, table_name, concept_id_field, start_date_field, 
+#'   end_date_field, maps_to_concept_id_field
+#' @param personCodeAtomicCountsTable Name of the atomic person code counts table to create 
+#'   (default: "atomic_person_code_counts")
+#'
+#' @return No return value, creates tables in the database
+#'
+#' @importFrom checkmate assertClass assertDataFrame assertSetEqual
+#' @importFrom tibble tribble
+#' @importFrom SqlRender render translate
+#' @importFrom DatabaseConnector executeSql
+#'
+#' @export
 createPersonCodeAtomicCountsTable <- function(
     CDMdbHandler,
     domains = NULL,

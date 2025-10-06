@@ -29,6 +29,8 @@ test_that("createPersonCodeCountsTable", {
   # aggregated_value
   personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & analysis_type != 'ATC' & !is.na(aggregated_value)) |> 
   dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  personCodeCounts |> dplyr::filter(analysis_type ==  'ATC' & !is.na(aggregated_value)) |>
+   dplyr::count() |> dplyr::pull(n) |> expect_gt(0)
   # aggregated_value_unit
   personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & analysis_type != 'ATC' & !is.na(aggregated_value)) |> 
   dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
@@ -82,7 +84,7 @@ test_that("createPersonCodeAtomicCountsTable condition", {
   # first_age
   atomicCountsTable |> dplyr::filter(is.na(first_age)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # aggregated_value
-   atomicCountsTable |> dplyr::filter(is.na(aggregated_value)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
+  atomicCountsTable |> dplyr::filter(is.na(aggregated_value)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
   # aggregated_value_unit
   atomicCountsTable |> dplyr::filter(aggregated_value_unit == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
   # aggregated_category
