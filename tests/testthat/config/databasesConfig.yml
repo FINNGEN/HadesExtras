@@ -40,8 +40,7 @@ E2:
     webapiurl: https://api.ohdsi.org/WebAPI
     sourcekey:
     resultsshchema:
-
-    # EUNOMIA 2
+# EUNOMIA 2
 E3:
   cohortTableHandler:
     database:
@@ -62,7 +61,7 @@ E3:
     webapiurl: https://api.ohdsi.org/wrong
     sourcekey:
     resultsshchema:
-# FinnGen
+# EunomiaFinnGen
 E4:
   cohortTableHandler:
     database:
@@ -83,4 +82,45 @@ E4:
     webapiurl: https://api.ohdsi.org/wrong
     sourcekey:
     resultsshchema:
-
+# BigQuery lite
+BQ5K:
+  cohortTableHandler:
+    database:
+      databaseId: BQ5K
+      databaseName: bigquery5k
+      databaseDescription: BigQuery database
+    connection:
+      connectionDetailsSettings:
+          dbms: bigquery
+          drv: bigrquery::bigquery()
+          project: atlas-development-270609
+          billing: atlas-development-270609
+          bigint: integer64
+      tempEmulationSchema: atlas-development-270609.sandbox
+    cdm:
+        cdmDatabaseSchema: atlas-development-270609.finngen_omop_r13_v3_5k
+        vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_r13_v3_5k
+    cohortTable:
+        cohortDatabaseSchema: atlas-development-270609.sandbox
+        cohortTableName: hadesextras_test_cohort_table_<timestamp>
+# BigQuery full
+BQ5:
+  cohortTableHandler:
+    database:
+      databaseId: BQ
+      databaseName: bigquery
+      databaseDescription: BigQuery database with 500k patients
+    connection:
+      connectionDetailsSettings:
+          dbms: bigquery
+          drv: bigrquery::bigquery()
+          project: atlas-development-270609
+          billing: atlas-development-270609
+          bigint: integer64
+      tempEmulationSchema: atlas-development-270609.sandbox
+    cdm:
+        cdmDatabaseSchema: atlas-development-270609.finngen_omop_r13_v3
+        vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_r13_v3
+    cohortTable:
+        cohortDatabaseSchema: atlas-development-270609.sandbox
+        cohortTableName: hadesextras_test_cohort_table_<timestamp>
