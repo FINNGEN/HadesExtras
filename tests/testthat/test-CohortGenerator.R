@@ -2,7 +2,7 @@
 # CohortGenerator_createCohortTables
 #
 test_that("CohortGenerator_createCohortTables creates a cohort table", {
-  testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
+  testthat::skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
 
   connection <- helper_createNewConnection()
   withr::defer({
@@ -820,7 +820,7 @@ test_that("removeCohortIdsFromCohortOverlapsTable works", {
 # CohortGenerator_dropCohortStatsTables
 #
 test_that("CohortGenerator_dropCohortStatsTables works", {
-  testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
+  testthat::skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
 
   connection <- helper_createNewConnection()
   withr::defer({
@@ -853,3 +853,92 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
   bq_table <- bigrquery::bq_table(bq_project, bq_dataset, cohortTableName)
   bigrquery::bq_table_exists(bq_table) |> expect_false()
 })
+
+
+#
+# CohortGenerator_getCohortDemograpics
+#
+test_that("CohortGenerator_getCohortDemograpics works", {
+  # get test settings
+  connection <- helper_createNewConnection()
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  vocabularyDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- "test_cohort"
+
+  # Create cohort table
+  CohortGenerator_createCohortTables(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = CohortGenerator::getCohortTableNames(cohortTableName)
+  )
+
+  # Insert test cohort data
+  cohort_data <- tibble::tibble(
+    cohort_definition_id = c(rep(10, 3), rep(20, 3)),
+    subject_id = c(1, 2, 3, 1, 2, 4),
+    cohort_start_date = rep(as.Date(c("2020-01-01", "2021-01-01")), 3),
+    cohort_end_date = rep(as.Date(c("2020-01-03", "2021-01-04")), 3)
+  )
+
+  suppressWarnings({
+    DatabaseConnector::insertTable(
+      connection = connection,
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = cohort_data
+    )
+  })
+
+  # Test the function
+  cohortDemographics <- CohortGenerator_getCohortDemograpics(
+    connection = connection,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTable = cohortTableName,
+    cohortIds = c(10, 20)
+  )
+
+  # Expectations
+  
+  cohortDemographics |>
+    names() |>
+    checkmate::expect_names(must.include = c("cohortId", "cohortEntries", "cohortSubjects", "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", "sexCountsAllEvents"))
+  cohortDemographics |>
+    nrow() |>
+    expect_equal(2)
+  cohortDemographics |>
+    dplyr::filter(cohortId == 10) |>
+    dplyr::pull("cohortEntries") |>
+    expect_equal(3)
+  cohortDemographics |>
+    dplyr::filter(cohortId == 10) |>
+    dplyr::pull("cohortSubjects") |>
+    expect_equal(3)
+  cohortDemographics |>
+    purrr::pluck("histogramCohortStartYear", 1) |>
+    expect_equal(tibble::tibble(year = c('2020', '2021'), n = c(2, 1)))
+  cohortDemographics |>
+    purrr::pluck("histogramCohortEndYear", 1) |>
+    expect_equal(tibble::tibble(year = c('2020', '2021'), n = c(2, 1)))
+  cohortDemographics |>
+    purrr::pluck("histogramBirthYear", 1) |>
+    expect_equal(tibble::tibble(year = c('1916', '1920', '1949'), n = c(1, 1, 1)))
+  cohortDemographics |>
+    purrr::pluck("histogramBirthYearAllEvents", 1) |>
+    expect_equal(tibble::tibble(year = c('1916', '1920', '1949'), n = c(1, 1, 1)))
+  cohortDemographics |>
+    purrr::pluck("sexCounts", 1) |>
+    expect_equal(tibble::tibble(sex = c('FEMALE', 'MALE'), n = c(1, 2)))
+  cohortDemographics |>
+    purrr::pluck("sexCountsAllEvents", 1) |>
+    expect_equal(tibble::tibble(sex = c('FEMALE', 'MALE'), n = c(1, 2)))
+})
+
+

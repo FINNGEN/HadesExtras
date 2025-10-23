@@ -49,7 +49,7 @@ CDMdbHandler <- R6::R6Class(
     #' @description
     #' Closes the connection if active.
     finalize = function() {
-      private$.connectionHandler$finalize()
+      private$.connectionHandler$closeConnection()
     }
   ),
   active = list(
@@ -128,13 +128,6 @@ CDMdbHandler <- R6::R6Class(
       private$.resultsDatabaseSchema <- resultsDatabaseSchema
 
       self$loadConnection(loadConnectionChecksLevel)
-    },
-
-    #' Finalize method
-    #' @description
-    #' Closes the connection if active.
-    finalize = function() {
-      private$.connectionHandler$finalize()
     },
 
     #' Reload connection

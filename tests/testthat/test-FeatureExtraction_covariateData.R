@@ -161,7 +161,7 @@ test_that("covariateData_ATCgroups works", {
 
 
 test_that("covariateData_ATCgroups returns correct value", {
-  skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
+  skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
 
   connection <- helper_createNewConnection()
   withr::defer({
@@ -229,7 +229,7 @@ test_that("covariateData_ATCgroups returns correct value", {
 
 
 test_that("covariateData_DDD_ATCgroups works", {
-  skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
+  skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
   connection <- helper_createNewConnection()
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)

@@ -491,9 +491,12 @@ CohortTableHandler <- R6::R6Class(
     #' to evaluate if year of births in the two cohorts have similar distribution.
     #' @param selected_cohortId1 The cohort id of the first cohort.
     #' @param selected_cohortId2 The cohort id of the second cohort.
+    #' @param testFor The type of test to perform. "Subjects" to test the year of birth of the subjects in the cohorts, "allEvents" to test the year of birth of all events in the cohorts.
     #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
     #'
-    getYearOfBirthTests = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
+    getYearOfBirthTests = function(selected_cohortId1, selected_cohortId2, testFor="Subjects") {
+
+      testFor |> checkmate::assertChoice(c("Subjects", "allEvents"))
 
       if(testFor == "allEvents"){
         yearOfBirthCase <- self$getCohortsSummary(includeAllEvents=T) |>
@@ -527,7 +530,6 @@ CohortTableHandler <- R6::R6Class(
           )
         ))
       }
-
 
       ttestResult <-  suppressWarnings(suppressMessages(
         t.test(cases[!is.na(cases)], controls[!is.na(controls)])

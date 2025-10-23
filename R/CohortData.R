@@ -283,24 +283,24 @@ getCohortDataFromCohortTable <- function(
   #
   # Function
   sql <- SqlRender::readSql(system.file("sql/sql_server/GetCohortDataFromCohortTables.sql", package = "HadesExtras", mustWork = TRUE))
-  sql <- SqlRender::render(
+  cohortTable <- DatabaseConnector::renderTranslateQuerySql(
+    connection = connection,
     sql = sql,
     cdm_database_schema = cdmDatabaseSchema,
     cohort_database_schema = cohortDatabaseSchema,
     cohort_table = cohortTable,
     cohort_ids = paste0("(", paste0(cohortNameIds$cohortId, collapse = " ,"), ")"),
     warnOnMissingParameters = TRUE
-  )
-  sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = connection@dbms
-  )
-  cohortTable <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  ) |>
     tibble::as_tibble()
 
   cohortData <- cohortTable |>
     dplyr::left_join(cohortNameIds, by = c("cohort_definition_id" = "cohortId")) |>
-    dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date)
+    dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date) |> 
+    dplyr::mutate(
+      cohort_start_date = as.Date(cohort_start_date),
+      cohort_end_date = as.Date(cohort_end_date)
+    )
 
   return(cohortData)
 }

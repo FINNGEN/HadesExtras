@@ -56,7 +56,6 @@ testthat::test_that("test that splitString errors", {
 
 
 # .operationStringToBinaryTree
-
 testthat::test_that("test that .operationStringToBinaryTreeworks", {
   .operationStringToBinaryTree("2Upd3") |>
     expect_equal(list(left = 2, operation = "Upd", right = 3))
@@ -139,7 +138,7 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  result <- DatabaseConnector::querySql(connection, sql) |>
     tibble::as_tibble() |>
     dplyr::arrange(subject_id)
   # results
@@ -198,7 +197,7 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  result <- DatabaseConnector::querySql(connection, sql) |>
     tibble::as_tibble() |>
     dplyr::arrange(subject_id)
 
@@ -262,7 +261,7 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  result <- DatabaseConnector::querySql(connection, sql) |>
     tibble::as_tibble() |>
     dplyr::arrange(subject_id)
 
@@ -334,7 +333,7 @@ testthat::test_that("test that operationStringToSQL works", {
     targetDialect = connection@dbms
   )
 
-  result <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  result <- DatabaseConnector::querySql(connection, sql) |>
     tibble::as_tibble() |>
     dplyr::arrange(subject_id)
 

@@ -44,11 +44,8 @@ Imports:
     yaml,
     Andromeda
 Remotes: 
-    OHDSI/CohortGenerator,
-    OHDSI/ResultModelManager, 
     OHDSI/ROhdsiWebApi,
-    javier-gracia-tabuenca-tuni/DatabaseConnector@bigquery-DBI-2,
-    OHDSI/FeatureExtraction@develop
+    javier-gracia-tabuenca-tuni/DatabaseConnector@bigquery-DBI-2
 Suggests: 
     devtools,
     ROhdsiWebApi,

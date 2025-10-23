@@ -153,3 +153,4 @@ test_that(" change cohort ids", {
 
   cohortCounts$cohortId |> expect_equal(c(10, 20))
 })
+

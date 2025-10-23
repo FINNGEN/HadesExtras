@@ -140,7 +140,6 @@ test_that(" cohortDataToCohortDefinitionSet works with ", {
 #
 # getCohortDataFromCohortTable
 #
-
 test_that("getCohortDataFromCohortTable returns a cohort", {
   connection <- helper_createNewConnection()
   withr::defer({
