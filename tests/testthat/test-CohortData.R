@@ -98,10 +98,10 @@ test_that(" cohortDataToCohortDefinitionSet works", {
     expect_true()
   (cohortDefinitionSet |> pull(sql) |> unique() |> length() == cohortDefinitionSet |> nrow()) |> expect_true()
   cohortDefinitionSet$sql[[1]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 1") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 1") |>
     expect_true()
   cohortDefinitionSet$sql[[2]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 2") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 2") |>
     expect_true()
 })
 
@@ -127,10 +127,10 @@ test_that(" cohortDataToCohortDefinitionSet works with ", {
     expect_true()
   (cohortDefinitionSet |> pull(sql) |> unique() |> length() == cohortDefinitionSet |> nrow()) |> expect_true()
   cohortDefinitionSet$sql[[1]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 33") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 33") |>
     expect_true()
   cohortDefinitionSet$sql[[2]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 44") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 44") |>
     expect_true()
 })
 

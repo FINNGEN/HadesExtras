@@ -862,10 +862,10 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
 #
 test_that("CohortGenerator_getCohortDemograpics works", {
   # get test settings
-  connection <- helper_createNewConnection()
+  connection2 <- helper_createNewConnection()
   withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
+    DatabaseConnector::dropEmulatedTempTables(connection2)
+    DatabaseConnector::disconnect(connection2)
   })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
@@ -875,7 +875,7 @@ test_that("CohortGenerator_getCohortDemograpics works", {
 
   # Create cohort table
   CohortGenerator_createCohortTables(
-    connection = connection,
+    connection = connection2,
     cohortDatabaseSchema = cohortDatabaseSchema,
     cohortTableNames = CohortGenerator::getCohortTableNames(cohortTableName)
   )
@@ -890,7 +890,7 @@ test_that("CohortGenerator_getCohortDemograpics works", {
 
   suppressWarnings({
     DatabaseConnector::insertTable(
-      connection = connection,
+      connection = connection2,
       databaseSchema = cohortDatabaseSchema,
       tableName = cohortTableName,
       data = cohort_data
@@ -899,7 +899,7 @@ test_that("CohortGenerator_getCohortDemograpics works", {
 
   # Test the function
   cohortDemographics <- CohortGenerator_getCohortDemograpics(
-    connection = connection,
+    connection = connection2,
     cdmDatabaseSchema = cdmDatabaseSchema,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
     cohortDatabaseSchema = cohortDatabaseSchema,

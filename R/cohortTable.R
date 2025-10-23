@@ -115,7 +115,7 @@ getCohortNamesFromCohortDefinitionTable <- function(
   # Function
   #
   sql <- "SELECT cohort_definition_id, cohort_definition_name, cohort_definition_description FROM @cohort_database_schema.@cohort_definition_table"
-  cohortDefinitionTable <- SqlRender::renderTranslateQuerySql(
+  cohortDefinitionTable <- DatabaseConnector::renderTranslateQuerySql(
     connection = connection,
     sql = sql,
     cohort_database_schema = cohortDatabaseSchema,
