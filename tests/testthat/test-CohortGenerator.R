@@ -137,6 +137,7 @@ test_that("cohortDataToCohortDefinitionSet works", {
   )
 
   # function
+  start_time <- Sys.time()
   cohortGeneratorResults <- CohortGenerator_generateCohortSet(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -145,7 +146,8 @@ test_that("cohortDataToCohortDefinitionSet works", {
     cohortTableNames = getCohortTableNames(cohortTableName),
     incremental = FALSE
   )
-
+  end_time <- Sys.time()
+  print(end_time - start_time)
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
   cohortGeneratorResults |>

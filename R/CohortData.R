@@ -173,7 +173,7 @@ cohortDataToCohortDefinitionSet <- function(
   #
   # Function
   #
-  sqlToRender <- SqlRender::readSql(system.file("sql/sql_server/ImportCohortTable.sql", package = "HadesExtras", mustWork = TRUE))
+  sqlToRender <- SqlRender::readSql(system.file("sql/sql_server/CohortDataToCohortDefinitionSet.sql", package = "HadesExtras", mustWork = TRUE))
 
   cohortDefinitionSet <- cohortData |>
     tidyr::nest(.key = "cohort", .by = c("cohort_name")) |>
@@ -189,8 +189,7 @@ cohortDataToCohortDefinitionSet <- function(
             "--", digest::digest(.y), "\n", # Digest inserted for incremental mode to detect changes in cohortData
             SqlRender::render(
               sql = sqlToRender,
-              source_cohort_id = .x,
-              is_temp_table = TRUE
+              source_cohort_id = .x
             )
           )
         }
