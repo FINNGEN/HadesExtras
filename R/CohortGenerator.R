@@ -107,7 +107,7 @@ CohortGenerator_generateCohortSet <- function(
     # Connect to tables and copy cohortData to database
     personTbl <- dplyr::tbl(connection, DBI::Id(schema = cdmDatabaseSchema, table = "person"))
     observationPeriodTable <- dplyr::tbl(connection, DBI::Id(schema = cdmDatabaseSchema, table = "observation_period"))
-    DatabaseConnector::insertTable(connection, tableName = "cohortData", data = cohortData, tempTable = TRUE)
+    DatabaseConnector::insertTable(connection, tableName = "cohortData", data = cohortData, tempTable = TRUE, createTable = TRUE )
     cohortDataTable <- dplyr::tbl(connection, I(SqlRender::translate(sprintf("#%s", "cohortData"), targetDialect = connection@dbms)))
 
     # join to cohort_data_table cohort_names_table.cohort_name; person.person_id; observation_period period dates
@@ -139,7 +139,7 @@ CohortGenerator_generateCohortSet <- function(
         n_missing_cohort_end = sum(ifelse(is.null(cohort_end_date), 1L, 0L), na.rm = TRUE)
       ) |>
       dplyr::collect()
-
+browser()
     # compute changes in toAppend
     toAppend <- toAppend |>
       dplyr::filter(!is.na(person_id)) |>

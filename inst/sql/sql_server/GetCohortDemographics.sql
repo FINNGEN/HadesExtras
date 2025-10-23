@@ -38,7 +38,7 @@ WITH demographics_data AS (
       COUNT(*) as counts
     FROM @cohort_database_schema.@cohort_table
     {@cohort_ids != ''} ? {WHERE cohort_definition_id IN (@cohort_ids)}
-    GROUP BY cohort_definition_id, YEAR(cohort_start_date)
+    GROUP BY cohort_definition_id, bin
     
     UNION ALL
   }
@@ -51,7 +51,7 @@ WITH demographics_data AS (
       COUNT(*) as counts
     FROM @cohort_database_schema.@cohort_table
     {@cohort_ids != ''} ? {WHERE cohort_definition_id IN (@cohort_ids)}
-    GROUP BY cohort_definition_id, YEAR(cohort_end_date)
+    GROUP BY cohort_definition_id, bin
     
     UNION ALL
   }
@@ -66,7 +66,7 @@ WITH demographics_data AS (
     INNER JOIN @cdm_database_schema.person p
       ON c.subject_id = p.person_id
     {@cohort_ids != ''} ? {WHERE c.cohort_definition_id IN (@cohort_ids)}
-    GROUP BY c.cohort_definition_id, p.year_of_birth
+    GROUP BY c.cohort_definition_id, bin
     
     UNION ALL
   }
@@ -81,7 +81,7 @@ WITH demographics_data AS (
     INNER JOIN @cdm_database_schema.person p
       ON c.subject_id = p.person_id
     {@cohort_ids != ''} ? {WHERE c.cohort_definition_id IN (@cohort_ids)}
-    GROUP BY c.cohort_definition_id, p.year_of_birth
+    GROUP BY c.cohort_definition_id, bin
     
     UNION ALL
   }
@@ -98,7 +98,7 @@ WITH demographics_data AS (
     LEFT JOIN @vocabulary_database_schema.concept concept
       ON p.gender_concept_id = concept.concept_id
     {@cohort_ids != ''} ? {WHERE c.cohort_definition_id IN (@cohort_ids)}
-    GROUP BY c.cohort_definition_id, concept_name
+    GROUP BY c.cohort_definition_id, bin
     
     UNION ALL
   }
@@ -115,7 +115,7 @@ WITH demographics_data AS (
     LEFT JOIN @vocabulary_database_schema.concept concept
       ON p.gender_concept_id = concept.concept_id
     {@cohort_ids != ''} ? {WHERE c.cohort_definition_id IN (@cohort_ids)}
-    GROUP BY c.cohort_definition_id, concept_name
+    GROUP BY c.cohort_definition_id, bin
     
     UNION ALL
   }
@@ -126,6 +126,7 @@ WITH demographics_data AS (
     NULL as feature,
     NULL as bin,
     NULL as counts
+  FROM (SELECT 1 as dummy) dummy_table
   WHERE 1 = 0
 )
 SELECT 

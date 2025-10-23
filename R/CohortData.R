@@ -246,8 +246,8 @@ cohortDataToCohortDefinitionSet <- function(
 #' It validates the input parameters, establishes a database connection if one is not provided,
 #' and then performs SQL operations to retrieve the cohort data.
 #'
-#' @importFrom DatabaseConnector connect disconnect dbGetQuery
-#' @importFrom SqlRender readSql render translate
+#' @importFrom DatabaseConnector renderTranslateQuerySql
+#' @importFrom SqlRender readSql
 #' @importFrom checkmate assertString assertDataFrame assertNames
 #'
 #' @return Returns TRUE if the cohort data is successfully retrieved.

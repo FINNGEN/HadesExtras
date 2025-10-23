@@ -127,6 +127,7 @@ test_that(" change cohort ids", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = cohortTableHandler$connectionHandler$getConnection(),
+      databaseSchema = cohortTableHandler$cohortDatabaseSchema,
       table = "cohort",
       data = testCohortTable
     )
