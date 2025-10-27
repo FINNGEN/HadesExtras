@@ -98,13 +98,14 @@ testthat::test_that("test that .operationStringToBinaryTreeworks", {
 # "1Ip2"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
 
   # set data
   testTable <- tibble::tibble(
@@ -118,7 +119,8 @@ testthat::test_that("test that operationStringToSQL works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 
@@ -157,13 +159,14 @@ testthat::test_that("test that operationStringToSQL works", {
 # "1Mp2"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
+  
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
 
   # set data
   testTable <- tibble::tibble(
@@ -177,7 +180,8 @@ testthat::test_that("test that operationStringToSQL works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 
@@ -221,13 +225,14 @@ testthat::test_that("test that operationStringToSQL works", {
 # "1Ip2Mp3"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
 
   # set data
   testTable <- tibble::tibble(
@@ -241,7 +246,8 @@ testthat::test_that("test that operationStringToSQL works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 
@@ -281,13 +287,14 @@ testthat::test_that("test that operationStringToSQL works", {
 # "1Upd2"
 testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- "test_operations_table"
+
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName  <- "test_operations_table"
 
   # set data
   testTable <- tibble::tribble(
@@ -313,7 +320,8 @@ testthat::test_that("test that operationStringToSQL works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 

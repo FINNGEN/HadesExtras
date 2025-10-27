@@ -1,14 +1,14 @@
 test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   cohortTableName <- "test_cohort"
 
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   testCohortDefinitionTable <- tibble::tribble(
     ~cohort_definition_id, ~cohort_definition_name, ~cohort_definition_description, ~definition_type_concept_id, ~cohort_definition_syntax, ~subject_concept_id, ~cohort_initiation_date,
@@ -21,7 +21,8 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testCohortDefinitionTable
+      data = testCohortDefinitionTable,
+      tempTable = TRUE
     )
   })
 
@@ -40,13 +41,15 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
 
 test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
   cohortTableHandler <- helper_createNewCohortTableHandler()
+
+  cohortDatabaseSchema <- cohortTableHandler$cohortDatabaseSchema
+  cohortTableName <- "test_cohort"
+
   withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(cohortTableHandler$connectionHandler$getConnection())
     rm(cohortTableHandler)
     gc()
   })
-
-  cohortDatabaseSchema <- cohortTableHandler$cohortDatabaseSchema
-  cohortTableName <- "cohort"
 
   # set data
   testCohortTable <- tibble::tribble(
@@ -72,7 +75,8 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
     DatabaseConnector::insertTable(
       connection = cohortTableHandler$connectionHandler$getConnection(),
       table = cohortTableName,
-      data = testCohortTable
+      data = testCohortTable,
+      tempTable = TRUE
     )
   })
 
@@ -99,7 +103,11 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
 
 test_that(" change cohort ids", {
   cohortTableHandler <- helper_createNewCohortTableHandler()
+  cohortDatabaseSchema <- cohortTableHandler$cohortDatabaseSchema
+  cohortTableName <- "test_cohort"
+
   on.exit({
+    DatabaseConnector::dropEmulatedTempTables(cohortTableHandler$connectionHandler$getConnection())
     rm(cohortTableHandler)
     gc()
   })
@@ -127,9 +135,9 @@ test_that(" change cohort ids", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = cohortTableHandler$connectionHandler$getConnection(),
-      databaseSchema = cohortTableHandler$cohortDatabaseSchema,
-      table = "cohort",
-      data = testCohortTable
+      table = cohortTableName,
+      data = testCohortTable,
+      tempTable = TRUE
     )
   })
 
@@ -143,7 +151,7 @@ test_that(" change cohort ids", {
 
   cohortDefinitionSet <- cohortTableToCohortDefinitionSettings(
     cohortDatabaseSchema = cohortTableHandler$cohortDatabaseSchema,
-    cohortTable = "cohort",
+    cohortTable = cohortTableName,
     cohortDefinitionTable = testCohortDefinitionTable,
     cohortDefinitionIds = c(1, 2),
     newCohortDefinitionIds = c(10, 20)

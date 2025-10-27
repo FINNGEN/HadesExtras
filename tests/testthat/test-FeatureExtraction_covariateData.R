@@ -1,13 +1,14 @@
 test_that("covariateData_YearOfBirth works", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   cohortTableName <- "test_cohort"
+
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # set data
   testTable <- tibble::tribble(
@@ -33,7 +34,8 @@ test_that("covariateData_YearOfBirth works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 
@@ -95,14 +97,15 @@ test_that("covariateData_YearOfBirth works", {
 
 test_that("covariateData_ATCgroups works", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   cohortTableName <- "test_cohort"
+
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # set data
   testTable <- tibble::tribble(
@@ -128,7 +131,8 @@ test_that("covariateData_ATCgroups works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 
@@ -231,14 +235,15 @@ test_that("covariateData_ATCgroups returns correct value", {
 test_that("covariateData_DDD_ATCgroups works", {
   skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   cohortTableName <- "test_cohort"
+
+  withr::defer({
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # set data
   testTable <- tibble::tribble(
@@ -264,7 +269,8 @@ test_that("covariateData_DDD_ATCgroups works", {
     DatabaseConnector::insertTable(
       connection = connection,
       table = cohortTableName,
-      data = testTable
+      data = testTable,
+      tempTable = TRUE
     )
   })
 

@@ -1,7 +1,6 @@
 #
 # checkCohortData
 #
-
 test_that("checkCohortData works", {
   cohortData <- tibble::tibble(
     cohort_name = rep(c("Cohort A", "Cohort B"), 5),
