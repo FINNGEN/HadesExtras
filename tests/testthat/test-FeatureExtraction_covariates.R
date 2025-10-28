@@ -125,12 +125,12 @@ test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all
   )
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/asthma/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/asthma/cohorts"),
-    sqlFolder = here::here("inst/testdata/asthma/sql/sql_server"),
+    settingsFileName = ("testdata/asthma/Cohorts.csv"),
+    jsonFolder = ("testdata/asthma/cohorts"),
+    sqlFolder = ("testdata/asthma/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = "HadesExtras",
     verbose = FALSE
   )
 

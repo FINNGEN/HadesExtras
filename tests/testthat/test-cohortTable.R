@@ -6,7 +6,7 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -47,7 +47,7 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(cohortTableHandler$connectionHandler$getConnection(), paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(cohortTableHandler$connectionHandler$getConnection(), cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(cohortTableHandler$connectionHandler$getConnection())
     rm(cohortTableHandler)
     gc()
@@ -109,7 +109,7 @@ test_that(" change cohort ids", {
   cohortTableName <- "test_cohort"
 
   on.exit({
-    dbRemoveTable(cohortTableHandler$connectionHandler$getConnection(), paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(cohortTableHandler$connectionHandler$getConnection(), cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(cohortTableHandler$connectionHandler$getConnection())
     rm(cohortTableHandler)
     gc()

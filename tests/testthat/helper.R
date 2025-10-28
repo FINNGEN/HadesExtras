@@ -40,15 +40,20 @@ helper_getParedSourcePersonAndPersonIds <- function(
     connection,
     cdmDatabaseSchema,
     numberPersons) {
-  # Connect, collect tables
-  personTable <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
-
-  # get first n persons
-  pairedSourcePersonAndPersonIds <- personTable |>
-    dplyr::arrange(person_id) |>
-    dplyr::select(person_id, person_source_value) |>
-    dplyr::collect(n = numberPersons)
-
+  # Get first n persons using SQL
+  sql <- "
+    SELECT person_id, person_source_value
+    FROM @cdm_database_schema.person
+    ORDER BY person_id
+    LIMIT @number_persons
+  "
+  
+  pairedSourcePersonAndPersonIds <- DatabaseConnector::renderTranslateQuerySql(
+    connection = connection,
+    sql = sql,
+    cdm_database_schema = cdmDatabaseSchema,
+    number_persons = numberPersons
+  ) |> tibble::as_tibble()
 
   return(pairedSourcePersonAndPersonIds)
 }
@@ -88,4 +93,13 @@ helper_FinnGen_getDatabaseFile <- function(){
   )
 
   return(file.path(tempdir(), "FinnGenR12_v5.4.sqlite"))
+}
+
+helper_dropTable <- function(connection, cohortDatabaseSchema, cohortTableName) {
+  DatabaseConnector::renderTranslateExecuteSql(
+    connection = connection,
+    sql = "DROP TABLE IF EXISTS @cohort_database_schema.@cohort_table",
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTableName
+  )
 }

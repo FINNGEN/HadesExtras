@@ -6,7 +6,7 @@ test_that("covariateData_YearOfBirth works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -104,7 +104,7 @@ test_that("covariateData_ATCgroups works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -186,12 +186,12 @@ test_that("covariateData_ATCgroups returns correct value", {
   )
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/asthma/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/asthma/cohorts"),
-    sqlFolder = here::here("inst/testdata/asthma/sql/sql_server"),
+    settingsFileName = ("testdata/asthma/Cohorts.csv"),
+    jsonFolder = ("testdata/asthma/cohorts"),
+    sqlFolder = ("testdata/asthma/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -243,7 +243,7 @@ test_that("covariateData_DDD_ATCgroups works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })

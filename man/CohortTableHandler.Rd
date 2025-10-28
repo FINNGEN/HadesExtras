@@ -33,15 +33,19 @@ Inherits from CDMdbHandler.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CohortTableHandler-new}{\code{CohortTableHandler$new()}}
-\item \href{#method-CohortTableHandler-finalize}{\code{CohortTableHandler$finalize()}}
 \item \href{#method-CohortTableHandler-loadConnection}{\code{CohortTableHandler$loadConnection()}}
 \item \href{#method-CohortTableHandler-insertOrUpdateCohorts}{\code{CohortTableHandler$insertOrUpdateCohorts()}}
 \item \href{#method-CohortTableHandler-deleteCohorts}{\code{CohortTableHandler$deleteCohorts()}}
 \item \href{#method-CohortTableHandler-getCohortCounts}{\code{CohortTableHandler$getCohortCounts()}}
+\item \href{#method-CohortTableHandler-getNumberOfSubjects}{\code{CohortTableHandler$getNumberOfSubjects()}}
+\item \href{#method-CohortTableHandler-getNumberOfCohortEntries}{\code{CohortTableHandler$getNumberOfCohortEntries()}}
 \item \href{#method-CohortTableHandler-getCohortsSummary}{\code{CohortTableHandler$getCohortsSummary()}}
 \item \href{#method-CohortTableHandler-getCohortIdAndNames}{\code{CohortTableHandler$getCohortIdAndNames()}}
 \item \href{#method-CohortTableHandler-updateCohortNames}{\code{CohortTableHandler$updateCohortNames()}}
 \item \href{#method-CohortTableHandler-getCohortsOverlap}{\code{CohortTableHandler$getCohortsOverlap()}}
+\item \href{#method-CohortTableHandler-getNumberOfOverlappingSubjects}{\code{CohortTableHandler$getNumberOfOverlappingSubjects()}}
+\item \href{#method-CohortTableHandler-getSexFisherTest}{\code{CohortTableHandler$getSexFisherTest()}}
+\item \href{#method-CohortTableHandler-getYearOfBirthTests}{\code{CohortTableHandler$getYearOfBirthTests()}}
 \item \href{#method-CohortTableHandler-clone}{\code{CohortTableHandler$clone()}}
 }
 }
@@ -84,22 +88,11 @@ Initialize the CohortTableHandler object
 \item{\code{cohortTableName}}{Name of the cohort table.}
 
 \item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
-Finalize method}
+
+loadConnection}
 }
 \if{html}{\out{</div>}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CohortTableHandler-finalize"></a>}}
-\if{latex}{\out{\hypertarget{method-CohortTableHandler-finalize}{}}}
-\subsection{Method \code{finalize()}}{
-Closes the connection if active.
-
-loadConnection
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$finalize()}\if{html}{\out{</div>}}
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CohortTableHandler-loadConnection"></a>}}
@@ -172,6 +165,50 @@ Retrieves cohort counts from the cohort table.
 \subsection{Returns}{
 A tibble containing the cohort counts with names.
 
+getNumberOfSubjects
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getNumberOfSubjects"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getNumberOfSubjects}{}}}
+\subsection{Method \code{getNumberOfSubjects()}}{
+Retrieves the number of subjects of a cohort ID.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getNumberOfSubjects(selected_cohortId)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{selected_cohortId}}{The cohort id for which number of subjects is sought.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A numeric value of the number of subjects in a cohort.
+
+getNumberOfCohortEntries
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getNumberOfCohortEntries"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getNumberOfCohortEntries}{}}}
+\subsection{Method \code{getNumberOfCohortEntries()}}{
+Retrieves the number of entries of a cohort ID.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getNumberOfCohortEntries(selected_cohortId)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{selected_cohortId}}{The cohort id for which number of entries is sought.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A numeric value of the number of entries in a cohort.
+
 getCohortsSummary
 }
 }
@@ -181,9 +218,16 @@ getCohortsSummary
 \subsection{Method \code{getCohortsSummary()}}{
 Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getCohortsSummary()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getCohortsSummary(includeAllEvents = F)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{includeAllEvents}}{Logical, whether to include all events or just subjects. Default is FALSE.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 A tibble containing cohort summary.
 
@@ -244,6 +288,95 @@ Retrieves the number of subjects that are in more than one cohort.
 \subsection{Returns}{
 A tibble containing one logical column for each cohort with name a cohort id,
 and an additional column \code{numberOfSubjects} with the number of subjects in the cohorts combination.
+
+getNumberOfOverlappingSubjects
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getNumberOfOverlappingSubjects"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getNumberOfOverlappingSubjects}{}}}
+\subsection{Method \code{getNumberOfOverlappingSubjects()}}{
+Retrieves the number of subjects that are overlapping between two given cohorts.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getNumberOfOverlappingSubjects(
+  selected_cohortId1,
+  selected_cohortId2
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{selected_cohortId1}}{The cohort id of the first cohort.}
+
+\item{\code{selected_cohortId2}}{The cohort id of the second cohort.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A numeric value of the number of overlapping subjects between two given cohorts.
+
+getSexFisherTest
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getSexFisherTest"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getSexFisherTest}{}}}
+\subsection{Method \code{getSexFisherTest()}}{
+Compares the proportion of males and females in two cohorts using Fisher's exact test.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getSexFisherTest(
+  selected_cohortId1,
+  selected_cohortId2,
+  testFor = "Subjects"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{selected_cohortId1}}{The cohort id of the first cohort.}
+
+\item{\code{selected_cohortId2}}{The cohort id of the second cohort.}
+
+\item{\code{testFor}}{Character string indicating what to test: "Subjects" or "allEvents". Default is "Subjects".}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list with class R htest class containing components such as p.value and conf.int of the test
+
+getYearOfBirthTests
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-getYearOfBirthTests"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-getYearOfBirthTests}{}}}
+\subsection{Method \code{getYearOfBirthTests()}}{
+Compares the year of birth distributions between the case and control cohorts using two-sample t-test to compare mean year of birth,
+uses cohen's d to assess effect size of the difference in the mean of the year of births,and the Kolmogorov-Smirnov test
+to evaluate if year of births in the two cohorts have similar distribution.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$getYearOfBirthTests(
+  selected_cohortId1,
+  selected_cohortId2,
+  testFor = "Subjects"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{selected_cohortId1}}{The cohort id of the first cohort.}
+
+\item{\code{selected_cohortId2}}{The cohort id of the second cohort.}
+
+\item{\code{testFor}}{The type of test to perform. "Subjects" to test the year of birth of the subjects in the cohorts, "allEvents" to test the year of birth of all events in the cohorts.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
 }
 }
 \if{html}{\out{<hr>}}

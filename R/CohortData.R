@@ -141,7 +141,7 @@ assertCohortData <- function(tibble) {
 #'
 #' @importFrom checkmate assertInt assertLogical
 #' @importFrom purrr map_chr map2_chr
-#' @importFrom dplyr row_number transmute
+#' @importFrom dplyr distinct row_number transmute
 #' @importFrom tidyr nest
 #' @importFrom SqlRender readSql render
 #' @importFrom digest digest

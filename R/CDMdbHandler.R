@@ -12,6 +12,7 @@
 #' @field connectionHandler Handler for database connections
 #' @field vocabularyDatabaseSchema Schema name for the vocabulary database
 #' @field cdmDatabaseSchema Schema name for the CDM database
+#' @field resultsDatabaseSchema Schema name for the results database
 #' @field connectionStatusLog Log of connection status and operations
 #' @field vocabularyInfo Information about the vocabulary tables
 #' @field CDMInfo Information about the CDM structure
@@ -45,9 +46,7 @@ CDMdbHandler <- R6::R6Class(
     .getTblVocabularySchema = NULL,
     .getTblCDMSchema = NULL,
     
-    #' Finalize method
-    #' @description
-    #' Closes the connection if active.
+    # Finalize method - closes the connection if active
     finalize = function() {
       private$.connectionHandler$closeConnection()
     }
@@ -72,6 +71,8 @@ CDMdbHandler <- R6::R6Class(
     cdmDatabaseSchema = function() {
       return(private$.cdmDatabaseSchema)
     },
+    #' @description
+    #' Returns the results database schema name.
     resultsDatabaseSchema = function() {
       return(private$.resultsDatabaseSchema)
     },
@@ -103,6 +104,7 @@ CDMdbHandler <- R6::R6Class(
     #' @param connectionHandler             A ConnectionHandler object
     #' @param cdmDatabaseSchema             Name of the CDM database schema
     #' @param vocabularyDatabaseSchema      (Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)
+    #' @param resultsDatabaseSchema         (Optional) Name of the results database schema (default is cdmDatabaseSchema)
     #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
     initialize = function(databaseId,
                           databaseName,

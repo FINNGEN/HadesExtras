@@ -42,9 +42,7 @@ CohortTableHandler <- R6::R6Class(
     .cohortDemograpics = NULL,
     .cohortsOverlap = NULL,
     
-    #' Finalize method
-    #' @description
-    #' Closes the connection if active.
+    # Finalize method - closes the connection if active
     finalize = function() {
       CohortGenerator_dropCohortStatsTables(
         connection = self$connectionHandler$getConnection(),
@@ -357,6 +355,8 @@ CohortTableHandler <- R6::R6Class(
     #' @description
     #' Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.
     #'
+    #' @param includeAllEvents Logical, whether to include all events or just subjects. Default is FALSE.
+    #'
     #' @return A tibble containing cohort summary.
     getCohortsSummary = function(includeAllEvents=F) {
 
@@ -449,6 +449,7 @@ CohortTableHandler <- R6::R6Class(
     #' Compares the proportion of males and females in two cohorts using Fisher's exact test.
     #' @param selected_cohortId1 The cohort id of the first cohort.
     #' @param selected_cohortId2 The cohort id of the second cohort.
+    #' @param testFor Character string indicating what to test: "Subjects" or "allEvents". Default is "Subjects".
     #' @return a list with class R htest class containing components such as p.value and conf.int of the test
     #'
     getSexFisherTest = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {

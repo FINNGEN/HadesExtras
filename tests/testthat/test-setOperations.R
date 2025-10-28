@@ -103,7 +103,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -165,7 +165,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -232,7 +232,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -295,7 +295,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })

@@ -10,12 +10,12 @@ test_that("Cohort fracture", {
   })
 
    cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/fracture/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/fracture/cohorts"),
-    sqlFolder = here::here("inst/testdata/fracture/sql/sql_server"),
+    settingsFileName = ("testdata/fracture/Cohorts.csv"),
+    jsonFolder = ("testdata/fracture/cohorts"),
+    sqlFolder = ("testdata/fracture/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = "HadesExtras",
     verbose = FALSE
 )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -35,12 +35,12 @@ test_that("Cohort asthma", {
   })
 
    cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/asthma/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/asthma/cohorts"),
-    sqlFolder = here::here("inst/testdata/asthma/sql/sql_server"),
+    settingsFileName = ("testdata/asthma/Cohorts.csv"),
+    jsonFolder = ("testdata/asthma/cohorts"),
+    sqlFolder = ("testdata/asthma/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = "HadesExtras",
     verbose = FALSE
 )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -60,12 +60,12 @@ test_that("Cohort matching", {
   })
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/matching/cohorts"),
-    sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
+    settingsFileName = ("testdata/matching/Cohorts.csv"),
+    jsonFolder = ("testdata/matching/cohorts"),
+    sqlFolder = ("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = "HadesExtras",
     verbose = FALSE
   )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)

@@ -58,12 +58,12 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
   )
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/matching/cohorts"),
-    sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
+    settingsFileName = ("testdata/matching/Cohorts.csv"),
+    jsonFolder = ("testdata/matching/cohorts"),
+    sqlFolder = ("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = "HadesExtras",
     verbose = FALSE
   )
 
@@ -519,7 +519,7 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -590,7 +590,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -654,7 +654,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -727,7 +727,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -878,7 +878,7 @@ test_that("CohortGenerator_getCohortDemograpics works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })

@@ -22,7 +22,7 @@
 #' @returns results from CohortGenerator::generateCohortSet with additional column 'buildInfo'
 #'
 #' @importFrom checkmate assertDataFrame assertNames
-#' @importFrom DatabaseConnector connect disconnect dbExistsTable dbRemoveTable dropEmulatedTempTables executeSql
+#' @importFrom DatabaseConnector connect disconnect dbExistsTable dropEmulatedTempTables executeSql
 #' @importFrom SqlRender render translate
 #' @importFrom dplyr mutate filter left_join if_else select arrange bind_rows
 #' @importFrom tidyr nest
@@ -321,7 +321,7 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
 #' @param cohortDatabaseSchema The schema name for the cohort database.
 #' @param cohortTable The name of the cohort table in the cohort database (default is "cohort").
 #' @param cohortIds A numeric vector of cohort IDs for which to retrieve demographics (default is an empty vector).
-#' @param toGet A character vector indicating which demographic information to retrieve. Possible values include "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", and "sexCounts".
+#' @param toGet A character vector indicating which demographic information to retrieve. Possible values include "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", and "sexCountsAllEvents".
 #' @param cohortDefinitionSet A set of cohort definitions (optional).
 #' @param databaseId The ID of the database (optional).
 #'
@@ -341,7 +341,12 @@ CohortGenerator_getCohortDemograpics <- function(
   cohortDatabaseSchema,
   cohortTable = "cohort",
   cohortIds = c(),
-  toGet = c("histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", "sexCountsAllEvents"),
+  toGet = c("histogramCohortStartYear",
+            "histogramCohortEndYear",
+            "histogramBirthYear",
+            "histogramBirthYearAllEvents",
+            "sexCounts",
+            "sexCountsAllEvents"),
   cohortDefinitionSet = NULL,
   databaseId = NULL
 ) {
