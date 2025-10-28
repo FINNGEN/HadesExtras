@@ -1,7 +1,6 @@
 #
 # checkCohortData
 #
-
 test_that("checkCohortData works", {
   cohortData <- tibble::tibble(
     cohort_name = rep(c("Cohort A", "Cohort B"), 5),
@@ -98,10 +97,10 @@ test_that(" cohortDataToCohortDefinitionSet works", {
     expect_true()
   (cohortDefinitionSet |> pull(sql) |> unique() |> length() == cohortDefinitionSet |> nrow()) |> expect_true()
   cohortDefinitionSet$sql[[1]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 1") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 1") |>
     expect_true()
   cohortDefinitionSet$sql[[2]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 2") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 2") |>
     expect_true()
 })
 
@@ -127,10 +126,10 @@ test_that(" cohortDataToCohortDefinitionSet works with ", {
     expect_true()
   (cohortDefinitionSet |> pull(sql) |> unique() |> length() == cohortDefinitionSet |> nrow()) |> expect_true()
   cohortDefinitionSet$sql[[1]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 33") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 33") |>
     expect_true()
   cohortDefinitionSet$sql[[2]] |>
-    stringr::str_detect("WHERE cohort_definition_id = 44") |>
+    stringr::str_detect("WHERE cd.cohort_definition_id = 44") |>
     expect_true()
 })
 
@@ -140,17 +139,22 @@ test_that(" cohortDataToCohortDefinitionSet works with ", {
 #
 # getCohortDataFromCohortTable
 #
-
 test_that("getCohortDataFromCohortTable returns a cohort", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
+  withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -158,13 +162,21 @@ test_that("getCohortDataFromCohortTable returns a cohort", {
     cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = here::here("inst/testdata/matching/Cohorts.csv"),
-    jsonFolder = here::here("inst/testdata/matching/cohorts"),
-    sqlFolder = here::here("inst/testdata/matching/sql/sql_server"),
+    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    # packageName = "HadesExtras",
+    packageName = packageName,
     verbose = FALSE
   )
 

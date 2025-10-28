@@ -84,8 +84,8 @@ checkCohortDefinitionTables <- function(
 #'
 #' @return A tibble containing cohort names, IDs, and descriptions.
 #'
-#' @importFrom DatabaseConnector connect disconnect dbGetQuery
-#' @importFrom SqlRender render translate
+#' @importFrom DatabaseConnector connect disconnect renderTranslateQuerySql
+#' @importFrom SqlRender readSql
 #' @importFrom tibble as_tibble
 #' @importFrom checkmate assertString
 #'
@@ -115,17 +115,13 @@ getCohortNamesFromCohortDefinitionTable <- function(
   # Function
   #
   sql <- "SELECT cohort_definition_id, cohort_definition_name, cohort_definition_description FROM @cohort_database_schema.@cohort_definition_table"
-  sql <- SqlRender::render(
+  cohortDefinitionTable <- DatabaseConnector::renderTranslateQuerySql(
+    connection = connection,
     sql = sql,
     cohort_database_schema = cohortDatabaseSchema,
     cohort_definition_table = cohortDefinitionTable,
     warnOnMissingParameters = TRUE
-  )
-  sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = connection@dbms
-  )
-  cohortDefinitionTable <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  ) |>
     tibble::as_tibble()
 
   return(cohortDefinitionTable)

@@ -6,7 +6,7 @@ test_that("createConnectionHandler works", {
   })
 
   withr::defer({
-    CDMdb$finalize()
+    rm(CDMdb);gc()
   })
 
   CDMdb |> checkmate::expect_class("CDMdbHandler")
@@ -30,7 +30,7 @@ test_that("createCDMdbHandlerFromList works with basicChecks", {
   )
 
   withr::defer({
-    CDMdb$finalize()
+    rm(CDMdb);gc()
   })
 
   CDMdb |> checkmate::expect_class("CDMdbHandler")

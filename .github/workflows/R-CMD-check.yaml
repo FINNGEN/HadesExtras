@@ -30,7 +30,7 @@ jobs:
           # - {os: windows-latest, r: 'release'}
         env_config:
           - {name: 'Eunomia', HADESEXTAS_TESTING_ENVIRONMENT: 'Eunomia-GiBleed'}
-          - {name: 'AtlasDev', HADESEXTAS_TESTING_ENVIRONMENT: 'AtlasDevelopment-DBI'}
+          - {name: 'AtlasDev', HADESEXTAS_TESTING_ENVIRONMENT: 'AtlasDevelopment-5k'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

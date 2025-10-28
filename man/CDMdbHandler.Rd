@@ -29,6 +29,8 @@ A class for handling CDM database connections and operations
 
 \item{\code{cdmDatabaseSchema}}{Schema name for the CDM database}
 
+\item{\code{resultsDatabaseSchema}}{Schema name for the results database}
+
 \item{\code{connectionStatusLog}}{Log of connection status and operations}
 
 \item{\code{vocabularyInfo}}{Information about the vocabulary tables}
@@ -45,7 +47,6 @@ A class for handling CDM database connections and operations
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CDMdbHandler-new}{\code{CDMdbHandler$new()}}
-\item \href{#method-CDMdbHandler-finalize}{\code{CDMdbHandler$finalize()}}
 \item \href{#method-CDMdbHandler-loadConnection}{\code{CDMdbHandler$loadConnection()}}
 \item \href{#method-CDMdbHandler-clone}{\code{CDMdbHandler$clone()}}
 }
@@ -54,6 +55,7 @@ A class for handling CDM database connections and operations
 \if{html}{\out{<a id="method-CDMdbHandler-new"></a>}}
 \if{latex}{\out{\hypertarget{method-CDMdbHandler-new}{}}}
 \subsection{Method \code{new()}}{
+Returns the results database schema name.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$new(
   databaseId,
@@ -82,22 +84,13 @@ A class for handling CDM database connections and operations
 
 \item{\code{vocabularyDatabaseSchema}}{(Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)}
 
+\item{\code{resultsDatabaseSchema}}{(Optional) Name of the results database schema (default is cdmDatabaseSchema)}
+
 \item{\code{loadConnectionChecksLevel}}{(Optional) Level of checks to perform when loading the connection (default is "allChecks")
-Finalize method}
+Reload connection}
 }
 \if{html}{\out{</div>}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CDMdbHandler-finalize"></a>}}
-\if{latex}{\out{\hypertarget{method-CDMdbHandler-finalize}{}}}
-\subsection{Method \code{finalize()}}{
-Closes the connection if active.
-Reload connection
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$finalize()}\if{html}{\out{</div>}}
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CDMdbHandler-loadConnection"></a>}}

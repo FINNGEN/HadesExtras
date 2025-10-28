@@ -40,7 +40,19 @@ CohortTableHandler <- R6::R6Class(
     .cohortDefinitionSet = NULL,
     .cohortGeneratorResults = NULL,
     .cohortDemograpics = NULL,
-    .cohortsOverlap = NULL
+    .cohortsOverlap = NULL,
+    
+    # Finalize method - closes the connection if active
+    finalize = function() {
+      CohortGenerator_dropCohortStatsTables(
+        connection = self$connectionHandler$getConnection(),
+        cohortDatabaseSchema = self$cohortDatabaseSchema,
+        cohortTableNames = self$cohortTableNames
+      )
+      unlink(private$.incrementalFolder, recursive = TRUE)
+
+      super$finalize()
+    }
   ),
   active = list(
     # Read-only parameters
@@ -129,19 +141,6 @@ CohortTableHandler <- R6::R6Class(
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         loadConnectionChecksLevel = loadConnectionChecksLevel
       )
-    },
-    #' Finalize method
-    #' @description
-    #' Closes the connection if active.
-    finalize = function() {
-      CohortGenerator_dropCohortStatsTables(
-        connection = self$connectionHandler$getConnection(),
-        cohortDatabaseSchema = self$cohortDatabaseSchema,
-        cohortTableNames = self$cohortTableNames
-      )
-      unlink(private$.incrementalFolder, recursive = TRUE)
-
-      super$finalize()
     },
     #'
     #' loadConnection
@@ -356,6 +355,8 @@ CohortTableHandler <- R6::R6Class(
     #' @description
     #' Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.
     #'
+    #' @param includeAllEvents Logical, whether to include all events or just subjects. Default is FALSE.
+    #'
     #' @return A tibble containing cohort summary.
     getCohortsSummary = function(includeAllEvents=F) {
 
@@ -448,7 +449,8 @@ CohortTableHandler <- R6::R6Class(
     #' Compares the proportion of males and females in two cohorts using Fisher's exact test.
     #' @param selected_cohortId1 The cohort id of the first cohort.
     #' @param selected_cohortId2 The cohort id of the second cohort.
-    #' @return a list with class R htest class containing components such as p.value and conf.int of the test
+    #' @param testFor Character string indicating what to test: "Subjects" or "allEvents". Default is "Subjects".
+    #' @return a list containing components such as p.value and conf.int of the test
     #'
     getSexFisherTest = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
 
@@ -490,9 +492,12 @@ CohortTableHandler <- R6::R6Class(
     #' to evaluate if year of births in the two cohorts have similar distribution.
     #' @param selected_cohortId1 The cohort id of the first cohort.
     #' @param selected_cohortId2 The cohort id of the second cohort.
-    #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
+    #' @param testFor The type of test to perform. "Subjects" to test the year of birth of the subjects in the cohorts, "allEvents" to test the year of birth of all events in the cohorts.
+    #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohend result (list of meanInCases, meanInControls, pooledsd, and cohend)
     #'
-    getYearOfBirthTests = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
+    getYearOfBirthTests = function(selected_cohortId1, selected_cohortId2, testFor="Subjects") {
+
+      testFor |> checkmate::assertChoice(c("Subjects", "allEvents"))
 
       if(testFor == "allEvents"){
         yearOfBirthCase <- self$getCohortsSummary(includeAllEvents=T) |>
@@ -526,7 +531,6 @@ CohortTableHandler <- R6::R6Class(
           )
         ))
       }
-
 
       ttestResult <-  suppressWarnings(suppressMessages(
         t.test(cases[!is.na(cases)], controls[!is.na(controls)])

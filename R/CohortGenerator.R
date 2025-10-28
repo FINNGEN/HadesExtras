@@ -22,7 +22,7 @@
 #' @returns results from CohortGenerator::generateCohortSet with additional column 'buildInfo'
 #'
 #' @importFrom checkmate assertDataFrame assertNames
-#' @importFrom DatabaseConnector connect disconnect dbExistsTable dbRemoveTable dropEmulatedTempTables executeSql
+#' @importFrom DatabaseConnector connect disconnect dbExistsTable dropEmulatedTempTables executeSql
 #' @importFrom SqlRender render translate
 #' @importFrom dplyr mutate filter left_join if_else select arrange bind_rows
 #' @importFrom tidyr nest
@@ -32,16 +32,17 @@
 #' @export
 
 CohortGenerator_generateCohortSet <- function(
-    connectionDetails = NULL,
-    connection = NULL,
-    cdmDatabaseSchema,
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    cohortDatabaseSchema = cdmDatabaseSchema,
-    cohortTableNames = CohortGenerator::getCohortTableNames(),
-    cohortDefinitionSet = NULL,
-    stopOnError = TRUE,
-    incremental = FALSE,
-    incrementalFolder = NULL) {
+  connectionDetails = NULL,
+  connection = NULL,
+  cdmDatabaseSchema,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+  cohortDatabaseSchema = cdmDatabaseSchema,
+  cohortTableNames = CohortGenerator::getCohortTableNames(),
+  cohortDefinitionSet = NULL,
+  stopOnError = TRUE,
+  incremental = FALSE,
+  incrementalFolder = NULL
+) {
   #
   # Validate parameters
   #
@@ -84,7 +85,6 @@ CohortGenerator_generateCohortSet <- function(
 
   # if incremental mode, ignore cohorts that are not changed
   if (incremental == TRUE) {
-
     cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
       dplyr::mutate(currentChecksum = CohortGenerator::computeChecksum(sql))
 
@@ -103,66 +103,8 @@ CohortGenerator_generateCohortSet <- function(
   if (nrow(cohortDefinitionSetCohortDataType) != 0) {
     # separate sql from cohortData
     cohortData <- .jsonToCohortData(cohortDefinitionSetCohortDataType)
-
-    # Connect to tables and copy cohortData to database
-    personTbl <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
-    observationPeriodTable <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "observation_period"))
-    cohortDataTable <- dplyr::copy_to(connection, cohortData, overwrite = TRUE, temporary = TRUE)
-
-    # join to cohort_data_table cohort_names_table.cohort_name; person.person_id; observation_period period dates
-    toAppend <- cohortDataTable |>
-      dplyr::left_join(
-        personTbl |>
-          dplyr::select(person_id, person_source_value) |>
-          dplyr::left_join(
-            observationPeriodTable |>
-              dplyr::select(person_id, observation_period_start_date, observation_period_end_date) |>
-              dplyr::group_by(person_id) |>
-              dplyr::summarise(
-                observation_period_start_date = min(observation_period_start_date, na.rm = TRUE),
-                observation_period_end_date = max(observation_period_end_date, na.rm = TRUE)
-              ),
-            by = c("person_id" = "person_id")
-          ),
-        by = c("person_source_value" = "person_source_value")
-      )
-
-    # collect check cohortData to add
-    checkOnCohortData <- toAppend |>
-      dplyr::group_by(cohort_definition_id) |>
-      dplyr::summarise(
-        n_source_person = dplyr::n_distinct(person_source_value),
-        n_source_entries = dplyr::n(),
-        n_missing_source_person = dplyr::n_distinct(person_source_value) - dplyr::n_distinct(person_id),
-        n_missing_cohort_start = sum(ifelse(is.null(cohort_start_date), 1L, 0L), na.rm = TRUE),
-        n_missing_cohort_end = sum(ifelse(is.null(cohort_end_date), 1L, 0L), na.rm = TRUE)
-      ) |>
-      dplyr::collect()
-
-    # compute changes in toAppend
-    toAppend <- toAppend |>
-      dplyr::filter(!is.na(person_id)) |>
-      # if cohort_start_date and cohort_end_date are na, use observation_period_start_date and observation_period_end_date
-      dplyr::mutate(
-        cohort_start_date = dplyr::if_else(is.na(cohort_start_date), observation_period_start_date, cohort_start_date),
-        cohort_end_date = dplyr::if_else(is.na(cohort_end_date), observation_period_end_date, cohort_end_date)
-      ) |>
-      dplyr::select(cohort_definition_id, subject_id = person_id, cohort_start_date, cohort_end_date) |>
-      dplyr::compute()
-
-    # Update @source_cohort_table in the sql
-    cohortDataImportTmpTableName <- toAppend |>
-      dbplyr::remote_name()
-
-    cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
-      dplyr::mutate(sql = stringr::str_replace(sql, "@source_cohort_table", cohortDataImportTmpTableName))
-
-    # replace recalculated cohortDefinitionSets
-    cohortDefinitionSet <- dplyr::bind_rows(
-      cohortDefinitionSet |> dplyr::filter(!(cohortId %in% cohortDefinitionSetCohortDataType$cohortId)),
-      cohortDefinitionSetCohortDataType |> dplyr::select(cohortId, cohortName, json, sql, cohortType)
-    ) |>
-      dplyr::arrange(cohortId)
+    # Insert cohortData to temporary table
+    DatabaseConnector::insertTable(connection, tableName = "cohort_data_temp_table", data = cohortData, tempTable = TRUE, createTable = TRUE)
   }
 
   #
@@ -196,6 +138,30 @@ CohortGenerator_generateCohortSet <- function(
   # start function after generateCohortSet
   #
   if (nrow(cohortDefinitionSetCohortDataType) != 0) {
+    
+    # Update buildInfo with cohortDataInfo
+    cohortCounts  <- CohortGenerator::getCohortCounts(
+      connection = connection, 
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTable = cohortTableNames$cohortTable,
+      cohortIds = cohortDefinitionSetCohortDataType$cohortId
+    )
+
+    checkOnCohortData <- cohortData |>
+      dplyr::group_by(cohort_definition_id) |>
+      dplyr::summarise(
+        n_source_person = dplyr::n_distinct(person_source_value),
+        n_source_entries = dplyr::n(),
+        n_missing_cohort_start = sum(ifelse(is.na(cohort_start_date), 1L, 0L), na.rm = TRUE),
+        n_missing_cohort_end = sum(ifelse(is.na(cohort_end_date), 1L, 0L), na.rm = TRUE)
+      ) |> 
+      dplyr::left_join(cohortCounts, by = c("cohort_definition_id" = "cohortId")) |>
+      dplyr::mutate(
+        n_missing_source_person = n_source_person - cohortSubjects,
+        n_missing_source_entries = n_source_entries - cohortEntries
+      ) |> 
+      dplyr::select(-cohortSubjects, -cohortEntries)
+
     #
     cohortGeneratorResults <- cohortGeneratorResults |>
       dplyr::left_join(
@@ -289,12 +255,13 @@ CohortGenerator_generateCohortSet <- function(
 #
 #' @export
 CohortGenerator_deleteCohortFromCohortTable <- function(
-    connectionDetails = NULL,
-    connection = NULL,
-    cohortDatabaseSchema,
-    cohortTableNames,
-    cohortIds,
-    incrementalFolder = NULL) {
+  connectionDetails = NULL,
+  connection = NULL,
+  cohortDatabaseSchema,
+  cohortTableNames,
+  cohortIds,
+  incrementalFolder = NULL
+) {
   #
   # Validate parameters
   #
@@ -354,29 +321,35 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
 #' @param cohortDatabaseSchema The schema name for the cohort database.
 #' @param cohortTable The name of the cohort table in the cohort database (default is "cohort").
 #' @param cohortIds A numeric vector of cohort IDs for which to retrieve demographics (default is an empty vector).
-#' @param toGet A character vector indicating which demographic information to retrieve. Possible values include "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", and "sexCounts".
+#' @param toGet A character vector indicating which demographic information to retrieve. Possible values include "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", and "sexCountsAllEvents".
 #' @param cohortDefinitionSet A set of cohort definitions (optional).
 #' @param databaseId The ID of the database (optional).
 #'
 #' @return
 #' A data frame with cohort counts and selected demographics
 #'
-#' @importFrom DatabaseConnector connect disconnect getTableNames
-#' @importFrom dplyr tbl count collect mutate left_join distinct select nest_by
-#' @importFrom CohortGenerator getCohortCounts
+#' @importFrom DatabaseConnector connect disconnect getTableNames querySql dbms
+#' @importFrom dplyr group_by left_join filter select rename mutate
+#' @importFrom tidyr nest pivot_wider
 #'
 #' @export
 CohortGenerator_getCohortDemograpics <- function(
-    connectionDetails = NULL,
-    connection = NULL,
-    cdmDatabaseSchema,
-    vocabularyDatabaseSchema = cdmDatabaseSchema,
-    cohortDatabaseSchema,
-    cohortTable = "cohort",
-    cohortIds = c(),
-    toGet = c("histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "sexCounts"),
-    cohortDefinitionSet = NULL,
-    databaseId = NULL) {
+  connectionDetails = NULL,
+  connection = NULL,
+  cdmDatabaseSchema,
+  vocabularyDatabaseSchema = cdmDatabaseSchema,
+  cohortDatabaseSchema,
+  cohortTable = "cohort",
+  cohortIds = c(),
+  toGet = c("histogramCohortStartYear",
+            "histogramCohortEndYear",
+            "histogramBirthYear",
+            "histogramBirthYearAllEvents",
+            "sexCounts",
+            "sexCountsAllEvents"),
+  cohortDefinitionSet = NULL,
+  databaseId = NULL
+) {
   start <- Sys.time()
 
   #
@@ -393,104 +366,100 @@ CohortGenerator_getCohortDemograpics <- function(
     return(NULL)
   }
 
-  toGet |> checkmate::assertSubset(c("histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "sexCounts"))
+  toGet |> checkmate::assertSubset(c("histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", "sexCountsAllEvents"))
 
   #
   # function
   #
-  cohortTbl <- dplyr::tbl(connection, dbplyr::in_schema(cohortDatabaseSchema, cohortTable))
-  personTbl <- dplyr::tbl(connection, dbplyr::in_schema(cdmDatabaseSchema, "person"))
-  conceptTbl <- dplyr::tbl(connection, dbplyr::in_schema(vocabularyDatabaseSchema, "concept"))
 
-  cohortCounts <- CohortGenerator::getCohortCounts(
-    connection = connection,
-    cohortDatabaseSchema = cohortDatabaseSchema,
-    cohortTable = cohortTable,
-    cohortIds = cohortIds,
-    cohortDefinitionSet = cohortDefinitionSet,
-    databaseId = databaseId
-  ) |> tibble::as_tibble()
+  # Read and render the SQL template
+  sqlPath <- system.file("sql", "sql_server", "GetCohortDemographics.sql", package = "HadesExtras")
+  sql <- SqlRender::readSql(sqlPath)
+  renderedSql <- SqlRender::render(
+    sql,
+    cohort_database_schema = cohortDatabaseSchema,
+    cohort_table = cohortTable,
+    cdm_database_schema = cdmDatabaseSchema,
+    vocabulary_database_schema = vocabularyDatabaseSchema,
+    cohort_ids = paste(cohortIds, collapse = ","),
+    cohortEntries = TRUE, # Always include cohort entries count
+    cohortSubjects = TRUE, # Always include cohort subjects count
+    histogramCohortStartYear = "histogramCohortStartYear" %in% toGet,
+    histogramCohortEndYear = "histogramCohortEndYear" %in% toGet,
+    histogramBirthYear = "histogramBirthYear" %in% toGet,
+    histogramBirthYearAllEvents = "histogramBirthYearAllEvents" %in% toGet,
+    sexCounts = "sexCounts" %in% toGet,
+    sexCountsAllEvents = "sexCountsAllEvents" %in% toGet
+  )
+  translatedSql <- SqlRender::translate(renderedSql, targetDialect = DatabaseConnector::dbms(connection))
 
-  histogramCohortStartYear <- tibble::tibble(cohort_definition_id = 0, .rows = 0)
+  demographicsData <- DatabaseConnector::querySql(connection, translatedSql) |>
+    tibble::as_tibble()
+  names(demographicsData) <- SqlRender::snakeCaseToCamelCase(names(demographicsData))
+
+  cohortCounts <- demographicsData |>
+    dplyr::filter(feature %in% c("cohortEntries", "cohortSubjects")) |>
+    dplyr::select(cohortId, feature, counts) |>
+    tidyr::pivot_wider(
+      names_from = feature,
+      values_from = counts
+    )
+
+  histogramCohortStartYear <- tibble::tibble(cohortId = 0, .rows = 0)
   if ("histogramCohortStartYear" %in% toGet) {
-    histogramCohortStartYear <- cohortTbl |>
-      dplyr::mutate(year = year(cohort_start_date)) |>
-      dplyr::count(cohort_definition_id, year) |>
-      dplyr::collect() |>
-      dplyr::nest_by(cohort_definition_id, .key = "histogramCohortStartYear")
+    histogramCohortStartYear <- demographicsData |>
+      dplyr::filter(feature == "histogramCohortStartYear") |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::nest_by(cohortId, .key = "histogramCohortStartYear")
   }
 
-  histogramCohortEndYear <- tibble::tibble(cohort_definition_id = 0, .rows = 0)
+  histogramCohortEndYear <- tibble::tibble(cohortId = 0, .rows = 0)
   if ("histogramCohortEndYear" %in% toGet) {
-    histogramCohortEndYear <- cohortTbl |>
-      dplyr::mutate(year = year(cohort_end_date)) |>
-      dplyr::count(cohort_definition_id, year) |>
-      dplyr::collect() |>
-      dplyr::nest_by(cohort_definition_id, .key = "histogramCohortEndYear")
+    histogramCohortEndYear <- demographicsData |>
+      dplyr::filter(feature == "histogramCohortStartYear") |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::nest_by(cohortId, .key = "histogramCohortEndYear")
   }
 
-  histogramBirthYear <- tibble::tibble(cohort_definition_id = 0, .rows = 0)
+  histogramBirthYear <- tibble::tibble(cohortId = 0, .rows = 0)
   if ("histogramBirthYear" %in% toGet) {
-    histogramBirthYear <- cohortTbl |>
-      dplyr::distinct(cohort_definition_id, subject_id) |>
-      dplyr::left_join(
-        personTbl |> dplyr::select(person_id, year_of_birth),
-        by = c("subject_id" = "person_id")
-      ) |>
-      dplyr::rename(year = year_of_birth) |>
-      dplyr::count(cohort_definition_id, year) |>
-      dplyr::collect() |>
-      dplyr::nest_by(cohort_definition_id, .key = "histogramBirthYear")
-
-    histogramBirthYearAllEvents <- cohortTbl |>
-      dplyr::left_join(
-        personTbl |> dplyr::select(person_id, year_of_birth),
-        by = c("subject_id" = "person_id")
-      ) |>
-      dplyr::rename(year = year_of_birth) |>
-      dplyr::count(cohort_definition_id, year) |>
-      dplyr::collect() |>
-      dplyr::nest_by(cohort_definition_id, .key = "histogramBirthYearAllEvents")
+    histogramBirthYear <- demographicsData |>
+      dplyr::filter(feature == "histogramBirthYear") |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::nest_by(cohortId, .key = "histogramBirthYear")
   }
 
-  sexCounts <- tibble::tibble(cohort_definition_id = 0, .rows = 0)
-  if ("sexCounts" %in% toGet) {
-    sexCounts <- cohortTbl |>
-      dplyr::left_join(
-        personTbl |> dplyr::select(person_id, gender_concept_id),
-        by = c("subject_id" = "person_id")
-      ) |>
-      dplyr::left_join(
-        conceptTbl |> dplyr::select(concept_id, concept_name),
-        by = c("gender_concept_id" = "concept_id")
-      ) |>
-      dplyr::distinct(cohort_definition_id, subject_id, concept_name) |>
-      dplyr::count(cohort_definition_id, sex = concept_name) |>
-      dplyr::collect() |>
-      dplyr::nest_by(cohort_definition_id, .key = "sexCounts")
+  histogramBirthYearAllEvents <- tibble::tibble(cohortId = 0, .rows = 0)
+  if ("histogramBirthYearAllEvents" %in% toGet) {
+    histogramBirthYearAllEvents <- demographicsData |>
+      dplyr::filter(feature == "histogramBirthYearAllEvents") |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::nest_by(cohortId, .key = "histogramBirthYearAllEvents")
+  }
 
-    sexCountsAllEvents <- cohortTbl |>
-      dplyr::left_join(
-        personTbl |> dplyr::select(person_id, gender_concept_id),
-        by = c("subject_id" = "person_id")
-      ) |>
-      dplyr::left_join(
-        conceptTbl |> dplyr::select(concept_id, concept_name),
-        by = c("gender_concept_id" = "concept_id")
-      ) |>
-      dplyr::count(cohort_definition_id, sex = concept_name) |>
-      dplyr::collect() |>
-      dplyr::nest_by(cohort_definition_id, .key = "sexCountsAllEvents")
+  sexCounts <- tibble::tibble(cohortId = 0, .rows = 0)
+  if ("sexCounts" %in% toGet) {
+    sexCounts <- demographicsData |>
+      dplyr::filter(feature == "sexCounts") |>
+      dplyr::transmute(cohortId = cohortId, sex = bin, n = counts) |>
+      dplyr::nest_by(cohortId, .key = "sexCounts")
+  }
+
+  sexCountsAllEvents <- tibble::tibble(cohortId = 0, .rows = 0)
+  if ("sexCountsAllEvents" %in% toGet) {
+    sexCountsAllEvents <- demographicsData |>
+      dplyr::filter(feature == "sexCountsAllEvents") |>
+      dplyr::transmute(cohortId = cohortId, sex = bin, n = counts) |>
+      dplyr::nest_by(cohortId, .key = "sexCountsAllEvents")
   }
 
   cohortDemograpics <- cohortCounts |>
-    dplyr::left_join(histogramCohortStartYear, by = c("cohortId" = "cohort_definition_id")) |>
-    dplyr::left_join(histogramCohortEndYear, by = c("cohortId" = "cohort_definition_id")) |>
-    dplyr::left_join(histogramBirthYear, by = c("cohortId" = "cohort_definition_id")) |>
-    dplyr::left_join(histogramBirthYearAllEvents, by = c("cohortId" = "cohort_definition_id")) |>
-    dplyr::left_join(sexCounts, by = c("cohortId" = "cohort_definition_id")) |>
-    dplyr::left_join(sexCountsAllEvents, by = c("cohortId" = "cohort_definition_id"))
-
+    dplyr::left_join(histogramCohortStartYear, by = "cohortId") |>
+    dplyr::left_join(histogramCohortEndYear, by = "cohortId") |>
+    dplyr::left_join(histogramBirthYear, by = "cohortId") |>
+    dplyr::left_join(histogramBirthYearAllEvents, by = "cohortId") |>
+    dplyr::left_join(sexCounts, by = "cohortId") |>
+    dplyr::left_join(sexCountsAllEvents, by = "cohortId")
 
 
   delta <- Sys.time() - start
@@ -523,11 +492,12 @@ CohortGenerator_getCohortDemograpics <- function(
 #'
 #' @export
 CohortGenerator_getCohortsOverlaps <- function(
-    connectionDetails = NULL,
-    connection = NULL,
-    cohortDatabaseSchema,
-    cohortTable = "cohort",
-    cohortIds = c()) {
+  connectionDetails = NULL,
+  connection = NULL,
+  cohortDatabaseSchema,
+  cohortTable = "cohort",
+  cohortIds = c()
+) {
   #
   # Validate parameters
   #
@@ -630,15 +600,14 @@ CohortGenerator_createCohortTables <- function(
   connection = NULL,
   cohortDatabaseSchema,
   cohortTableNames = CohortGenerator::getCohortTableNames(),
-  incremental = FALSE) {
-
+  incremental = FALSE
+) {
   if (is.null(connection)) {
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
   if (connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)) {
-
     strings <- strsplit(cohortDatabaseSchema, "\\.")
     bq_project <- strings[[1]][1]
     bq_dataset <- strings[[1]][2]
@@ -720,7 +689,6 @@ CohortGenerator_createCohortTables <- function(
         bigrquery::bq_table_create(bq_table, fields = tableTemplates[[tableName]])
       }
     }
-
   } else {
     CohortGenerator::createCohortTables(
       connection = connection,
@@ -748,8 +716,8 @@ CohortGenerator_dropCohortStatsTables <- function(
   connectionDetails = NULL,
   connection = NULL,
   cohortDatabaseSchema,
-  cohortTableNames = CohortGenerator::getCohortTableNames()) {
-
+  cohortTableNames = CohortGenerator::getCohortTableNames()
+) {
   if (is.null(connection)) {
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
@@ -762,7 +730,7 @@ CohortGenerator_dropCohortStatsTables <- function(
 
     # Define all table suffixes (including empty for main cohort table)
     tableSuffixes <- c(
-      "",  # for main cohort table
+      "", # for main cohort table
       "_inclusion",
       "_inclusion_result",
       "_inclusion_stats",

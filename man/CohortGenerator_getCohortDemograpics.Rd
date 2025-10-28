@@ -13,7 +13,7 @@ CohortGenerator_getCohortDemograpics(
   cohortTable = "cohort",
   cohortIds = c(),
   toGet = c("histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear",
-    "sexCounts"),
+    "histogramBirthYearAllEvents", "sexCounts", "sexCountsAllEvents"),
   cohortDefinitionSet = NULL,
   databaseId = NULL
 )
@@ -33,7 +33,7 @@ CohortGenerator_getCohortDemograpics(
 
 \item{cohortIds}{A numeric vector of cohort IDs for which to retrieve demographics (default is an empty vector).}
 
-\item{toGet}{A character vector indicating which demographic information to retrieve. Possible values include "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", and "sexCounts".}
+\item{toGet}{A character vector indicating which demographic information to retrieve. Possible values include "histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", and "sexCountsAllEvents".}
 
 \item{cohortDefinitionSet}{A set of cohort definitions (optional).}
 
