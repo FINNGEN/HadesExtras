@@ -9,13 +9,21 @@ test_that("Cohort fracture", {
     gc()
   })
 
-   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = ("testdata/fracture/Cohorts.csv"),
-    jsonFolder = ("testdata/fracture/cohorts"),
-    sqlFolder = ("testdata/fracture/sql/sql_server"),
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = paste0(basePath, "testdata/fracture/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/fracture/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/fracture/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = packageName,
     verbose = FALSE
 )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -34,13 +42,21 @@ test_that("Cohort asthma", {
     gc()
   })
 
-   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = ("testdata/asthma/Cohorts.csv"),
-    jsonFolder = ("testdata/asthma/cohorts"),
-    sqlFolder = ("testdata/asthma/sql/sql_server"),
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = paste0(basePath, "testdata/asthma/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/asthma/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/asthma/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = packageName,
     verbose = FALSE
 )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -59,13 +75,21 @@ test_that("Cohort matching", {
     gc()
   })
 
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = ("testdata/matching/Cohorts.csv"),
-    jsonFolder = ("testdata/matching/cohorts"),
-    sqlFolder = ("testdata/matching/sql/sql_server"),
+    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = packageName,
     verbose = FALSE
   )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)

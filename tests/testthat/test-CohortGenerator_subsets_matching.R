@@ -49,13 +49,21 @@ test_that("Matching Subset works", {
     cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = ("testdata/matching/Cohorts.csv"),
-    jsonFolder = ("testdata/matching/cohorts"),
-    sqlFolder = ("testdata/matching/sql/sql_server"),
+    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = packageName,
     verbose = FALSE
   )
 
@@ -129,14 +137,22 @@ test_that("Matching Subset works for different parameters", {
     cohortTableNames = getCohortTableNames(cohortTableName)
   )
 
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = ("testdata/matching/Cohorts.csv"),
-    jsonFolder = ("testdata/matching/cohorts"),
-    sqlFolder = ("testdata/matching/sql/sql_server"),
+    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = packageName,
     verbose = FALSE
   )
 
