@@ -573,9 +573,6 @@ test_that("getSexFisherTest returns valid fisher.test result", {
 # getYearOfBirthTests
 #
 test_that("getYearOfBirthTests returns t-test, ks-test, and cohen's d results", {
-  # TEMP:
-  skip("Skipping atm")
-  # END TEMP
   cohortTableHandler <- helper_createNewCohortTableHandler()
   withr::defer({
     rm(cohortTableHandler)

@@ -409,7 +409,7 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramCohortStartYear" %in% toGet) {
     histogramCohortStartYear <- demographicsData |>
       dplyr::filter(feature == "histogramCohortStartYear") |>
-      dplyr::select(cohortId, year = bin, n = counts) |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
       dplyr::nest_by(cohortId, .key = "histogramCohortStartYear")
   }
 
@@ -417,7 +417,7 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramCohortEndYear" %in% toGet) {
     histogramCohortEndYear <- demographicsData |>
       dplyr::filter(feature == "histogramCohortStartYear") |>
-      dplyr::select(cohortId, year = bin, n = counts) |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
       dplyr::nest_by(cohortId, .key = "histogramCohortEndYear")
   }
 
@@ -425,7 +425,7 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramBirthYear" %in% toGet) {
     histogramBirthYear <- demographicsData |>
       dplyr::filter(feature == "histogramBirthYear") |>
-      dplyr::select(cohortId, year = bin, n = counts) |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
       dplyr::nest_by(cohortId, .key = "histogramBirthYear")
   }
 
@@ -433,7 +433,7 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramBirthYearAllEvents" %in% toGet) {
     histogramBirthYearAllEvents <- demographicsData |>
       dplyr::filter(feature == "histogramBirthYearAllEvents") |>
-      dplyr::select(cohortId, year = bin, n = counts) |>
+      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
       dplyr::nest_by(cohortId, .key = "histogramBirthYearAllEvents")
   }
 
@@ -441,7 +441,7 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("sexCounts" %in% toGet) {
     sexCounts <- demographicsData |>
       dplyr::filter(feature == "sexCounts") |>
-      dplyr::select(cohortId, sex = bin, n = counts) |>
+      dplyr::transmute(cohortId = cohortId, sex = bin, n = counts) |>
       dplyr::nest_by(cohortId, .key = "sexCounts")
   }
 
@@ -449,7 +449,7 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("sexCountsAllEvents" %in% toGet) {
     sexCountsAllEvents <- demographicsData |>
       dplyr::filter(feature == "sexCountsAllEvents") |>
-      dplyr::select(cohortId, sex = bin, n = counts) |>
+      dplyr::transmute(cohortId = cohortId, sex = bin, n = counts) |>
       dplyr::nest_by(cohortId, .key = "sexCountsAllEvents")
   }
 

@@ -945,10 +945,10 @@ test_that("CohortGenerator_getCohortDemograpics works", {
     expect_equal(3)
   cohortDemographics |>
     purrr::pluck("histogramCohortStartYear", 1) |>
-    expect_equal(tibble::tibble(year = c('2020', '2021'), n = c(2, 1)))
+    expect_equal(tibble::tibble(year = c(2020, 2021), n = c(2, 1)))
   cohortDemographics |>
     purrr::pluck("histogramCohortEndYear", 1) |>
-    expect_equal(tibble::tibble(year = c('2020', '2021'), n = c(2, 1)))
+    expect_equal(tibble::tibble(year = c(2020, 2021), n = c(2, 1)))
   cohortDemographics |>
     purrr::pluck("sexCounts", 1) |>
     expect_equal(tibble::tibble(sex = c('FEMALE', 'MALE'), n = c(1, 2)))
