@@ -519,6 +519,7 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -534,9 +535,9 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
+      databaseSchema = cohortDatabaseSchema,
       tableName = cohortTableName,
-      data = cohort_data, 
-      tempTable = TRUE
+      data = cohort_data
     )
   })
 
@@ -589,6 +590,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -603,9 +605,9 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
+      databaseSchema = cohortDatabaseSchema,
       tableName = cohortTableName,
-      data = cohort_data,
-      tempTable = TRUE
+      data = cohort_data
     )
   })
 
@@ -652,6 +654,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -667,9 +670,9 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
+      databaseSchema = cohortDatabaseSchema,
       tableName = cohortTableName,
-      data = cohort_data,
-      tempTable = TRUE
+      data = cohort_data
     )
   })
 
@@ -724,6 +727,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -739,9 +743,9 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
+      databaseSchema = cohortDatabaseSchema,
       tableName = cohortTableName,
-      data = cohort_data,
-      tempTable = TRUE
+      data = cohort_data
     )
   })
 
@@ -874,6 +878,7 @@ test_that("CohortGenerator_getCohortDemograpics works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -896,9 +901,9 @@ test_that("CohortGenerator_getCohortDemograpics works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
+      databaseSchema = cohortDatabaseSchema,
       tableName = cohortTableName,
-      data = cohort_data,
-      tempTable = TRUE
+      data = cohort_data
     )
   })
 

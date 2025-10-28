@@ -6,6 +6,7 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -20,9 +21,9 @@ test_that("getCohortNamesFromCohortDefinitionTable returns a cohort", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testCohortDefinitionTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testCohortDefinitionTable
     )
   })
 
@@ -46,6 +47,7 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(cohortTableHandler$connectionHandler$getConnection(), paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(cohortTableHandler$connectionHandler$getConnection())
     rm(cohortTableHandler)
     gc()
@@ -74,9 +76,9 @@ test_that("Copy from cohortTable using insertOrUpdateCohorts works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = cohortTableHandler$connectionHandler$getConnection(),
-      table = cohortTableName,
-      data = testCohortTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testCohortTable
     )
   })
 
@@ -107,6 +109,7 @@ test_that(" change cohort ids", {
   cohortTableName <- "test_cohort"
 
   on.exit({
+    dbRemoveTable(cohortTableHandler$connectionHandler$getConnection(), paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(cohortTableHandler$connectionHandler$getConnection())
     rm(cohortTableHandler)
     gc()
@@ -135,9 +138,9 @@ test_that(" change cohort ids", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = cohortTableHandler$connectionHandler$getConnection(),
-      table = cohortTableName,
-      data = testCohortTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testCohortTable
     )
   })
 
@@ -162,4 +165,3 @@ test_that(" change cohort ids", {
 
   cohortCounts$cohortId |> expect_equal(c(10, 20))
 })
-

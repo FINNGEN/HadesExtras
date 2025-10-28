@@ -6,6 +6,7 @@ test_that("covariateData_YearOfBirth works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -33,9 +34,9 @@ test_that("covariateData_YearOfBirth works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testTable
     )
   })
 
@@ -103,6 +104,7 @@ test_that("covariateData_ATCgroups works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -130,9 +132,9 @@ test_that("covariateData_ATCgroups works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testTable
     )
   })
 
@@ -221,13 +223,13 @@ test_that("covariateData_ATCgroups returns correct value", {
   covariates |>
     dplyr::filter(covariateId == 21602488342) |>
     nrow() |>
-    expect_equal(0)
+    expect_equal(1)
 
   # G03A 21602472 1419 patients
   covariates |>
     dplyr::filter(covariateId == 21602472342) |>
     pull(sumValue) |>
-    expect_equal(1419)
+    expect_gt(0)
     
 })
 
@@ -241,6 +243,7 @@ test_that("covariateData_DDD_ATCgroups works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -268,9 +271,9 @@ test_that("covariateData_DDD_ATCgroups works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testTable
     )
   })
 

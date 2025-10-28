@@ -9,8 +9,8 @@ INSERT INTO @target_database_schema.@target_cohort_table (
 SELECT 
   cd.cohort_definition_id,
   p.person_id AS subject_id,
-  COALESCE(cd.cohort_start_date, op.observation_period_start_date) AS cohort_start_date,
-  COALESCE(cd.cohort_end_date, op.observation_period_end_date) AS cohort_end_date
+  COALESCE(CAST(cd.cohort_start_date AS DATE), op.observation_period_start_date) AS cohort_start_date,
+  COALESCE(CAST(cd.cohort_end_date AS DATE), op.observation_period_end_date) AS cohort_end_date
 FROM #cohort_data_temp_table AS cd
 INNER JOIN @cdm_database_schema.person AS p
   ON cd.person_source_value = p.person_source_value

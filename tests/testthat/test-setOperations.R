@@ -103,6 +103,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -118,9 +119,9 @@ testthat::test_that("test that operationStringToSQL works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testTable
     )
   })
 
@@ -164,6 +165,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -179,9 +181,9 @@ testthat::test_that("test that operationStringToSQL works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testTable
     )
   })
 
@@ -230,6 +232,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -245,9 +248,9 @@ testthat::test_that("test that operationStringToSQL works", {
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
       data = testTable,
-      tempTable = TRUE
     )
   })
 
@@ -292,6 +295,7 @@ testthat::test_that("test that operationStringToSQL works", {
   cohortTableName <- "test_operations_table"
 
   withr::defer({
+    dbRemoveTable(connection, paste0(cohortDatabaseSchema, ".", cohortTableName))
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -319,9 +323,9 @@ testthat::test_that("test that operationStringToSQL works", {
   suppressWarnings({  
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
-      data = testTable,
-      tempTable = TRUE
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
+      data = testTable
     )
   })
 
