@@ -141,7 +141,7 @@ assertCohortData <- function(tibble) {
 #'
 #' @importFrom checkmate assertInt assertLogical
 #' @importFrom purrr map_chr map2_chr
-#' @importFrom dplyr row_number transmute
+#' @importFrom dplyr distinct row_number transmute
 #' @importFrom tidyr nest
 #' @importFrom SqlRender readSql render
 #' @importFrom digest digest
@@ -173,7 +173,7 @@ cohortDataToCohortDefinitionSet <- function(
   #
   # Function
   #
-  sqlToRender <- SqlRender::readSql(system.file("sql/sql_server/ImportCohortTable.sql", package = "HadesExtras", mustWork = TRUE))
+  sqlToRender <- SqlRender::readSql(system.file("sql/sql_server/CohortDataToCohortDefinitionSet.sql", package = "HadesExtras", mustWork = TRUE))
 
   cohortDefinitionSet <- cohortData |>
     tidyr::nest(.key = "cohort", .by = c("cohort_name")) |>
@@ -189,8 +189,7 @@ cohortDataToCohortDefinitionSet <- function(
             "--", digest::digest(.y), "\n", # Digest inserted for incremental mode to detect changes in cohortData
             SqlRender::render(
               sql = sqlToRender,
-              source_cohort_id = .x,
-              is_temp_table = TRUE
+              source_cohort_id = .x
             )
           )
         }
@@ -246,8 +245,8 @@ cohortDataToCohortDefinitionSet <- function(
 #' It validates the input parameters, establishes a database connection if one is not provided,
 #' and then performs SQL operations to retrieve the cohort data.
 #'
-#' @importFrom DatabaseConnector connect disconnect dbGetQuery
-#' @importFrom SqlRender readSql render translate
+#' @importFrom DatabaseConnector renderTranslateQuerySql
+#' @importFrom SqlRender readSql
 #' @importFrom checkmate assertString assertDataFrame assertNames
 #'
 #' @return Returns TRUE if the cohort data is successfully retrieved.
@@ -283,24 +282,24 @@ getCohortDataFromCohortTable <- function(
   #
   # Function
   sql <- SqlRender::readSql(system.file("sql/sql_server/GetCohortDataFromCohortTables.sql", package = "HadesExtras", mustWork = TRUE))
-  sql <- SqlRender::render(
+  cohortTable <- DatabaseConnector::renderTranslateQuerySql(
+    connection = connection,
     sql = sql,
     cdm_database_schema = cdmDatabaseSchema,
     cohort_database_schema = cohortDatabaseSchema,
     cohort_table = cohortTable,
     cohort_ids = paste0("(", paste0(cohortNameIds$cohortId, collapse = " ,"), ")"),
     warnOnMissingParameters = TRUE
-  )
-  sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = connection@dbms
-  )
-  cohortTable <- DatabaseConnector::dbGetQuery(connection, sql, progressBar = FALSE, reportOverallTime = FALSE) |>
+  ) |>
     tibble::as_tibble()
 
   cohortData <- cohortTable |>
     dplyr::left_join(cohortNameIds, by = c("cohort_definition_id" = "cohortId")) |>
-    dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date)
+    dplyr::select(cohort_name = cohortName, person_source_value, cohort_start_date, cohort_end_date) |> 
+    dplyr::mutate(
+      cohort_start_date = as.Date(cohort_start_date),
+      cohort_end_date = as.Date(cohort_end_date)
+    )
 
   return(cohortData)
 }

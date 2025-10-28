@@ -1,13 +1,15 @@
 test_that("covariateData_YearOfBirth works", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
+  withr::defer({
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # set data
   testTable <- tibble::tribble(
@@ -23,16 +25,17 @@ test_that("covariateData_YearOfBirth works", {
     2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
     2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
     2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
-  ) |> 
-  dplyr::mutate(
-    cohort_definition_id = as.integer(cohort_definition_id),
-    subject_id = as.integer(subject_id)
-  )
+  ) |>
+    dplyr::mutate(
+      cohort_definition_id = as.integer(cohort_definition_id),
+      subject_id = as.integer(subject_id)
+    )
 
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
       data = testTable
     )
   })
@@ -95,14 +98,16 @@ test_that("covariateData_YearOfBirth works", {
 
 test_that("covariateData_ATCgroups works", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
+  withr::defer({
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # set data
   testTable <- tibble::tribble(
@@ -118,16 +123,17 @@ test_that("covariateData_ATCgroups works", {
     2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
     2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
     2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
-  ) |> 
-  dplyr::mutate(
-    cohort_definition_id = as.integer(cohort_definition_id),
-    subject_id = as.integer(subject_id)
-  )
+  ) |>
+    dplyr::mutate(
+      cohort_definition_id = as.integer(cohort_definition_id),
+      subject_id = as.integer(subject_id)
+    )
 
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
       data = testTable
     )
   })
@@ -160,17 +166,101 @@ test_that("covariateData_ATCgroups works", {
 })
 
 
-test_that("covariateData_DDD_ATCgroups works", {
-  skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "AtlasDevelopment-DBI")
+test_that("covariateData_ATCgroups returns correct value", {
+  skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
+
   connection <- helper_createNewConnection()
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
 
+  CohortGenerator_createCohortTables(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+  )
+
+  if (interactive()) {
+    basePath <- here::here("inst/")
+    packageName <- NULL
+  } else {
+    basePath <- ""
+    packageName <- "HadesExtras"
+  }
+
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = paste0(basePath, "testdata/asthma/Cohorts.csv"),
+    jsonFolder = paste0(basePath, "testdata/asthma/cohorts"),
+    sqlFolder = paste0(basePath, "testdata/asthma/sql/sql_server"),
+    cohortFileNameFormat = "%s",
+    cohortFileNameValue = c("cohortId"),
+    packageName = packageName,
+    verbose = FALSE
+  )
+
+  CohortGenerator::generateCohortSet(
+    connection = connection,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+    cohortDefinitionSet = cohortDefinitionSet,
+    incremental = FALSE
+  )
+
+  covariateSettings <- covariateData_ATCgroups()
+
+  covariate_control <- FeatureExtraction::getDbCovariateData(
+    connection = connection,
+    cohortTable = cohortTableName,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    covariateSettings = covariateSettings,
+    cohortIds = 1,
+    aggregated = TRUE
+  )
+
+  covariates <- covariate_control$covariates |>
+    dplyr::collect()
+
+  # G03AB 21602488 0 patients
+  covariates |>
+    dplyr::filter(covariateId == 21602488342) |>
+    nrow() |>
+    expect_equal(1)
+
+  # G03A 21602472 1419 patients
+  covariates |>
+    dplyr::filter(covariateId == 21602472342) |>
+    pull(sumValue) |>
+    expect_gt(0)
+    
+})
+
+
+test_that("covariateData_DDD_ATCgroups works", {
+  skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
+  connection <- helper_createNewConnection()
+
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
+  withr::defer({
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   # set data
   testTable <- tibble::tribble(
@@ -186,16 +276,17 @@ test_that("covariateData_DDD_ATCgroups works", {
     2, 4, as.Date("2000-06-01"), as.Date("2010-12-01"), # overlap
     2, 5, as.Date("2004-06-01"), as.Date("2010-12-01"), # overlap with second
     2, 6, as.Date("2000-01-01"), as.Date("2010-12-01")
-  ) |> 
-  dplyr::mutate(
-    cohort_definition_id = as.integer(cohort_definition_id),
-    subject_id = as.integer(subject_id)
-  )
+  ) |>
+    dplyr::mutate(
+      cohort_definition_id = as.integer(cohort_definition_id),
+      subject_id = as.integer(subject_id)
+    )
 
   suppressWarnings({
     DatabaseConnector::insertTable(
       connection = connection,
-      table = cohortTableName,
+      databaseSchema = cohortDatabaseSchema,
+      tableName = cohortTableName,
       data = testTable
     )
   })

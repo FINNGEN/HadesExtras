@@ -1,3 +1,4 @@
+ATC
 ATCgroups
 CDM
 CDMHandled
@@ -8,6 +9,7 @@ CohortGenerator
 CohortTableHandler
 CohortsSummary
 ConnectionHandler
+DDD
 Eunomia
 FeatureExtraction
 Gracia
@@ -25,6 +27,8 @@ YAML
 YearOfBirth
 addLog
 allChecks
+allEvents
+analysisRef
 bigquery
 bigrquery
 bq
@@ -32,6 +36,9 @@ buildInfo
 cdm
 cdmDatabaseSchema
 cloneable
+cohen's
+cohend
+cohendresult
 cohors
 cohortData
 cohortDataToCohortDefinitionSet
@@ -40,6 +47,7 @@ cohortId
 cohortTable
 cohortTableHandlerConfiguration
 cohortsSummary
+conf
 connectionDetailsSettings
 connectionStatus
 contais
@@ -48,6 +56,7 @@ createCDMdbHandlerFromList
 createCohortTableHandlerFromList
 createCohortTables
 createTemporalCovariateSettingsFromList
+csv
 databaseName
 dbplyr
 deleteCohortFromCohortTable
@@ -59,17 +68,29 @@ getCohortIdAndNames
 getCohortsOverlap
 getCohortsOverlaps
 getCohortsSummary
+getNumberOfCohortEntries
+getNumberOfOverlappingSubjects
+getNumberOfSubjects
+getSexFisherTest
+getYearOfBirthTests
 histogramBirthYear
+histogramBirthYearAllEvents
 histogramCohortEndYear
 histogramCohortStartYear
+htest
 insertOrUpdateCohorts
 json
+kstestResult
 loadConnection
+meanInCases
+meanInControls
+pooledsd
 postgres
 pre
 reactable
 readCohortData
 sexCounts
+sexCountsAllEvents
 sql
 tempEmulationSchema
 tibble
@@ -77,5 +98,6 @@ tibbles
 tibles
 tippy
 tooltip
+ttestResult
 updateCohortNames
 yaml

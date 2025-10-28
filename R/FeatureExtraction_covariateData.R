@@ -224,9 +224,9 @@ ATCgroups <- function(
 
   sql <- SqlRender::render(sql,
     cdm_database_schema = cdmDatabaseSchema,
-    domain_table = "drug_era",
-    domain_start_date = "drug_era_start_date",
-    domain_end_date = "drug_era_end_date",
+    domain_table = "drug_exposure",
+    domain_start_date = "drug_exposure_start_date",
+    domain_end_date = "drug_exposure_end_date",
     domain_concept_id = "drug_concept_id",
     analysis_id = analysisId,
     aggregated = aggregated,
@@ -242,18 +242,13 @@ ATCgroups <- function(
 
   # Construct covariate reference:
   if (continuous) {
-    covariatesContinuous <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_table")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
-    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_ref")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
+    covariatesContinuous <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_ddd_covariate_table", snakeCaseToCamelCase = TRUE)  
+    covariateRef <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_ddd_covariate_ref", snakeCaseToCamelCase = TRUE)  
   } else {
-    covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
-    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
+    covariates <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_covariate_table", snakeCaseToCamelCase = TRUE)  
+    covariateRef <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_covariate_ref", snakeCaseToCamelCase = TRUE)  
   }
   
-
   # Construct analysis reference:
   analysisRef <- data.frame(
     analysisId = analysisId,
@@ -279,7 +274,7 @@ ATCgroups <- function(
       analysisRef = analysisRef
     )
   }
-
+  
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 
