@@ -94,12 +94,3 @@ helper_FinnGen_getDatabaseFile <- function(){
 
   return(file.path(tempdir(), "FinnGenR12_v5.4.sqlite"))
 }
-
-helper_dropTable <- function(connection, cohortDatabaseSchema, cohortTableName) {
-  DatabaseConnector::renderTranslateExecuteSql(
-    connection = connection,
-    sql = "DROP TABLE IF EXISTS @cohort_database_schema.@cohort_table",
-    cohort_database_schema = cohortDatabaseSchema,
-    cohort_table = cohortTableName
-  )
-}

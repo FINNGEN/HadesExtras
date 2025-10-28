@@ -527,7 +527,7 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -598,7 +598,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -662,7 +662,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -735,7 +735,7 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -841,13 +841,15 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
   testthat::skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
 
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cohortTableName <- "test_cohort2"
+
+  withr::defer({
+    
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -886,7 +888,7 @@ test_that("CohortGenerator_getCohortDemograpics works", {
   cohortTableName <- "test_cohort"
 
   withr::defer({
-    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
+    
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
