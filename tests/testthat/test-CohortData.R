@@ -141,14 +141,20 @@ test_that(" cohortDataToCohortDefinitionSet works with ", {
 #
 test_that("getCohortDataFromCohortTable returns a cohort", {
   connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
+  withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   CohortGenerator_createCohortTables(
     connection = connection,

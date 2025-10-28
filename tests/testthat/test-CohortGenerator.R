@@ -5,13 +5,19 @@ test_that("CohortGenerator_createCohortTables creates a cohort table", {
   testthat::skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
 
   connection <- helper_createNewConnection()
+
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+  
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_cohort2"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -42,14 +48,18 @@ test_that("CohortGenerator_createCohortTables creates a cohort table", {
 #
 test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -111,14 +121,18 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
 test_that("cohortDataToCohortDefinitionSet works", {
   # get test settings
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -171,14 +185,18 @@ test_that("cohortDataToCohortDefinitionSet works", {
 test_that("cohortDataToCohortDefinitionSet reports missing source person id", {
   # get test settings
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -229,14 +247,18 @@ test_that("cohortDataToCohortDefinitionSet reports missing source person id", {
 test_that("cohortDataToCohortDefinitionSet reports missing cohort_start_date", {
   # get test settings
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -288,6 +310,9 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_start_date", {
 test_that("cohortDataToCohortDefinitionSet reports missing cohort_end_date", {
   # get test settings
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
@@ -348,14 +373,18 @@ test_that("cohortDataToCohortDefinitionSet reports missing cohort_end_date", {
 test_that("cohortDataToCohortDefinitionSet also works from imported files", {
   # get test settings
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -428,14 +457,18 @@ test_that("cohortDataToCohortDefinitionSet also works from imported files", {
 test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tmp cohortData", {
   # get test settings
   connection <- helper_createNewConnection()
+  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
   withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
 
   CohortGenerator_createCohortTables(
     connection = connection,
@@ -524,10 +557,10 @@ test_that("CohortGenerator_getCohortsOverlaps works", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   withr::defer({
-    
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -595,10 +628,10 @@ test_that("CohortGenerator_getCohortsOverlaps works no overlap", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
-  withr::defer({
-    
+  withr::defer({ 
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -659,10 +692,10 @@ test_that("CohortGenerator_getCohortsOverlaps works no duplicates", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   withr::defer({
-    
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -732,10 +765,10 @@ test_that("CohortGenerator_getCohortsOverlaps works no ordered cohortData", {
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   withr::defer({
-    
+     helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -843,10 +876,14 @@ test_that("CohortGenerator_dropCohortStatsTables works", {
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_cohort2"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   withr::defer({
-    
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -885,10 +922,14 @@ test_that("CohortGenerator_getCohortDemograpics works", {
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   vocabularyDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- "test_cohort"
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   withr::defer({
-    
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })

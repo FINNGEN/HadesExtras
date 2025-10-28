@@ -100,10 +100,10 @@ testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
+  cohortTableName <- helper_tableNameWithTimestamp("test_operations_table")
 
   withr::defer({
-    
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -162,10 +162,10 @@ testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
   
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
+  cohortTableName <- helper_tableNameWithTimestamp("test_operations_table")
 
   withr::defer({
-    
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -229,10 +229,10 @@ testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
+  cohortTableName <- helper_tableNameWithTimestamp("test_operations_table")
 
   withr::defer({
-    
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
@@ -292,10 +292,10 @@ testthat::test_that("test that operationStringToSQL works", {
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cohortTableName <- "test_operations_table"
+  cohortTableName <- helper_tableNameWithTimestamp("test_operations_table")
 
   withr::defer({
-    
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })

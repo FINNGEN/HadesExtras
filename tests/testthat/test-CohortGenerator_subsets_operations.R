@@ -17,16 +17,21 @@ test_that("Operation subset naming and instantitation", {
 
 test_that("Operation Subset works", {
   testthat::skip_if_not(testingDatabase |> stringr::str_starts("Eunomia"))
-  
-  connection <- helper_createNewConnection()
-  withr::defer({
-    DatabaseConnector::dropEmulatedTempTables(connection)
-    DatabaseConnector::disconnect(connection)
-  })
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort") 
+  
+  connection <- helper_createNewConnection()
+  withr::defer({
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
+    DatabaseConnector::dropEmulatedTempTables(connection)
+    DatabaseConnector::disconnect(connection)
+  })
 
   CohortGenerator_createCohortTables(
     connection = connection,

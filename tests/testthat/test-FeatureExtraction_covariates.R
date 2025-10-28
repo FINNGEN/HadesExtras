@@ -109,15 +109,20 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
 test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all covariates", {
   skip_if(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
   connection <- helper_createNewConnection()
+
+    cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
   withr::defer({
-    
+    CohortGenerator_dropCohortStatsTables(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = getCohortTableNames(cohortTableName)
+    )
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
-
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- 'test_cohort'
 
   CohortGenerator_createCohortTables(
     connection = connection,
