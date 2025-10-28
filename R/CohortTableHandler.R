@@ -450,7 +450,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param selected_cohortId1 The cohort id of the first cohort.
     #' @param selected_cohortId2 The cohort id of the second cohort.
     #' @param testFor Character string indicating what to test: "Subjects" or "allEvents". Default is "Subjects".
-    #' @return a list with class R htest class containing components such as p.value and conf.int of the test
+    #' @return a list containing components such as p.value and conf.int of the test
     #'
     getSexFisherTest = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
 
@@ -493,7 +493,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param selected_cohortId1 The cohort id of the first cohort.
     #' @param selected_cohortId2 The cohort id of the second cohort.
     #' @param testFor The type of test to perform. "Subjects" to test the year of birth of the subjects in the cohorts, "allEvents" to test the year of birth of all events in the cohorts.
-    #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
+    #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohend result (list of meanInCases, meanInControls, pooledsd, and cohend)
     #'
     getYearOfBirthTests = function(selected_cohortId1, selected_cohortId2, testFor="Subjects") {
 
