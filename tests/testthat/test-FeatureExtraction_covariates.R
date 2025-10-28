@@ -107,9 +107,10 @@ test_that("FeatureExtraction_createTemporalCovariateSettingsFromList works with 
 #
 
 test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all covariates", {
-  skip_if(testingDatabase == "AtlasDevelopment-DBI")
+  skip_if(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
   connection <- helper_createNewConnection()
   withr::defer({
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })

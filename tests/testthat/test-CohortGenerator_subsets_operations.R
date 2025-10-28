@@ -16,7 +16,7 @@ test_that("Operation subset naming and instantitation", {
 
 
 test_that("Operation Subset works", {
-  testthat::skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") == "Eunomia-GiBleed")
+  testthat::skip_if_not(testingDatabase |> stringr::str_starts("Eunomia"))
   
   connection <- helper_createNewConnection()
   withr::defer({

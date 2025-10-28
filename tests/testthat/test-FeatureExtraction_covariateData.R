@@ -171,6 +171,7 @@ test_that("covariateData_ATCgroups returns correct value", {
 
   connection <- helper_createNewConnection()
   withr::defer({
+    helper_dropTable(connection, cohortDatabaseSchema, cohortTableName)
     DatabaseConnector::dropEmulatedTempTables(connection)
     DatabaseConnector::disconnect(connection)
   })
