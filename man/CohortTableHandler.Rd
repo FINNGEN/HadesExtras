@@ -344,7 +344,7 @@ Compares the proportion of males and females in two cohorts using Fisher's exact
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a list with class R htest class containing components such as p.value and conf.int of the test
+a list containing components such as p.value and conf.int of the test
 
 getYearOfBirthTests
 }
@@ -376,7 +376,7 @@ to evaluate if year of births in the two cohorts have similar distribution.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohendresult (list of meanInCases, meanInControls, pooledsd, and cohend)
+a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohend result (list of meanInCases, meanInControls, pooledsd, and cohend)
 }
 }
 \if{html}{\out{<hr>}}
