@@ -5,7 +5,7 @@
 #' @param cohortsSummary A tibble in  cohortsSummary format.
 #' @param deleteButtonsShinyId An optional Shiny input ID for handling the click of the delete buttons.
 #' @param editButtonsShinyId An optional Shiny input ID for handling the click of the edit buttons.
-#' 
+#'
 #' @importFrom checkmate assertString
 #' @importFrom dplyr mutate if_else select
 #' @importFrom purrr map_chr
@@ -123,6 +123,7 @@ rectable_cohortsSummary <- function(
     )
   )
 
+
   if (!is.null(deleteButtonsShinyId)) {
     columns[["deleteButton"]] <- reactable::colDef(
       name = "",
@@ -133,13 +134,18 @@ rectable_cohortsSummary <- function(
   }
 
   if (!is.null(editButtonsShinyId)) {
-    columns[["editButton"]] <- reactable::colDef(
-      name = "",
-      sortable = FALSE,
-      cell = function() htmltools::tags$button(shiny::icon("edit")),
-      maxWidth = 40
+    edit_col <- list(
+      editButton = reactable::colDef(
+        name = "",
+        sortable = FALSE,
+        cell = function() htmltools::tags$button(shiny::icon("edit")),
+        maxWidth = 40
+      )
     )
+    columns <- append(columns, edit_col, after = match("cohort", names(columns)))
   }
+
+
 
   onClick <- ""
   if (!is.null(deleteButtonsShinyId) | !is.null(editButtonsShinyId)) {
@@ -336,7 +342,7 @@ rectable_cohortsSummary <- function(
 #' @importFrom dplyr count mutate
 #'
 .buildInfoStr <- function(buildInfo) {
-  # 
+  #
   emojis <- list(
     error = "\u274c",
     warning = "\u26A0\uFE0F",
