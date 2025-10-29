@@ -9,7 +9,7 @@ Inherits from CDMdbHandler."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">HadesExtras</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,15 +90,19 @@ Inherits from CDMdbHandler.</p>
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
 <ul><li><p><a href="#method-CohortTableHandler-new"><code>CohortTableHandler$new()</code></a></p></li>
-<li><p><a href="#method-CohortTableHandler-finalize"><code>CohortTableHandler$finalize()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-loadConnection"><code>CohortTableHandler$loadConnection()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-insertOrUpdateCohorts"><code>CohortTableHandler$insertOrUpdateCohorts()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-deleteCohorts"><code>CohortTableHandler$deleteCohorts()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-getCohortCounts"><code>CohortTableHandler$getCohortCounts()</code></a></p></li>
+<li><p><a href="#method-CohortTableHandler-getNumberOfSubjects"><code>CohortTableHandler$getNumberOfSubjects()</code></a></p></li>
+<li><p><a href="#method-CohortTableHandler-getNumberOfCohortEntries"><code>CohortTableHandler$getNumberOfCohortEntries()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-getCohortsSummary"><code>CohortTableHandler$getCohortsSummary()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-getCohortIdAndNames"><code>CohortTableHandler$getCohortIdAndNames()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-updateCohortNames"><code>CohortTableHandler$updateCohortNames()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-getCohortsOverlap"><code>CohortTableHandler$getCohortsOverlap()</code></a></p></li>
+<li><p><a href="#method-CohortTableHandler-getNumberOfOverlappingSubjects"><code>CohortTableHandler$getNumberOfOverlappingSubjects()</code></a></p></li>
+<li><p><a href="#method-CohortTableHandler-getSexFisherTest"><code>CohortTableHandler$getSexFisherTest()</code></a></p></li>
+<li><p><a href="#method-CohortTableHandler-getYearOfBirthTests"><code>CohortTableHandler$getYearOfBirthTests()</code></a></p></li>
 <li><p><a href="#method-CohortTableHandler-clone"><code>CohortTableHandler$clone()</code></a></p></li>
 </ul></div><p></p><hr><a id="method-CohortTableHandler-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
@@ -152,27 +156,18 @@ Inherits from CDMdbHandler.</p>
 
 
 <dt><code>loadConnectionChecksLevel</code></dt>
-<dd><p>(Optional) Level of checks to perform when loading the connection (default is "allChecks")
-Finalize method</p></dd>
+<dd><p>(Optional) Level of checks to perform when loading the connection (default is "allChecks")</p>
+<p>loadConnection</p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-CohortTableHandler-finalize"></a><div class="section">
-<h3 id="method-finalize-">Method <code>finalize()</code><a class="anchor" aria-label="anchor" href="#method-finalize-"></a></h3>
-<p>Closes the connection if active.</p>
-<p>loadConnection</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">finalize</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-
 </div><p></p><hr><a id="method-CohortTableHandler-loadConnection"></a><div class="section">
 <h3 id="method-loadconnection-">Method <code>loadConnection()</code><a class="anchor" aria-label="anchor" href="#method-loadconnection-"></a></h3>
 <p>Reloads the connection with the initial setting and updates connection status</p>
 <p>insertOrUpdateCohorts</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">loadConnection</span><span class="op">(</span><span class="va">loadConnectionChecksLevel</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -190,7 +185,7 @@ Finalize method</p></dd>
 <p>If there is no cohort with the same cohortId it is added to the cohortDefinitionSet,
 If there is a cohort with the same cohortId, the cohort is updated in the cohortDefinitionSet
 CohortDefinitionSet is generated and demographics is updated for only the cohorts that have changed</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">insertOrUpdateCohorts</span><span class="op">(</span><span class="va">cohortDefinitionSet</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -207,7 +202,7 @@ CohortDefinitionSet is generated and demographics is updated for only the cohort
 </div><p></p><hr><a id="method-CohortTableHandler-deleteCohorts"></a><div class="section">
 <h3 id="method-deletecohorts-">Method <code>deleteCohorts()</code><a class="anchor" aria-label="anchor" href="#method-deletecohorts-"></a></h3>
 <p>Deletes cohorts from the cohort table.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">deleteCohorts</span><span class="op">(</span><span class="va">cohortIds</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -224,25 +219,75 @@ CohortDefinitionSet is generated and demographics is updated for only the cohort
 </div><p></p><hr><a id="method-CohortTableHandler-getCohortCounts"></a><div class="section">
 <h3 id="method-getcohortcounts-">Method <code>getCohortCounts()</code><a class="anchor" aria-label="anchor" href="#method-getcohortcounts-"></a></h3>
 <p>Retrieves cohort counts from the cohort table.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getCohortCounts</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>A tibble containing the cohort counts with names.</p>
+<p>getNumberOfSubjects</p>
+</div>
+
+</div><p></p><hr><a id="method-CohortTableHandler-getNumberOfSubjects"></a><div class="section">
+<h3 id="method-getnumberofsubjects-">Method <code>getNumberOfSubjects()</code><a class="anchor" aria-label="anchor" href="#method-getnumberofsubjects-"></a></h3>
+<p>Retrieves the number of subjects of a cohort ID.</p><div class="section">
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getNumberOfSubjects</span><span class="op">(</span><span class="va">selected_cohortId</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>selected_cohortId</code></dt>
+<dd><p>The cohort id for which number of subjects is sought.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>A numeric value of the number of subjects in a cohort.</p>
+<p>getNumberOfCohortEntries</p>
+</div>
+
+</div><p></p><hr><a id="method-CohortTableHandler-getNumberOfCohortEntries"></a><div class="section">
+<h3 id="method-getnumberofcohortentries-">Method <code>getNumberOfCohortEntries()</code><a class="anchor" aria-label="anchor" href="#method-getnumberofcohortentries-"></a></h3>
+<p>Retrieves the number of entries of a cohort ID.</p><div class="section">
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getNumberOfCohortEntries</span><span class="op">(</span><span class="va">selected_cohortId</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>selected_cohortId</code></dt>
+<dd><p>The cohort id for which number of entries is sought.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<p>A numeric value of the number of entries in a cohort.</p>
 <p>getCohortsSummary</p>
 </div>
 
 </div><p></p><hr><a id="method-CohortTableHandler-getCohortsSummary"></a><div class="section">
 <h3 id="method-getcohortssummary-">Method <code>getCohortsSummary()</code><a class="anchor" aria-label="anchor" href="#method-getcohortssummary-"></a></h3>
 <p>Retrieves the summary of cohorts including cohort start and end year histograms and sex counts.</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getCohortsSummary</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getCohortsSummary</span><span class="op">(</span>includeAllEvents <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>includeAllEvents</code></dt>
+<dd><p>Logical, whether to include all events or just subjects. Default is FALSE.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>A tibble containing cohort summary.</p>
 <p>getCohortIdAndNames</p>
 </div>
@@ -250,12 +295,12 @@ CohortDefinitionSet is generated and demographics is updated for only the cohort
 </div><p></p><hr><a id="method-CohortTableHandler-getCohortIdAndNames"></a><div class="section">
 <h3 id="method-getcohortidandnames-">Method <code>getCohortIdAndNames()</code><a class="anchor" aria-label="anchor" href="#method-getcohortidandnames-"></a></h3>
 <p>Retrieves the cohort names.</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getCohortIdAndNames</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>A vector with the name of the cohorts</p>
 <p>updateCohortNames</p>
 </div>
@@ -263,12 +308,12 @@ CohortDefinitionSet is generated and demographics is updated for only the cohort
 </div><p></p><hr><a id="method-CohortTableHandler-updateCohortNames"></a><div class="section">
 <h3 id="method-updatecohortnames-">Method <code>updateCohortNames()</code><a class="anchor" aria-label="anchor" href="#method-updatecohortnames-"></a></h3>
 <p>Updates the cohort name and short name.</p><div class="section">
-<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">updateCohortNames</span><span class="op">(</span><span class="va">cohortId</span>, <span class="va">newCohortName</span>, <span class="va">newShortName</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>cohortId</code></dt>
 <dd><p>The cohort id to update.</p></dd>
 
@@ -296,25 +341,121 @@ CohortDefinitionSet is generated and demographics is updated for only the cohort
 </div><p></p><hr><a id="method-CohortTableHandler-getCohortsOverlap"></a><div class="section">
 <h3 id="method-getcohortsoverlap-">Method <code>getCohortsOverlap()</code><a class="anchor" aria-label="anchor" href="#method-getcohortsoverlap-"></a></h3>
 <p>Retrieves the number of subjects that are in more than one cohort.</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getCohortsOverlap</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>A tibble containing one logical column for each cohort with name a cohort id,
 and an additional column <code>numberOfSubjects</code> with the number of subjects in the cohorts combination.</p>
+<p>getNumberOfOverlappingSubjects</p>
+</div>
+
+</div><p></p><hr><a id="method-CohortTableHandler-getNumberOfOverlappingSubjects"></a><div class="section">
+<h3 id="method-getnumberofoverlappingsubjects-">Method <code>getNumberOfOverlappingSubjects()</code><a class="anchor" aria-label="anchor" href="#method-getnumberofoverlappingsubjects-"></a></h3>
+<p>Retrieves the number of subjects that are overlapping between two given cohorts.</p><div class="section">
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getNumberOfOverlappingSubjects</span><span class="op">(</span></span>
+<span>  <span class="va">selected_cohortId1</span>,</span>
+<span>  <span class="va">selected_cohortId2</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>selected_cohortId1</code></dt>
+<dd><p>The cohort id of the first cohort.</p></dd>
+
+
+<dt><code>selected_cohortId2</code></dt>
+<dd><p>The cohort id of the second cohort.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
+<p>A numeric value of the number of overlapping subjects between two given cohorts.</p>
+<p>getSexFisherTest</p>
+</div>
+
+</div><p></p><hr><a id="method-CohortTableHandler-getSexFisherTest"></a><div class="section">
+<h3 id="method-getsexfishertest-">Method <code>getSexFisherTest()</code><a class="anchor" aria-label="anchor" href="#method-getsexfishertest-"></a></h3>
+<p>Compares the proportion of males and females in two cohorts using Fisher's exact test.</p><div class="section">
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getSexFisherTest</span><span class="op">(</span></span>
+<span>  <span class="va">selected_cohortId1</span>,</span>
+<span>  <span class="va">selected_cohortId2</span>,</span>
+<span>  testFor <span class="op">=</span> <span class="st">"Subjects"</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>selected_cohortId1</code></dt>
+<dd><p>The cohort id of the first cohort.</p></dd>
+
+
+<dt><code>selected_cohortId2</code></dt>
+<dd><p>The cohort id of the second cohort.</p></dd>
+
+
+<dt><code>testFor</code></dt>
+<dd><p>Character string indicating what to test: "Subjects" or "allEvents". Default is "Subjects".</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
+<p>a list containing components such as p.value and conf.int of the test</p>
+<p>getYearOfBirthTests</p>
+</div>
+
+</div><p></p><hr><a id="method-CohortTableHandler-getYearOfBirthTests"></a><div class="section">
+<h3 id="method-getyearofbirthtests-">Method <code>getYearOfBirthTests()</code><a class="anchor" aria-label="anchor" href="#method-getyearofbirthtests-"></a></h3>
+<p>Compares the year of birth distributions between the case and control cohorts using two-sample t-test to compare mean year of birth,
+uses cohen's d to assess effect size of the difference in the mean of the year of births,and the Kolmogorov-Smirnov test
+to evaluate if year of births in the two cohorts have similar distribution.</p><div class="section">
+<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">getYearOfBirthTests</span><span class="op">(</span></span>
+<span>  <span class="va">selected_cohortId1</span>,</span>
+<span>  <span class="va">selected_cohortId2</span>,</span>
+<span>  testFor <span class="op">=</span> <span class="st">"Subjects"</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>selected_cohortId1</code></dt>
+<dd><p>The cohort id of the first cohort.</p></dd>
+
+
+<dt><code>selected_cohortId2</code></dt>
+<dd><p>The cohort id of the second cohort.</p></dd>
+
+
+<dt><code>testFor</code></dt>
+<dd><p>The type of test to perform. "Subjects" to test the year of birth of the subjects in the cohorts, "allEvents" to test the year of birth of all events in the cohorts.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
+<p>a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohend result (list of meanInCases, meanInControls, pooledsd, and cohend)</p>
 </div>
 
 </div><p></p><hr><a id="method-CohortTableHandler-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CohortTableHandler</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">HadesExtras</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,6 +82,10 @@
 <dd><p>Schema name for the CDM database</p></dd>
 
 
+<dt><code>resultsDatabaseSchema</code></dt>
+<dd><p>Schema name for the results database</p></dd>
+
+
 <dt><code>connectionStatusLog</code></dt>
 <dd><p>Log of connection status and operations</p></dd>
 
@@ -111,13 +115,11 @@
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
 <ul><li><p><a href="#method-CDMdbHandler-new"><code>CDMdbHandler$new()</code></a></p></li>
-<li><p><a href="#method-CDMdbHandler-finalize"><code>CDMdbHandler$finalize()</code></a></p></li>
 <li><p><a href="#method-CDMdbHandler-loadConnection"><code>CDMdbHandler$loadConnection()</code></a></p></li>
 <li><p><a href="#method-CDMdbHandler-clone"><code>CDMdbHandler$clone()</code></a></p></li>
 </ul></div><p></p><hr><a id="method-CDMdbHandler-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
-
-<div class="section">
+<p>Returns the results database schema name.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/CDMdbHandler.html">CDMdbHandler</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  <span class="va">databaseId</span>,</span>
@@ -157,27 +159,22 @@
 <dd><p>(Optional) Name of the vocabulary database schema (default is cdmDatabaseSchema)</p></dd>
 
 
+<dt><code>resultsDatabaseSchema</code></dt>
+<dd><p>(Optional) Name of the results database schema (default is cdmDatabaseSchema)</p></dd>
+
+
 <dt><code>loadConnectionChecksLevel</code></dt>
 <dd><p>(Optional) Level of checks to perform when loading the connection (default is "allChecks")
-Finalize method</p></dd>
+Reload connection</p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-CDMdbHandler-finalize"></a><div class="section">
-<h3 id="method-finalize-">Method <code>finalize()</code><a class="anchor" aria-label="anchor" href="#method-finalize-"></a></h3>
-<p>Closes the connection if active.
-Reload connection</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CDMdbHandler</span><span class="op">$</span><span class="fu">finalize</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-
 </div><p></p><hr><a id="method-CDMdbHandler-loadConnection"></a><div class="section">
 <h3 id="method-loadconnection-">Method <code>loadConnection()</code><a class="anchor" aria-label="anchor" href="#method-loadconnection-"></a></h3>
 <p>Updates the connection status by checking the database connection, vocabulary database schema, and CDM database schema.</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CDMdbHandler</span><span class="op">$</span><span class="fu">loadConnection</span><span class="op">(</span><span class="va">loadConnectionChecksLevel</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -193,7 +190,7 @@ Reload connection</p><div class="section">
 </div><p></p><hr><a id="method-CDMdbHandler-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">CDMdbHandler</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
