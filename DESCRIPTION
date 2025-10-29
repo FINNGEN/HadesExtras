@@ -1,6 +1,6 @@
 Package: HadesExtras
 Title: HadesExtras
-Version: 1.1.2
+Version: 2.0.0
 Authors@R: 
     person("Javier", "Gracia-Tabuenca", , "javier.graciatabuenca@tuni.fi", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2455-0598"))
@@ -9,14 +9,13 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://github.com/FINNGEN/HadesExtras, https://finngen.github.io/HadesExtras/
 BugReports: https://github.com/FINNGEN/HadesExtras/issues
 Imports: 
     apexcharter,
     bigrquery,
     checkmate,
-    DBI,
     dbplyr,
     digest,
     dplyr,
@@ -39,16 +38,12 @@ Imports:
     FeatureExtraction,
     CohortGenerator,
     ResultModelManager,
-    Eunomia, 
     tippy,
     yaml,
     Andromeda
 Remotes: 
-    OHDSI/CohortGenerator,
-    OHDSI/ResultModelManager, 
     OHDSI/ROhdsiWebApi,
-    javier-gracia-tabuenca-tuni/DatabaseConnector@BQ-DBI,
-    OHDSI/FeatureExtraction@develop
+    javier-gracia-tabuenca-tuni/DatabaseConnector@bigquery-DBI-2
 Suggests: 
     devtools,
     ROhdsiWebApi,
@@ -60,6 +55,7 @@ Suggests:
     yaml, 
     usethis,
     withr,
-    spelling
+    spelling,
+    Eunomia
 Config/testthat/edition: 3
 VignetteBuilder: knitr

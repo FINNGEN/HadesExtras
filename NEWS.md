@@ -1,3 +1,8 @@
+# HadesExtras 2.0.0
+- Adapted for DatabaseConnector v7
+- change all dbplyr code to sql
+- improved unit tests
+
 # HadesExtras 1.1.2
 - Added demographic summaries for events to CohortTableHandler
 - Added comparison function to CohortTableHandler
