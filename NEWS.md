@@ -1,3 +1,6 @@
+# HadesExtras 2.1.0
+- CohortTableHandler automatically creates a default short name for the cohorts
+
 # HadesExtras 2.0.0
 - Adapted for DatabaseConnector v7
 - change all dbplyr code to sql
