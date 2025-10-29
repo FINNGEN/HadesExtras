@@ -345,7 +345,7 @@ test_that("CohortTableHandler$updateCohortNames updates cohort names", {
   cohortTableHandler$getCohortIdAndNames() |>
     dplyr::filter(cohortId == 20) |>
     pull(shortName) |>
-    expect_equal("C20")
+    expect_equal("coho")
 })
 
 
@@ -378,7 +378,7 @@ test_that("CohortTableHandler$updateCohortNames creates shortName one is NA", {
   cohortTableHandler$getCohortIdAndNames() |>
     dplyr::filter(cohortId == 20) |>
     pull(shortName) |>
-    expect_equal("C20")
+    expect_equal("coho")
 })
 
 

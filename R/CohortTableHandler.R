@@ -190,11 +190,52 @@ CohortTableHandler <- R6::R6Class(
         stop("Provided table is not of cohortDefinitionSet format")
       }
 
+      make_short_name <- function(name, id) {
+        if (is.na(name) || name == "") {
+          return(paste0("C", id))
+        }
+
+        # remove bracketed parts: [ ... ] or ( ... )
+        name <- stringr::str_remove_all(name, "\\[.*?\\]|\\(.*?\\)")
+        name <- stringr::str_trim(name)
+
+        # split on space, underscore, dash, dot
+        parts <- unlist(stringr::str_split(name, "[-_\\.\\s]+"))
+        parts <- parts[parts != ""]
+
+        # if there are no parts after splitting, use C+id default
+        if (length(parts) == 0) {
+          return(paste0("C", id))
+        }
+
+        # if there is only a single word, or one part, take the first 4 chars as shortname
+        if (length(parts) == 1) {
+          return(stringr::str_sub(parts[1], 1, 4))
+        }
+
+        first <- stringr::str_sub(parts[1], 1, 4)
+        last  <- stringr::str_sub(parts[length(parts)], 1, 4)
+        stringr::str_c(first, last)
+      }
+
+
       # if not shortName, create it
       if (!"shortName" %in% names(cohortDefinitionSet)) {
-        cohortDefinitionSet$shortName <- paste0("C", cohortDefinitionSet$cohortId)
+        cohortDefinitionSet$shortName <- mapply(
+          make_short_name,
+          cohortDefinitionSet$cohortName,
+          cohortDefinitionSet$cohortId,
+          USE.NAMES = FALSE
+        )
       } else {
-        cohortDefinitionSet$shortName <- dplyr::if_else(is.na(cohortDefinitionSet$shortName), paste0("C", cohortDefinitionSet$cohortId), cohortDefinitionSet$shortName)
+        cohortDefinitionSet$shortName <- dplyr::if_else(is.na(cohortDefinitionSet$shortName),
+                                                        mapply(
+                                                          make_short_name,
+                                                          cohortDefinitionSet$cohortName,
+                                                          cohortDefinitionSet$cohortId,
+                                                          USE.NAMES = FALSE
+                                                        ),
+                                                        cohortDefinitionSet$shortName)
       }
 
       cohortIdsExists <- intersect(private$.cohortDefinitionSet$cohortId, cohortDefinitionSet$cohortId)
