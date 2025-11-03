@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">HadesExtras</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@
 <span><span class="co"># Get the path to the Eunomia database</span></span>
 <span><span class="va">pathToGiBleedEunomiaSqlite</span> <span class="op">&lt;-</span> <span class="fu">Eunomia</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/Eunomia/reference/getDatabaseFile.html" class="external-link">getDatabaseFile</a></span><span class="op">(</span><span class="st">"GiBleed"</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; attempting to download GiBleed</span></span>
-<span><span class="co">#&gt; attempting to extract and load: /tmp/RtmpTTKogj/GiBleed_5.3.zip to: /tmp/RtmpTTKogj/GiBleed_5.3.sqlite</span></span></code></pre></div>
+<span><span class="co">#&gt; attempting to extract and load: /tmp/RtmpqfvS98/GiBleed_5.3.zip to: /tmp/RtmpqfvS98/GiBleed_5.3.sqlite</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a>
@@ -139,7 +139,7 @@ used.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCDMdbHandlerFromList.html">createCDMdbHandlerFromList</a></span><span class="op">(</span><span class="va">config</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Connecting using SQLite driver</span></span>
-<span><span class="co">#&gt; Inserting data took 0.00847 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Inserting data took 0.00885 secs</span></span></code></pre></div>
 <p>First thing to do is to check the status of the connection.
 <code>CDMdb$connectionStatusLog</code> not only shows if the connection
 is correct, but also if the <code>tempEmulationSchema</code> works, and
