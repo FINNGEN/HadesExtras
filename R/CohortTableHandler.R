@@ -41,7 +41,7 @@ CohortTableHandler <- R6::R6Class(
     .cohortGeneratorResults = NULL,
     .cohortDemograpics = NULL,
     .cohortsOverlap = NULL,
-    
+
     # Finalize method - closes the connection if active
     finalize = function() {
       CohortGenerator_dropCohortStatsTables(
@@ -210,7 +210,8 @@ CohortTableHandler <- R6::R6Class(
 
         # if there is only a single word, or one part, take the first 4 chars as shortname
         if (length(parts) == 1) {
-          return(stringr::str_sub(parts[1], 1, 4))
+          prefix <- stringr::str_sub(parts[1], 1, 4)
+          return(paste0(prefix, id))
         }
 
         first <- stringr::str_sub(parts[1], 1, 4)
