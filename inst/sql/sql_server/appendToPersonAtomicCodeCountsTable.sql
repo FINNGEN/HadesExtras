@@ -4,17 +4,17 @@ INSERT INTO @resultsDatabaseSchema.@personCodeAtomicCountsTable
 -- calculate counts per each group of concept_id, calendar_year, gender_concept_id, age_decil
 SELECT 
         CAST('@domain_id' AS VARCHAR(255)) AS domain_id,
-        ccm.person_id AS person_id,
+        CAST(ccm.person_id AS BIGINT) AS person_id,
         CAST(ccm.concept_id AS BIGINT) AS concept_id,
         CAST(ccm.maps_to_concept_id AS BIGINT) AS maps_to_concept_id,
-        COUNT_BIG(*) AS n_records,
+        COUNT(*) AS n_records,
         MIN(ccm.start_date) AS first_date,
-        CAST(MIN(ccm.age) AS INTEGER) AS first_age,
+        CAST(MIN(ccm.age) AS INT) AS first_age,
         {@domain_id == 'Drug'} ? { CAST(SUM(ccm.value) AS FLOAT) } : {
         {@domain_id == 'Measurement'} ? { CAST(AVG(ccm.value) AS FLOAT) } : 
         { NULL }} AS aggregated_value,
-        CAST(MAX(COALESCE(ccm.value_unit, 0)) AS BIGINT) AS aggregated_value_unit,
-        CAST(MAX(COALESCE(ccm.category, 0)) AS BIGINT) AS aggregated_category
+        CAST(MAX(COALESCE(ccm.value_unit, 0)) AS INT) AS aggregated_value_unit,
+        CAST(MAX(COALESCE(ccm.category, 0)) AS INT) AS aggregated_category
 FROM (
         -- get all person_ids with the concept_id with in a valid observation period
         -- calculate the calendar year, gender_concept_id, age_decile

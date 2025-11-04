@@ -40,14 +40,15 @@ createPersonCodeCountsTable <- function(
     # - Create code counts table
     sqlPath <- system.file("sql", "sql_server", "CreateCodeCountsTable.sql", package = "HadesExtras")
     baseSql <- SqlRender::readSql(sqlPath)
-    sql <- SqlRender::render(baseSql,
+    DatabaseConnector::renderTranslateExecuteSql(
+        connection = connection,
+        sql = baseSql,
         resultsDatabaseSchema = resultsDatabaseSchema,
         personCodeCountsTable = personCodeCountsTable,
         personCodeAtomicCountsTable = personCodeAtomicCountsTable,
+        cdmDatabaseSchema = cdmDatabaseSchema,
         cdmDatabaseSchema = cdmDatabaseSchema
     )
-    sql <- SqlRender::translate(sql, targetDialect = connection@dbms)
-    DatabaseConnector::executeSql(connection, sql)
 
     
 }
@@ -111,23 +112,23 @@ createPersonCodeAtomicCountsTable <- function(
     # - Create code atomic counts table
     sql <- "DROP TABLE IF EXISTS @resultsDatabaseSchema.@personCodeAtomicCountsTable;
     CREATE TABLE @resultsDatabaseSchema.@personCodeAtomicCountsTable (
-        domain_id VARCHAR(255),
-        person_id INTEGER,
-        concept_id INTEGER,
-        maps_to_concept_id INTEGER,
-        n_records INTEGER,
+        domain_id VARCHAR(255) NOT NULL,
+        person_id BIGINT NOT NULL,
+        concept_id BIGINT,
+        maps_to_concept_id BIGINT,
+        n_records INT,
         first_date DATE,
-        first_age INTEGER,
+        first_age INT,
         aggregated_value FLOAT,
-        aggregated_value_unit INTEGER,
-        aggregated_category INTEGER
+        aggregated_value_unit INT,
+        aggregated_category INT
     )"
-    sql <- SqlRender::render(sql,
+    DatabaseConnector::renderTranslateExecuteSql(
+        connection = connection,
+        sql = sql,
         resultsDatabaseSchema = resultsDatabaseSchema,
         personCodeAtomicCountsTable = personCodeAtomicCountsTable
     )
-    sql <- SqlRender::translate(sql, targetDialect = connection@dbms)
-    DatabaseConnector::executeSql(connection, sql)
 
     # - Append to code atomic counts table
     sqlPath <- system.file("sql", "sql_server", "AppendToPersonAtomicCodeCountsTable.sql", package = "HadesExtras")
@@ -136,7 +137,9 @@ createPersonCodeAtomicCountsTable <- function(
     for (i in 1:nrow(domains)) {
         domain <- domains[i, ]
         message(sprintf("Processing domain: %s", domain$table_name))
-        sql <- SqlRender::render(baseSql,
+        DatabaseConnector::renderTranslateExecuteSql(
+            connection = connection,
+            sql = baseSql,
             domain_id = domain$domain_id,
             personCodeAtomicCountsTable = personCodeAtomicCountsTable,
             cdmDatabaseSchema = cdmDatabaseSchema,
@@ -147,8 +150,5 @@ createPersonCodeAtomicCountsTable <- function(
             end_date_field = domain$end_date_field,
             maps_to_concept_id_field = domain$maps_to_concept_id_field
         )
-
-        sql <- SqlRender::translate(sql, targetDialect = connection@dbms)
-        DatabaseConnector::executeSql(connection, sql)
     }
 }

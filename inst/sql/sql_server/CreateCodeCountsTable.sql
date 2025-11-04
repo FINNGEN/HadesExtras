@@ -3,33 +3,37 @@ DROP TABLE IF EXISTS @resultsDatabaseSchema.temp_concept_ancestor;
 DROP TABLE IF EXISTS @resultsDatabaseSchema.@personCodeCountsTable;
 
 CREATE TABLE @resultsDatabaseSchema.temp_concept_ancestor (
-    ancestor_concept_id INTEGER,
-    descendant_concept_id INTEGER,
-    ancestor_vocabulary_id VARCHAR(255)
+    ancestor_concept_id BIGINT NOT NULL,
+    descendant_concept_id BIGINT NOT NULL,
+    ancestor_vocabulary_id VARCHAR(20) NOT NULL, 
+    ancestor_concept_class_id VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE @resultsDatabaseSchema.@personCodeCountsTable (
-    analysis_type VARCHAR(255),
-    person_id INTEGER,
-    concept_id INTEGER,
-    n_records INTEGER,
-    first_date DATE,
-    first_age INTEGER,
-    aggregated_value FLOAT,
-    aggregated_value_unit INTEGER,
-    aggregated_category INTEGER
+    analysis_type VARCHAR(20) NOT NULL,
+    concept_class_id VARCHAR(20) NOT NULL,
+    person_id BIGINT NOT NULL,
+    concept_id BIGINT NOT NULL,
+    n_records INT NOT NULL,
+    first_date DATE NOT NULL,
+    first_age INT NOT NULL,
+    aggregated_value FLOAT NULL,
+    aggregated_value_unit INT NULL,
+    aggregated_category INT NULL
 );
 
 -- Create a temporary concept ancestor table that also includes all the concepts to themselves
 INSERT INTO @resultsDatabaseSchema.temp_concept_ancestor (
 	ancestor_concept_id,
 	descendant_concept_id,
-	ancestor_vocabulary_id
+	ancestor_vocabulary_id,
+	ancestor_concept_class_id
 	)
 SELECT DISTINCT 
     ca.ancestor_concept_id AS ancestor_concept_id,
     ca.descendant_concept_id AS descendant_concept_id,
-    c.vocabulary_id AS ancestor_vocabulary_id
+    c.vocabulary_id AS ancestor_vocabulary_id,
+    c.concept_class_id AS ancestor_concept_class_id
  FROM (
     SELECT * FROM @cdmDatabaseSchema.concept_ancestor
     UNION ALL
@@ -42,13 +46,15 @@ SELECT DISTINCT
         @cdmDatabaseSchema.concept
 ) AS ca
 LEFT JOIN @cdmDatabaseSchema.concept AS c
-ON ca.ancestor_concept_id = c.concept_id;
+ON ca.ancestor_concept_id = c.concept_id
+WHERE c.vocabulary_id IS NOT NULL;
 
 -- Append standard analysis for Condition, Procedure, Observation, Device, and all ancestors
 INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable 
     
 SELECT
     pcac.domain_id AS analysis_type,
+    'Standard' AS concept_class_id,
     pcac.person_id AS person_id,
     tca.ancestor_concept_id AS concept_id,
     SUM(pcac.n_records) AS n_records,
@@ -73,6 +79,7 @@ INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable
     
 SELECT
     tca.ancestor_vocabulary_id AS analysis_type,
+    tca.ancestor_concept_class_id AS concept_class_id,
     pcac.person_id AS person_id,
     tca.ancestor_concept_id AS concept_id,
     SUM(pcac.n_records) AS n_records,
@@ -96,6 +103,7 @@ INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable
     
 SELECT
     'ATC' AS analysis_type,
+    tca.ancestor_concept_class_id AS concept_class_id,
     pcac.person_id AS person_id,
     tca.ancestor_concept_id AS concept_id,
     SUM(pcac.n_records) AS n_records,
@@ -117,6 +125,7 @@ INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable
     
 SELECT DISTINCT
     'Measurements' AS analysis_type,
+    'Standard' AS concept_class_id,
     pcac.person_id AS person_id,
     pcac.concept_id AS concept_id,
     pcac.n_records AS n_records,
@@ -126,6 +135,5 @@ SELECT DISTINCT
     pcac.aggregated_value_unit AS aggregated_value_unit,
     pcac.aggregated_category AS aggregated_category
 FROM @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac;
-
 
 DROP TABLE IF EXISTS @resultsDatabaseSchema.temp_concept_ancestor;

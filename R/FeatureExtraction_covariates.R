@@ -25,6 +25,31 @@ getListOfAnalysis <- function() {
 }
 
 
+getListOfPreComputedAnalysis <- function(
+  CDMdbHandler,
+  personCodeCountsTable = "person_code_counts"
+) {
+  #
+  # VALIDATE
+  #
+  CDMdbHandler |> checkmate::assertClass("CDMdbHandler")
+  personCodeCountsTable |> checkmate::assertString()
+  connection <- CDMdbHandler$connectionHandler$getConnection()
+  resultsDatabaseSchema <- CDMdbHandler$resultsDatabaseSchema
+
+  #
+  # FUNCTION
+  #
+  sql <- "SELECT DISTINCT analysis_type, concept_class_id FROM @resultsDatabaseSchema.@personCodeCountsTable"
+  preComputedAnalysis <- DatabaseConnector::renderTranslateQuerySql(
+    connection = connection,
+    sql = sql,
+    resultsDatabaseSchema = resultsDatabaseSchema,
+    personCodeCountsTable = personCodeCountsTable
+  )
+
+  return(preComputedAnalysis)
+}
 
 
 #' Create Temporal Covariate Settings From List
@@ -37,16 +62,17 @@ getListOfAnalysis <- function() {
 #'
 #' @importFrom checkmate assertInteger
 #' @importFrom FeatureExtraction createTemporalCovariateSettings createDetailedTemporalCovariateSettings
-#' @importFrom dplyr filter 
+#' @importFrom dplyr filter
 #'
 #' @return A list of temporal covariate settings.
 #'
 #' @export
 #'
 FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
-    analysisIds,
-    temporalStartDays = c(-99999),
-    temporalEndDays = c(99999)) {
+  analysisIds,
+  temporalStartDays = c(-99999),
+  temporalEndDays = c(99999)
+) {
   analysisIds |> checkmate::assertNumeric()
   temporalStartDays |> checkmate::assertNumeric()
   temporalEndDays |> checkmate::assertNumeric()
@@ -155,9 +181,8 @@ FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
   if ("YearOfBirth" %in% selectedAnalysis$analysisName) {
     listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_YearOfBirth()
   }
- 
+
   if ("ATCgroups" %in% selectedAnalysis$analysisName) {
-  
     listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_ATCgroups(
       temporalStartDays = temporalStartDays,
       temporalEndDays = temporalEndDays
@@ -165,7 +190,6 @@ FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
   }
 
   if ("DDDATCgroups" %in% selectedAnalysis$analysisName) {
-  
     listOfCovariateSetings[[length(listOfCovariateSetings) + 1]] <- covariateData_ATCgroups(
       temporalStartDays = temporalStartDays,
       temporalEndDays = temporalEndDays,
@@ -174,7 +198,5 @@ FeatureExtraction_createTemporalCovariateSettingsFromList <- function(
   }
 
 
-
   return(listOfCovariateSetings)
 }
-

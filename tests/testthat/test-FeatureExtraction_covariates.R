@@ -177,23 +177,26 @@ test_that("FeatureExtraction_createDetailedTemporalCovariateSettings can run all
     expect_length(0)
 })
 
+test_that("getListOfPreComputedAnalysis  works", {
 
-analysisIds <- c(1, 41, 101, 141)
+  CDMdb <- createCDMdbHandlerFromList(test_cohortTableHandlerConfig)
+  withr::defer({
+    rm(CDMdb)
+    gc()
+  })
 
-p  <- profvis::profvis({
-  covariateData <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    cohortTable = cohortTableName,
-    cohortDatabaseSchema = cohortDatabaseSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    covariateSettings = covariateSettings,
-    cohortIds = c(1, 2),
-    aggregated = TRUE, 
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
-  )
+  personCodeCountsTable <- "person_code_counts_test"
+
+  preComputedAnalysis <- getListOfPreComputedAnalysis(CDMdb, personCodeCountsTable = personCodeCountsTable)
+
+  # check at least one analysis is returned
+  preComputedAnalysis |>
+    nrow() |>
+    expect_gt(0)
+
+  # check the analysis types are correct
+  preComputedAnalysis |>
+  dplyr::filter(concept_class_id == "Standard") |>
+    dplyr::pull(analysis_type)  |> 
+    checkmate::assertSubset(c("Condition", "Procedure", "Observation", "Device", "Measurements"))
 })
-tempfile <- tempfile(fileext = ".html")
-htmlwidgets::saveWidget(p, tempfile)
-
-# Can open in browser from R
-browseURL(tempfile)

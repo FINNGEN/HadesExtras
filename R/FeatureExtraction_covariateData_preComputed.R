@@ -13,17 +13,13 @@
 #'
 #' @export
 #'
-covariateData_allAtOnce <- function(
+covariateData_preComputed <- function(
   analysisTypes 
 ) {
   covariateSettings <- list(
-    temporal = TRUE,
-    temporalSequence = FALSE,
-    temporalStartDays = temporalStartDays,
-    temporalEndDays = temporalEndDays,
-    continuous = continuous
+    analysisTypes = analysisTypes
   )
-  attr(covariateSettings, "fun") <- "HadesExtras::ATCgroups"
+  attr(covariateSettings, "fun") <- "HadesExtras::preComputed"
   class(covariateSettings) <- "covariateSettings"
   return(covariateSettings)
 }
