@@ -10,7 +10,7 @@ CREATE TABLE @resultsDatabaseSchema.temp_concept_ancestor (
 );
 
 CREATE TABLE @resultsDatabaseSchema.@personCodeCountsTable (
-    analysis_type VARCHAR(20) NOT NULL,
+    analysis_group VARCHAR(20) NOT NULL,
     concept_class_id VARCHAR(20) NOT NULL,
     person_id BIGINT NOT NULL,
     concept_id BIGINT NOT NULL,
@@ -53,7 +53,7 @@ WHERE c.vocabulary_id IS NOT NULL;
 INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable 
     
 SELECT
-    pcac.domain_id AS analysis_type,
+    pcac.domain_id AS analysis_group,
     'Standard' AS concept_class_id,
     pcac.person_id AS person_id,
     tca.ancestor_concept_id AS concept_id,
@@ -78,7 +78,7 @@ GROUP BY
 INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable 
     
 SELECT
-    tca.ancestor_vocabulary_id AS analysis_type,
+    tca.ancestor_vocabulary_id AS analysis_group,
     tca.ancestor_concept_class_id AS concept_class_id,
     pcac.person_id AS person_id,
     tca.ancestor_concept_id AS concept_id,
@@ -102,7 +102,7 @@ GROUP BY
 INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable 
     
 SELECT
-    'ATC' AS analysis_type,
+    'ATC' AS analysis_group,
     tca.ancestor_concept_class_id AS concept_class_id,
     pcac.person_id AS person_id,
     tca.ancestor_concept_id AS concept_id,
@@ -124,7 +124,7 @@ GROUP BY
 INSERT INTO @resultsDatabaseSchema.@personCodeCountsTable 
     
 SELECT DISTINCT
-    'Measurements' AS analysis_type,
+    'Measurements' AS analysis_group,
     'Standard' AS concept_class_id,
     pcac.person_id AS person_id,
     pcac.concept_id AS concept_id,

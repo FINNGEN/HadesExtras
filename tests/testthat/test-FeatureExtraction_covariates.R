@@ -196,7 +196,7 @@ test_that("getListOfPreComputedAnalysis  works", {
 
   # check the analysis types are correct
   preComputedAnalysis |>
-  dplyr::filter(concept_class_id == "Standard") |>
-    dplyr::pull(analysis_type)  |> 
+  dplyr::filter(conceptClassId == "Standard") |>
+    dplyr::pull(analysisType)  |> 
     checkmate::assertSubset(c("Condition", "Procedure", "Observation", "Device", "Measurements"))
 })

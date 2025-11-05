@@ -40,13 +40,15 @@ getListOfPreComputedAnalysis <- function(
   #
   # FUNCTION
   #
-  sql <- "SELECT DISTINCT analysis_type, concept_class_id FROM @resultsDatabaseSchema.@personCodeCountsTable"
+  sql <- "SELECT DISTINCT analysis_group, concept_class_id FROM @resultsDatabaseSchema.@personCodeCountsTable"
   preComputedAnalysis <- DatabaseConnector::renderTranslateQuerySql(
     connection = connection,
     sql = sql,
     resultsDatabaseSchema = resultsDatabaseSchema,
-    personCodeCountsTable = personCodeCountsTable
-  )
+    personCodeCountsTable = personCodeCountsTable, 
+    snakeCaseToCamelCase = TRUE
+  ) |> 
+    dplyr::tibble()
 
   return(preComputedAnalysis)
 }

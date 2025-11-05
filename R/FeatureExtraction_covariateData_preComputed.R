@@ -1,23 +1,30 @@
-
-#' covariateData_ATCgroups
+#' covariateData_preComputed
 #'
-#' @description Creates covariate settings for ATC drug groups
-#' @param temporalStartDays Start day relative to index (-99999 by default)
-#' @param temporalEndDays End day relative to index (99999 by default)
-#' @param continuous Logical. If TRUE, the covariate data is continuous.
-#' 
-#' @return A covariate settings object for ATC drug groups
-#' 
-#' @importFrom DatabaseConnector querySql
-#' @importFrom SqlRender render translate
+#' @description Creates covariate settings for pre-computed covariate analyses.
+#' @param preComputedAnalysis A data frame with columns 'analysisType' and 'conceptClassId'
+#'
+#' @return A covariate settings object for pre-computed analyses
+#'
+#' @importFrom checkmate assertDataFrame assertSetEqual
 #'
 #' @export
 #'
 covariateData_preComputed <- function(
-  analysisTypes 
+  shcresultsDatabaseSchema, 
+  preComputedCovariateTable = "pre_computed_covariate_table",
+  covariateGroups,
+  covariateTypes
 ) {
+  covariateGroups |> checkmate::assertDataFrame()
+  covariateGroups |>
+    names() |>
+    checkmate::assertSetEqual(c("groupType", "conceptClassId"))
+
+  covariateTypes |> checkmate::assertSubset(c("Binary", "Counts", "AgeFirstEvent", "DaysToFirstEvent"))
+
   covariateSettings <- list(
-    analysisTypes = analysisTypes
+    covariateGroups = covariateGroups,
+    covariateTypes = covariateTypes
   )
   attr(covariateSettings, "fun") <- "HadesExtras::preComputed"
   class(covariateSettings) <- "covariateSettings"
@@ -46,39 +53,36 @@ covariateData_preComputed <- function(
 #'
 #' @export
 #'
-ATCgroups <- function(
-    connection,
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    cdmDatabaseSchema,
-    cdmVersion = "5",
-    cohortTable = "#cohort_person",
-    cohortIds = c(-1),
-    rowIdField = "subject_id",
-    covariateSettings,
-    aggregated = FALSE,
-    minCharacterizationMean = 0) {
+preComputed <- function(
+  connection,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+  cdmDatabaseSchema,
+  cdmVersion = "5",
+  cohortTable = "#cohort_person",
+  cohortIds = c(-1),
+  rowIdField = "subject_id",
+  covariateSettings,
+  aggregated = FALSE,
+  minCharacterizationMean = 0
+) {
+  shcresultsDatabaseSchema <- covariateSettings$shcresultsDatabaseSchema
+  preComputedCovariateTable <- covariateSettings$preComputedCovariateTable
+  covariateGroups <- covariateSettings$covariateGroups
+  covariateTypes <- covariateSettings$covariateTypes
 
-  continuous <- covariateSettings$continuous
 
-  # Some SQL to construct the covariate:
-  if (continuous) {
-    sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateDDDATCgroups.sql", package = "HadesExtras"))
-    analysisId <- 343
-    analysisName <- "DDDATCgroups"
-    isBinary <- "Y"
-    missingMeansZero <- "N"
-  } else {
-    sql <- SqlRender::readSql(system.file("sql/sql_server/CovariateATCgroups.sql", package = "HadesExtras"))
-    analysisId <- 342
-    analysisName <- "ATCgroups"
-    isBinary <- "N"
-    missingMeansZero <- "Y"
-  }
+  DatabaseConnector::insertTable(
+    connection = connection,
+    tableName = "pre_computed_covariate_table",
+    data = covariateGroups,
+    dropTableIfExists = TRUE,
+    createTable = TRUE,
+    tempTable = TRUE
+  )
+  
 
-  writeLines(paste0("Constructing ", analysisName, " covariate"))
 
-  ATCTimePeriodsValuesStr <- paste0("(", 1:length(covariateSettings$temporalStartDays), ",", covariateSettings$temporalStartDays, ",", covariateSettings$temporalEndDays, ")", collapse = ",")
-
+  
   sql <- SqlRender::render(sql,
     cdm_database_schema = cdmDatabaseSchema,
     domain_table = "drug_exposure",
@@ -94,31 +98,6 @@ ATCgroups <- function(
   )
   sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
 
-  # Retrieve the covariate:
-  DatabaseConnector::executeSql(connection, sql)
-
-  # Construct covariate reference:
-  if (continuous) {
-    covariatesContinuous <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_table")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
-    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_ddd_covariate_ref")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
-  } else {
-    covariates <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_table")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
-    covariateRef <- DatabaseConnector::dbReadTable(connection, "#atc_covariate_ref")  |> 
-    SqlRender::snakeCaseToCamelCaseNames()
-  }
-  
-
-  # Construct analysis reference:
-  analysisRef <- data.frame(
-    analysisId = analysisId,
-    analysisName = analysisName,
-    domainId = "Drug",
-    isBinary = isBinary,
-    missingMeansZero = missingMeansZero
-  )
 
   # Construct analysis reference:
   metaData <- list(sql = sql, call = match.call())
@@ -136,7 +115,7 @@ ATCgroups <- function(
       analysisRef = analysisRef
     )
   }
-  
+
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 

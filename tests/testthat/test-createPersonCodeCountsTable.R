@@ -14,11 +14,11 @@ test_that("createPersonCodeCountsTable", {
 
   nRows  <- personCodeCounts |> dplyr::count() |> dplyr::pull(n) 
   nRows |> expect_gt(0)
-  # analysis_type
-  personCodeCounts |> dplyr::filter(is.na(analysis_type)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # analysis_group
+  personCodeCounts |> dplyr::filter(is.na(analysis_group)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # concept_class_id, only Standard for Condition, Procedure, Observation, Device
   personCodeCounts |> dplyr::filter(is.na(concept_class_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
-  personCodeCounts |> dplyr::count(analysis_type, concept_class_id) |> dplyr::filter(analysis_type %in% c('Condition', 'Procedure', 'Observation', 'Device')) |> 
+  personCodeCounts |> dplyr::count(analysis_group, concept_class_id) |> dplyr::filter(analysis_group %in% c('Condition', 'Procedure', 'Observation', 'Device')) |> 
     dplyr::filter(concept_class_id != 'Standard') |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)  
   # person_id
   personCodeCounts |> dplyr::filter(is.na(person_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
@@ -31,18 +31,18 @@ test_that("createPersonCodeCountsTable", {
   # first_age
   personCodeCounts |> dplyr::filter(is.na(first_age)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # aggregated_value
-  personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & analysis_type != 'ATC' & !is.na(aggregated_value)) |> 
+  personCodeCounts |> dplyr::filter(analysis_group !=  'Measurements' & analysis_group != 'ATC' & !is.na(aggregated_value)) |> 
   dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # aggregated_value_unit
-  personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & analysis_type != 'ATC' & !is.na(aggregated_value)) |> 
+  personCodeCounts |> dplyr::filter(analysis_group !=  'Measurements' & analysis_group != 'ATC' & !is.na(aggregated_value)) |> 
   dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # aggregated_category
-  personCodeCounts |> dplyr::filter(analysis_type !=  'Measurements' & !is.na(aggregated_category)) |> 
+  personCodeCounts |> dplyr::filter(analysis_group !=  'Measurements' & !is.na(aggregated_category)) |> 
   dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
 
   skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
   # ATC only available in AtlasDevelopment
-  personCodeCounts |> dplyr::filter(analysis_type ==  'ATC' & !is.na(aggregated_value)) |>
+  personCodeCounts |> dplyr::filter(analysis_group ==  'ATC' & !is.na(aggregated_value)) |>
    dplyr::count() |> dplyr::pull(n) |> expect_gt(0)
 })
 
