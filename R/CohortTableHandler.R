@@ -190,54 +190,23 @@ CohortTableHandler <- R6::R6Class(
         stop("Provided table is not of cohortDefinitionSet format")
       }
 
-      make_short_name <- function(name, id) {
-        if (is.na(name) || name == "") {
-          return(paste0("C", id))
-        }
-
-        # remove bracketed parts: [ ... ] or ( ... )
-        name <- stringr::str_remove_all(name, "\\[.*?\\]|\\(.*?\\)")
-        name <- stringr::str_trim(name)
-
-        # split on space, underscore, dash, dot
-        parts <- unlist(stringr::str_split(name, "[-_\\.\\s]+"))
-        parts <- parts[parts != ""]
-
-        # if there are no parts after splitting, use C+id default
-        if (length(parts) == 0) {
-          return(paste0("C", id))
-        }
-
-        # if there is only a single word, or one part, take the first 4 chars as shortname
-        if (length(parts) == 1) {
-          prefix <- stringr::str_sub(parts[1], 1, 4)
-          return(paste0(prefix, id))
-        }
-
-        first <- stringr::str_sub(parts[1], 1, 4)
-        last  <- stringr::str_sub(parts[length(parts)], 1, 4)
-        stringr::str_c(first, last)
-      }
-
-
       # if not shortName, create it
       if (!"shortName" %in% names(cohortDefinitionSet)) {
-        cohortDefinitionSet$shortName <- mapply(
-          make_short_name,
-          cohortDefinitionSet$cohortName,
-          cohortDefinitionSet$cohortId,
-          USE.NAMES = FALSE
-        )
-      } else {
-        cohortDefinitionSet$shortName <- dplyr::if_else(is.na(cohortDefinitionSet$shortName),
-                                                        mapply(
-                                                          make_short_name,
-                                                          cohortDefinitionSet$cohortName,
-                                                          cohortDefinitionSet$cohortId,
-                                                          USE.NAMES = FALSE
-                                                        ),
-                                                        cohortDefinitionSet$shortName)
+        cohortDefinitionSet$shortName <- NA_character_
       }
+      # create default short names
+      cohortDefinitionSet <- cohortDefinitionSet |>
+        dplyr::mutate(
+          shortName = dplyr::if_else(is.na(shortName),
+            purrr::map2_chr(.x = cohortName, .y = cohortId, .f = .makeShortName),
+            shortName
+          )
+        )
+      # solve short name conflicts
+      existingShortNames <- private$.cohortDefinitionSet$shortName
+      newShortNames <- cohortDefinitionSet$shortName
+      newShortNames <- .solveShortNameConflicts(newShortNames, existingShortNames)
+      cohortDefinitionSet$shortName <- newShortNames
 
       cohortIdsExists <- intersect(private$.cohortDefinitionSet$cohortId, cohortDefinitionSet$cohortId)
       if (length(cohortIdsExists) != 0) {
@@ -258,8 +227,8 @@ CohortTableHandler <- R6::R6Class(
       # TODO: fix cohortDefinitionSet for subsets using
       cohortDefinitionSet <- cohortDefinitionSet |>
         dplyr::mutate(
-          subsetParent = dplyr::if_else( is.na(isSubset) | isSubset==FALSE, cohortId, subsetParent),
-          isSubset=dplyr::if_else(is.na(isSubset), FALSE,isSubset)
+          subsetParent = dplyr::if_else(is.na(isSubset) | isSubset == FALSE, cohortId, subsetParent),
+          isSubset = dplyr::if_else(is.na(isSubset), FALSE, isSubset)
         )
       attr(cohortDefinitionSet, "hasSubsetDefinitions") <- hasSubSets
 
@@ -400,8 +369,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param includeAllEvents Logical, whether to include all events or just subjects. Default is FALSE.
     #'
     #' @return A tibble containing cohort summary.
-    getCohortsSummary = function(includeAllEvents=F) {
-
+    getCohortsSummary = function(includeAllEvents = F) {
       cohortDemographics <- private$.cohortDemograpics
       if (!includeAllEvents) {
         cohortDemographics <- cohortDemographics |>
@@ -474,13 +442,13 @@ CohortTableHandler <- R6::R6Class(
     #' @param selected_cohortId2 The cohort id of the second cohort.
     #' @return A numeric value of the number of overlapping subjects between two given cohorts.
     #'
-    getNumberOfOverlappingSubjects = function(selected_cohortId1,selected_cohortId2) {
+    getNumberOfOverlappingSubjects = function(selected_cohortId1, selected_cohortId2) {
       nSubjectsOverlap <- private$.cohortsOverlap |>
         dplyr::filter(
           stringr::str_detect(cohortIdCombinations, paste0("-", selected_cohortId1, "-")) &
             stringr::str_detect(cohortIdCombinations, paste0("-", selected_cohortId2, "-"))
         ) |>
-        dplyr::pull(numberOfSubjects)  |>
+        dplyr::pull(numberOfSubjects) |>
         sum()
 
       return(nSubjectsOverlap)
@@ -494,34 +462,41 @@ CohortTableHandler <- R6::R6Class(
     #' @param testFor Character string indicating what to test: "Subjects" or "allEvents". Default is "Subjects".
     #' @return a list containing components such as p.value and conf.int of the test
     #'
-    getSexFisherTest = function(selected_cohortId1,selected_cohortId2,testFor="Subjects") {
-
-      if(testFor == "allEvents"){
-         sexCase <- self$getCohortsSummary(includeAllEvents=T) |>
+    getSexFisherTest = function(selected_cohortId1, selected_cohortId2, testFor = "Subjects") {
+      if (testFor == "allEvents") {
+        sexCase <- self$getCohortsSummary(includeAllEvents = T) |>
           dplyr::filter(cohortId == selected_cohortId1) |>
           dplyr::pull(sexCountsAllEvents)
-        sexControl <-  self$getCohortsSummary(includeAllEvents=T) |>
+        sexControl <- self$getCohortsSummary(includeAllEvents = T) |>
           dplyr::filter(cohortId == selected_cohortId2) |>
           dplyr::pull(sexCountsAllEvents)
-      }else {
+      } else {
         sexCase <- self$getCohortsSummary() |>
           dplyr::filter(cohortId == selected_cohortId1) |>
           dplyr::pull(sexCounts)
-        sexControl <-  self$getCohortsSummary() |>
+        sexControl <- self$getCohortsSummary() |>
           dplyr::filter(cohortId == selected_cohortId2) |>
           dplyr::pull(sexCounts)
       }
 
-      nMaleCases <- sexCase[[1]]  |> dplyr::filter(sex == "MALE")  |> dplyr::pull(n)
-      nMaleCases <- ifelse(length(nMaleCases)==0, 0, nMaleCases)
-      nFemaleCases <- sexCase[[1]]  |> dplyr::filter(sex == "FEMALE")  |> dplyr::pull(n)
-      nFemaleCases <- ifelse(length(nFemaleCases)==0, 0, nFemaleCases)
-      nMaleControls <- sexControl[[1]]  |> dplyr::filter(sex == "MALE") |> dplyr::pull(n)
-      nMaleControls <- ifelse(length(nMaleControls)==0, 0, nMaleControls)
-      nFemaleControls <- sexControl[[1]]  |> dplyr::filter(sex == "FEMALE") |> dplyr::pull(n)
-      nFemaleControls <- ifelse(length(nFemaleControls)==0, 0, nFemaleControls)
+      nMaleCases <- sexCase[[1]] |>
+        dplyr::filter(sex == "MALE") |>
+        dplyr::pull(n)
+      nMaleCases <- ifelse(length(nMaleCases) == 0, 0, nMaleCases)
+      nFemaleCases <- sexCase[[1]] |>
+        dplyr::filter(sex == "FEMALE") |>
+        dplyr::pull(n)
+      nFemaleCases <- ifelse(length(nFemaleCases) == 0, 0, nFemaleCases)
+      nMaleControls <- sexControl[[1]] |>
+        dplyr::filter(sex == "MALE") |>
+        dplyr::pull(n)
+      nMaleControls <- ifelse(length(nMaleControls) == 0, 0, nMaleControls)
+      nFemaleControls <- sexControl[[1]] |>
+        dplyr::filter(sex == "FEMALE") |>
+        dplyr::pull(n)
+      nFemaleControls <- ifelse(length(nFemaleControls) == 0, 0, nFemaleControls)
 
-      data <-matrix(c(nMaleCases,nFemaleCases,nMaleControls,nFemaleControls),ncol=2)
+      data <- matrix(c(nMaleCases, nFemaleCases, nMaleControls, nFemaleControls), ncol = 2)
       fisher_results <- stats::fisher.test(data)
 
       return(fisher_results)
@@ -537,18 +512,17 @@ CohortTableHandler <- R6::R6Class(
     #' @param testFor The type of test to perform. "Subjects" to test the year of birth of the subjects in the cohorts, "allEvents" to test the year of birth of all events in the cohorts.
     #' @return a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohend result (list of meanInCases, meanInControls, pooledsd, and cohend)
     #'
-    getYearOfBirthTests = function(selected_cohortId1, selected_cohortId2, testFor="Subjects") {
-
+    getYearOfBirthTests = function(selected_cohortId1, selected_cohortId2, testFor = "Subjects") {
       testFor |> checkmate::assertChoice(c("Subjects", "allEvents"))
 
-      if(testFor == "allEvents"){
-        yearOfBirthCase <- self$getCohortsSummary(includeAllEvents=T) |>
+      if (testFor == "allEvents") {
+        yearOfBirthCase <- self$getCohortsSummary(includeAllEvents = T) |>
           dplyr::filter(cohortId == selected_cohortId1) |>
           dplyr::pull(histogramBirthYearAllEvents)
-        yearOfBirthControl <- self$getCohortsSummary(includeAllEvents=T) |>
+        yearOfBirthControl <- self$getCohortsSummary(includeAllEvents = T) |>
           dplyr::filter(cohortId == selected_cohortId2) |>
           dplyr::pull(histogramBirthYearAllEvents)
-      }else{
+      } else {
         yearOfBirthCase <- self$getCohortsSummary() |>
           dplyr::filter(cohortId == selected_cohortId1) |>
           dplyr::pull(histogramBirthYear)
@@ -574,7 +548,7 @@ CohortTableHandler <- R6::R6Class(
         ))
       }
 
-      ttestResult <-  suppressWarnings(suppressMessages(
+      ttestResult <- suppressWarnings(suppressMessages(
         t.test(cases[!is.na(cases)], controls[!is.na(controls)])
       ))
 
@@ -583,14 +557,14 @@ CohortTableHandler <- R6::R6Class(
       ))
 
       # Calculate Cohen's d
-      meanCases = mean(cases,na.rm = TRUE)
-      meanControls = mean(controls,na.rm = TRUE)
+      meanCases <- mean(cases, na.rm = TRUE)
+      meanControls <- mean(controls, na.rm = TRUE)
       mean_diff <- meanCases - meanControls
-      pooled_sd <- sqrt(((length(cases)-1)*var(cases,na.rm = TRUE) + (length(controls)-1)*var(controls,na.rm = TRUE)) / (length(cases) + length(controls) - 2))
+      pooled_sd <- sqrt(((length(cases) - 1) * var(cases, na.rm = TRUE) + (length(controls) - 1) * var(controls, na.rm = TRUE)) / (length(cases) + length(controls) - 2))
       cohen_d <- mean_diff / pooled_sd
-      cohendresult =  c(meanInCases = meanCases, meanInControls = meanControls,pooledsd = pooled_sd, cohend=cohen_d)
+      cohendresult <- c(meanInCases = meanCases, meanInControls = meanControls, pooledsd = pooled_sd, cohend = cohen_d)
 
-      return(list(ttestResult = ttestResult, ksResult = ks_result,cohendResult = cohendresult))
+      return(list(ttestResult = ttestResult, ksResult = ks_result, cohendResult = cohendresult))
     }
   )
 )
@@ -613,8 +587,9 @@ CohortTableHandler <- R6::R6Class(
 #'
 #' @export
 createCohortTableHandlerFromList <- function(
-    cohortTableHandlerConfig,
-    loadConnectionChecksLevel = "allChecks") {
+  cohortTableHandlerConfig,
+  loadConnectionChecksLevel = "allChecks"
+) {
   cohortTableHandlerConfig |> checkmate::assertList()
   cohortTableHandlerConfig |>
     names() |>
@@ -639,3 +614,66 @@ createCohortTableHandlerFromList <- function(
   return(cohortTableHandler)
 }
 
+#' @title Cohort Short Name Utilities
+#' @description
+#' Internal utilities to generate concise, human-readable short names for cohorts, 
+#' and to resolve conflicts to ensure uniqueness of cohort short names.
+#'
+#' @param name Character. The full name of the cohort.
+#' @param id Integer or character. The id of the cohort.
+#' @return \code{.makeShortName}: A character value representing the short cohort name.
+#'
+#' @importFrom stringr str_remove_all str_trim str_split str_sub
+#' @importFrom tibble tibble
+#' @importFrom dplyr group_by mutate row_number if_else pull
+#' 
+.makeShortName <- function(name, id) {
+  shortName <- paste0("C", id)
+
+  # remove bracketed parts: [ ... ] or ( ... )
+  name <- stringr::str_remove_all(name, "\\[.*?\\]|\\(.*?\\)")
+  name <- stringr::str_trim(name)
+
+  # split on space, underscore, dash, dot
+  parts <- unlist(stringr::str_split(name, "[-_\\.\\s]+"))
+  parts <- parts[parts != ""] |> na.omit()
+
+  # if there is only a single word, or one part, take the first 4 chars as shortname
+  if (length(parts) == 1) {
+    prefix <- stringr::str_sub(parts[1], 1, 4)
+    shortName <- prefix
+  }
+  # if more than one part, take the first 4 chars of the first and last part
+  if (length(parts) > 1) {
+    first <- stringr::str_sub(parts[1], 1, 4)
+    last <- stringr::str_sub(parts[length(parts)], 1, 4)
+    shortName <- paste0(first, last)
+  }
+
+  shortName <- toupper(shortName)
+
+  return(shortName)
+}
+
+#' @title Resolve Cohort Short Name Conflicts
+#' @description
+#' Given a set of new and existing short names, resolve any duplicates. Appends an index to any duplicate names to ensure uniqueness.
+#'
+#' @param newShortNames Character vector. The newly generated short names to be made unique.
+#' @param existingShortNames Character vector. The set of existing short names to avoid conflicts with.
+#' @return A character vector of unique short names.
+#' 
+#' @importFrom tibble tibble
+#' @importFrom dplyr group_by mutate row_number if_else pull
+#' 
+.solveShortNameConflicts <- function(newShortNames, existingShortNames) {
+  allShortNames <- c(existingShortNames, newShortNames)
+  duplicatedShortNames <- allShortNames[which(duplicated(allShortNames))] |> unique()
+  tibble::tibble(name = newShortNames) |>
+    dplyr::group_by(name) |>
+    dplyr::mutate(
+      idx = dplyr::row_number(),
+      name = dplyr::if_else(name %in% duplicatedShortNames, paste0(name, idx), name)
+    ) |>
+    dplyr::pull(name)
+}
