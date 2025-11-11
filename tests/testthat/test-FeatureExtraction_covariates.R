@@ -187,6 +187,8 @@ test_that("getListOfPreComputedAnalysis  works", {
 
   personCodeCountsTable <- "person_code_counts_test"
 
+  createPersonCodeCountsTable(CDMdb, personCodeCountsTable = personCodeCountsTable)
+
   preComputedAnalysis <- getListOfPreComputedAnalysis(CDMdb, personCodeCountsTable = personCodeCountsTable)
 
   # check at least one analysis is returned

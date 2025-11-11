@@ -10,15 +10,15 @@
 #' @export
 #'
 covariateData_preComputed <- function(
-  shcresultsDatabaseSchema, 
-  preComputedCovariateTable = "pre_computed_covariate_table",
+  resultsDatabaseSchema,
+  personCodeCountsTable = "person_code_counts",
   covariateGroups,
   covariateTypes
 ) {
   covariateGroups |> checkmate::assertDataFrame()
   covariateGroups |>
     names() |>
-    checkmate::assertSetEqual(c("groupType", "conceptClassId"))
+    checkmate::assertSetEqual(c("analysisGroup", "conceptClassId"))
 
   covariateTypes |> checkmate::assertSubset(c("Binary", "Counts", "AgeFirstEvent", "DaysToFirstEvent"))
 
@@ -65,59 +65,139 @@ preComputed <- function(
   aggregated = FALSE,
   minCharacterizationMean = 0
 ) {
-  shcresultsDatabaseSchema <- covariateSettings$shcresultsDatabaseSchema
-  preComputedCovariateTable <- covariateSettings$preComputedCovariateTable
+  resultsDatabaseSchema <- covariateSettings$resultsDatabaseSchema
+  personCodeCountsTable <- covariateSettings$personCodeCountsTable
   covariateGroups <- covariateSettings$covariateGroups
   covariateTypes <- covariateSettings$covariateTypes
 
-
+  covariateGroups <- covariateGroups |>
+    dplyr::group_by(analysisGroup) |>
+    dplyr::mutate(analysisGroupId = dplyr::cur_group_id()) |>
+    dplyr::ungroup()
+  browser()
   DatabaseConnector::insertTable(
     connection = connection,
-    tableName = "pre_computed_covariate_table",
+    tableName = "covariate_groups",
     data = covariateGroups,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    tempTable = TRUE
+    tempTable = TRUE,
+    camelCaseToSnakeCase = TRUE
   )
-  
 
+  # Create pre_computed_cohort
+  sql <- "
+    IF OBJECT_ID('tempdb..#pre_computed_cohort', 'U') IS NOT NULL
+    DROP TABLE #pre_computed_cohort;
 
-  
-  sql <- SqlRender::render(sql,
-    cdm_database_schema = cdmDatabaseSchema,
-    domain_table = "drug_exposure",
-    domain_start_date = "drug_exposure_start_date",
-    domain_end_date = "drug_exposure_end_date",
-    domain_concept_id = "drug_concept_id",
-    analysis_id = analysisId,
-    aggregated = aggregated,
-    atc_time_period_values = ATCTimePeriodsValuesStr,
-    row_id_field = "subject_id",
+    -- Cohort patient level data
+    SELECT
+      c.cohort_definition_id AS cohort_definition_id,
+      ccg.analysis_group_id AS analysis_group_id,
+      ccg.concept_class_id AS concept_class_id,
+      pcct.concept_id AS concept_id,
+      c.subject_id AS subject_id,
+      pcct.n_records AS n_records,
+      DATEDIFF(DAY, c.cohort_start_date, pcct.first_date) AS day_to_first_event,
+      pcct.first_age AS age_first_event,
+      pcct.aggregated_value AS aggregated_value,
+      pcct.aggregated_value_unit AS aggregated_value_unit,
+      pcct.aggregated_category AS aggregated_category
+    INTO #pre_computed_cohort
+    FROM @cohort_table c
+    INNER JOIN @results_database_schema.@person_code_counts_table AS pcct ON c.subject_id = pcct.person_id
+    INNER JOIN #covariate_groups ccg ON pcct.analysis_group = ccg.analysis_group AND pcct.concept_class_id = ccg.concept_class_id
+    {@cohort_definition_id != -1} ? { WHERE c.cohort_definition_id IN (@cohort_definition_id)};
+  "
+
+  DatabaseConnector::renderTranslateExecuteSql(
+    connection = connection,
+    sql = sql,
+    results_database_schema = resultsDatabaseSchema,
+    person_code_counts_table = personCodeCountsTable,
     cohort_definition_id = paste0(cohortIds, collapse = ","),
     cohort_table = cohortTable
   )
-  sql <- SqlRender::translate(sql, targetDialect = attr(connection, "dbms"))
 
+  # Create pre_computed_covariate_table and pre_computed_covariate_ref
+  # For each type
+  sqlPath <- system.file("sql", "sql_server", "CovariatePreComputed.sql", package = "HadesExtras")
+  sql <- SqlRender::readSql(sqlPath)
+  for (covariateType in covariateTypes) {
+    DatabaseConnector::renderTranslateExecuteSql(
+      connection = connection,
+      sql = sql,
+      cdm_database_schema = cdmDatabaseSchema,
+      results_database_schema = resultsDatabaseSchema,
+      person_code_counts_table = personCodeCountsTable,
+      cohort_definition_id = paste0(cohortIds, collapse = ","),
+      cohort_table = cohortTable,
+      row_id_field = rowIdField,
+      aggregated = aggregated,
+      covariate_type = covariateType
+    )
+  }
+
+  # Cleanup
+  sql <- "
+    TRUNCATE TABLE #covariate_groups;
+    DROP TABLE #covariate_groups;
+  "
+  DatabaseConnector::renderTranslateExecuteSql(
+    connection = connection,
+    sql = sql
+  )
+
+  # Return results
+  results <- Andromeda::andromeda()
+  DatabaseConnector::querySqlToAndromeda(
+    connection = connection,
+    sql = SqlRender::translate("SELECT * FROM #pre_computed_covariate_table", targetDialect = attr(connection, "dbms")),
+    andromeda = results,
+    andromedaTableName = "covariates",
+    snakeCaseToCamelCase = TRUE
+  )
+
+  DatabaseConnector::querySqlToAndromeda(
+    connection = connection,
+    sql = SqlRender::translate("SELECT * FROM #pre_computed_covariate_ref", targetDialect = attr(connection, "dbms")),
+    andromeda = results,
+    andromedaTableName = "covariateRef",
+    snakeCaseToCamelCase = TRUE
+  )
+
+  results$analysisRef <- covariateGroups |>
+    dplyr::cross_join(
+      tibble::tibble(
+        covariateType = c("Binary", "Counts", "AgeFirstEvent", "DaysToFirstEvent"),
+        typeId = c(150, 250, 350, 450),
+        isBinary = c(TRUE, FALSE, FALSE, FALSE),
+        missingMeansZero = c(FALSE, TRUE, TRUE, TRUE)
+      ) |>
+        dplyr::filter(covariateType %in% covariateTypes)
+    ) |>
+    dplyr::transmute(
+      analysisId = analysisGroupId + typeId,
+      analysisName = paste0(covariateType, "|", analysisGroup),
+      domainId = dplyr::if_else(analysisGroup %in% c("Condition", "Procedure", "Observation", "Device", "Measurements"), analysisGroup, "Source"),
+      isBinary = isBinary,
+      missingMeansZero = missingMeansZero
+    )
+
+  results$covariateRef <- results$covariateRef |>
+    dplyr::left_join(results$analysisRef |> dplyr::select(analysisId, analysisName), by = "analysisId") |>
+    dplyr::mutate(
+      covariateName = paste0(analysisName, "|", covariateName)
+    ) |>
+    dplyr::select(-analysisName)
 
   # Construct analysis reference:
   metaData <- list(sql = sql, call = match.call())
 
-  if (continuous) {
-    result <- Andromeda::andromeda(
-      covariatesContinuous = covariatesContinuous,
-      covariateRef = covariateRef,
-      analysisRef = analysisRef
-    )
-  } else {
-    result <- Andromeda::andromeda(
-      covariates = covariates,
-      covariateRef = covariateRef,
-      analysisRef = analysisRef
-    )
-  }
+  attr(results, "metaData") <- metaData
+  class(results) <- "CovariateData"
 
-  attr(result, "metaData") <- metaData
-  class(result) <- "CovariateData"
+  
 
-  return(result)
+  return(results)
 }

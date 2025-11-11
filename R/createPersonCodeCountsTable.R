@@ -46,7 +46,6 @@ createPersonCodeCountsTable <- function(
         resultsDatabaseSchema = resultsDatabaseSchema,
         personCodeCountsTable = personCodeCountsTable,
         personCodeAtomicCountsTable = personCodeAtomicCountsTable,
-        cdmDatabaseSchema = cdmDatabaseSchema,
         cdmDatabaseSchema = cdmDatabaseSchema
     )
 
