@@ -17,7 +17,7 @@ SELECT
 	c2.concept_code AS unit,
 	pcct.aggregated_category AS aggregated_category
 INTO #pre_computed_cohort
-FROM @cohort_table c
+FROM @cohort_table_schema.@cohort_table_name c
 INNER JOIN @results_database_schema.@person_code_counts_table AS pcct ON c.subject_id = pcct.person_id
 INNER JOIN #covariate_groups ccg ON pcct.analysis_group = ccg.analysis_group AND pcct.concept_class_id = ccg.concept_class_id
 LEFT JOIN @cdm_database_schema.concept c2 ON pcct.aggregated_value_unit = c2.concept_id
@@ -124,7 +124,7 @@ FROM (
 			MIN(CASE WHEN pct_rank >= 0.90 THEN n_records END) AS p90_value,
 			'counts' AS unit
 		FROM ranked_n_records
-		GROUP BY cohort_definition_id, analysis_group_id, concept_id
+		GROUP BY cohort_definition_id, analysis_group_id, concept_id, unit
 	}
 	{@include_age_first_event & @include_counts} ? {
 		UNION ALL
@@ -147,7 +147,7 @@ FROM (
 			MIN(CASE WHEN pct_rank >= 0.90 THEN age_first_event END) AS p90_value,
 			'years' AS unit
 		FROM ranked_age_first_event
-		GROUP BY cohort_definition_id, analysis_group_id, concept_id
+		GROUP BY cohort_definition_id, analysis_group_id, concept_id, unit
 	}
 	{@include_days_to_first_event & (@include_counts | @include_age_first_event)} ? {
 		UNION ALL
@@ -170,7 +170,7 @@ FROM (
 			MIN(CASE WHEN pct_rank >= 0.90 THEN day_to_first_event END) AS p90_value,
 			'days' AS unit
 		FROM ranked_days_to_first_event
-		GROUP BY cohort_definition_id, analysis_group_id, concept_id
+		GROUP BY cohort_definition_id, analysis_group_id, concept_id, unit
 	}
 	{@include_continuous & (@include_counts | @include_age_first_event | @include_days_to_first_event)} ? {
 		UNION ALL
@@ -193,7 +193,7 @@ FROM (
 			MIN(CASE WHEN pct_rank >= 0.90 THEN aggregated_value END) AS p90_value,
 			unit AS unit
 		FROM ranked_aggregated_value
-		GROUP BY cohort_definition_id, analysis_group_id, concept_id
+		GROUP BY cohort_definition_id, analysis_group_id, concept_id, unit
 	}
 );
 }

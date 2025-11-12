@@ -31,6 +31,7 @@ getPreComputedCovariates <- function(
   personCodeCountsTable,
   covariateGroups,
   covariateTypes,
+  cohortTableSchema,
   cohortTable = "#cohort_person",
   cohortIds = c(-1),
   aggregated = FALSE,
@@ -47,6 +48,7 @@ getPreComputedCovariates <- function(
     names() |>
     checkmate::assertSetEqual(c("analysisGroup", "conceptClassId"))
   covariateTypes |> checkmate::assertSubset(c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"))
+  cohortTableSchema |> checkmate::assertString()
   cohortTable |> checkmate::assertString()
   cohortIds |> checkmate::assertNumeric()
   aggregated |> checkmate::assertLogical()
@@ -75,7 +77,8 @@ getPreComputedCovariates <- function(
   DatabaseConnector::renderTranslateExecuteSql(
     connection = connection,
     sql = sql,
-    cohort_table = cohortTable,
+    cohort_table_schema = cohortTableSchema,
+    cohort_table_name = cohortTable,
     cohort_definition_id = paste0(cohortIds, collapse = ","),
     results_database_schema = resultsDatabaseSchema,
     cdm_database_schema = cdmDatabaseSchema,

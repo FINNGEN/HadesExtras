@@ -38,6 +38,7 @@ test_that("preComputed returns correct value", {
     personCodeCountsTable = personCodeCountsTable,
     covariateGroups = preComputedAnalysis,
     covariateTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"),
+    cohortTableSchema = cohortTableHandler$cohortDatabaseSchema,
     cohortTable = cohortTableHandler$cohortTableNames$cohortTable,
     cohortIds = c(1, 2),
     aggregated = TRUE,

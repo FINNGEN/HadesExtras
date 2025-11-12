@@ -95,6 +95,7 @@ INNER JOIN @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac
 WHERE pcac.domain_id != 'Drug' AND pcac.domain_id != 'Measurement'
 GROUP BY
     tca.ancestor_vocabulary_id,
+    tca.ancestor_concept_class_id,
     tca.ancestor_concept_id,
     pcac.person_id;
 
@@ -118,6 +119,7 @@ INNER JOIN @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac
     ON tca.descendant_concept_id = pcac.concept_id
 GROUP BY
     tca.ancestor_concept_id,
+    tca.ancestor_concept_class_id,
     pcac.person_id;
 
 -- Append Measurements, only standard analysis no hierarchy
