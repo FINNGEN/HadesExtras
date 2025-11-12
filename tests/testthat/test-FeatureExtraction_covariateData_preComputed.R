@@ -31,32 +31,25 @@ test_that("preComputed returns correct value", {
 
   preComputedAnalysis <- getListOfPreComputedAnalysis(cohortTableHandler, personCodeCountsTable = personCodeCountsTable)
 
-  covariateSettings <- list(
+  results <- getPreComputedCovariates(
+    connection = cohortTableHandler$connectionHandler$getConnection(),
+    cdmDatabaseSchema = cohortTableHandler$cdmDatabaseSchema,
     resultsDatabaseSchema = cohortTableHandler$resultsDatabaseSchema,
     personCodeCountsTable = personCodeCountsTable,
     covariateGroups = preComputedAnalysis,
-    covariateTypes = c("Binary", "Counts")
-  )
-
-  preComputed(
-    connection = cohortTableHandler$connectionHandler$getConnection(),
-    cdmDatabaseSchema = cohortTableHandler$cdmDatabaseSchema,
+    covariateTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"),
     cohortTable = cohortTableHandler$cohortTableNames$cohortTable,
     cohortIds = c(1, 2),
-    covariateSettings = covariateSettings,
-    aggregated = TRUE
+    aggregated = TRUE,
+    minCharacterizationMean = 0
   )
 
 
+  results$analysisRef |> head()
+  results$conceptRef |> head()
+  results$covariates |> head()
+  results$covariatesContinuous |> head()
 
-  preComputed(
-    connection = cohortTableHandler$connectionHandler$getConnection(),
-    cdmDatabaseSchema = cohortTableHandler$cdmDatabaseSchema,
-    cohortTable = cohortTableHandler$cohortTableNames$cohortTable,
-    cohortIds = c(1, 2),
-    covariateSettings = covariateSettings,
-    aggregated = FALSE
-  )
 
 
   # covariateSettings <- covariateData_preComputed(

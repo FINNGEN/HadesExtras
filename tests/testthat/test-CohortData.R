@@ -9,7 +9,6 @@ test_that("checkCohortData works", {
     cohort_end_date = rep(as.Date(c("2020-01-03", "2020-01-04")), 5)
   )
 
-
   cohortData |> assertCohortData()
   cohortData |>
     checkCohortData() |>
