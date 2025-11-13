@@ -1,40 +1,39 @@
 
-#' preComputed
+#' getPreComputedCovariates
 #'
-#' @description Executes pre-computed covariate extraction for a given cohort and covariate settings.
+#' @description
+#' Extracts pre-computed covariate data for the specified cohort(s) and covariate group/type settings.
 #'
 #' @param connection A database connection object created using \code{DatabaseConnector::connect}.
-#' @param tempEmulationSchema The temp schema where the covariate tables will be created.
-#' @param cdmDatabaseSchema The schema where the CDM tables are located.
-#' @param cdmVersion The version of the CDM.
-#' @param cohortTable The table where the cohort data is located.
-#' @param cohortIds The cohort IDs to include.
-#' @param rowIdField The field in the cohort table that is the row ID.
-#' @param covariateSettings A list of settings for the covariate data.
-#' @param aggregated Logical. If TRUE, the covariate data is aggregated.
-#' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#' @param cdmDatabaseSchema Name of the schema containing the OMOP Common Data Model (CDM) tables.
+#' @param cohortTableSchema Name of the schema containing the cohort table.
+#' @param cohortTable Name of the cohort table.
+#' @param cohortIds A vector of cohort definition IDs to include.
+#' @param resultsDatabaseSchema Name of the schema containing intermediate/results tables.
+#' @param personCodeCountsTable Name of the table containing code/person counts or aggregates.
+#' @param covariateGroups A data frame specifying the groups (with columns 'analysisGroup' and 'conceptClassId') of covariates to extract.
+#' @param covariateTypes Character vector specifying covariate types to include (e.g. "Binary", "Categorical", etc.).
+#' @param minCharacterizationMean Numeric; minimum mean for a covariate to be included in the output.
 #'
-#' @importFrom DatabaseConnector querySql
-#' @importFrom SqlRender render translate
-#' @importFrom dplyr select mutate
+#' @importFrom DatabaseConnector querySql insertTable
+#' @importFrom SqlRender render translate readSql
+#' @importFrom dplyr select mutate group_by ungroup cur_group_id
 #' @importFrom tidyr nest unnest
 #' @importFrom purrr map
 #' @importFrom tibble tibble
 #' @importFrom Andromeda andromeda
 #'
 #' @export
-#'
-getPreComputedCovariates <- function(
+getPreComputedCovariatesAggregated <- function(
   connection,
   cdmDatabaseSchema,
+  cohortTableSchema,
+  cohortTable = "#cohort_person",
+  cohortIds = c(-1),
   resultsDatabaseSchema,
   personCodeCountsTable,
   covariateGroups,
   covariateTypes,
-  cohortTableSchema,
-  cohortTable = "#cohort_person",
-  cohortIds = c(-1),
-  aggregated = FALSE,
   minCharacterizationMean = 0
 ) {
 
@@ -51,7 +50,6 @@ getPreComputedCovariates <- function(
   cohortTableSchema |> checkmate::assertString()
   cohortTable |> checkmate::assertString()
   cohortIds |> checkmate::assertNumeric()
-  aggregated |> checkmate::assertLogical()
   minCharacterizationMean |> checkmate::assertNumber()
 
 
@@ -72,7 +70,7 @@ getPreComputedCovariates <- function(
   )
 
   # All in one SQL file with conditional unions, makes it faster than with INSERTs
-  sqlPath <- system.file("sql", "sql_server", "CovariatePreComputed.sql", package = "HadesExtras")
+  sqlPath <- system.file("sql", "sql_server", "CovariatePreComputedAgregated.sql", package = "HadesExtras")
   sql <- SqlRender::readSql(sqlPath)
   DatabaseConnector::renderTranslateExecuteSql(
     connection = connection,
@@ -93,11 +91,11 @@ getPreComputedCovariates <- function(
 
 
   # Return results
-  results <- Andromeda::andromeda()
+  covariatesAndromeda <- Andromeda::andromeda()
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate("SELECT * FROM #pre_computed_covariates", targetDialect = attr(connection, "dbms")),
-    andromeda = results,
+    andromeda = covariatesAndromeda,
     andromedaTableName = "covariates",
     snakeCaseToCamelCase = TRUE
   )
@@ -105,7 +103,7 @@ getPreComputedCovariates <- function(
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate("SELECT * FROM #pre_computed_covariates_continuous", targetDialect = attr(connection, "dbms")),
-    andromeda = results,
+    andromeda = covariatesAndromeda,
     andromedaTableName = "covariatesContinuous",
     snakeCaseToCamelCase = TRUE
   )
@@ -113,12 +111,12 @@ getPreComputedCovariates <- function(
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate("SELECT * FROM #pre_computed_concept_ref", targetDialect = attr(connection, "dbms")),
-    andromeda = results,
+    andromeda = covariatesAndromeda,
     andromedaTableName = "conceptRef",
     snakeCaseToCamelCase = TRUE
   )
 
-  results$analysisRef <- covariateGroups |>
+  covariatesAndromeda$analysisRef <- covariateGroups |>
     dplyr::cross_join(
       tibble::tibble(
         covariateType = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"),
@@ -133,5 +131,8 @@ getPreComputedCovariates <- function(
       domainId = dplyr::if_else(analysisGroup %in% c("Condition", "Procedure", "Observation", "Device", "Measurements"), analysisGroup, "Source")
     )
 
-  return(results)
+  return(covariatesAndromeda)
 }
+
+
+

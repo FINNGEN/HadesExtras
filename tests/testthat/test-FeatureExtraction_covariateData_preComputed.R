@@ -31,43 +31,24 @@ test_that("preComputed returns correct value", {
 
   preComputedAnalysis <- getListOfPreComputedAnalysis(cohortTableHandler, personCodeCountsTable = personCodeCountsTable)
 
-  results <- getPreComputedCovariates(
+  covariatesAndromeda <- getPreComputedCovariatesAggregated(
     connection = cohortTableHandler$connectionHandler$getConnection(),
     cdmDatabaseSchema = cohortTableHandler$cdmDatabaseSchema,
+    cohortTableSchema = cohortTableHandler$cohortDatabaseSchema,
+    cohortTable = cohortTableHandler$cohortTableNames$cohortTable,
+    cohortIds = c(1, 2),
     resultsDatabaseSchema = cohortTableHandler$resultsDatabaseSchema,
     personCodeCountsTable = personCodeCountsTable,
     covariateGroups = preComputedAnalysis,
     covariateTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"),
-    cohortTableSchema = cohortTableHandler$cohortDatabaseSchema,
-    cohortTable = cohortTableHandler$cohortTableNames$cohortTable,
-    cohortIds = c(1, 2),
-    aggregated = TRUE,
     minCharacterizationMean = 0
   )
 
 
-  results$analysisRef |> head()
-  results$conceptRef |> head()
-  results$covariates |> head()
-  results$covariatesContinuous |> head()
+  covariatesAndromeda$analysisRef |> head()
+  covariatesAndromeda$conceptRef |> head()
+  covariatesAndromeda$covariates |> head()
+  covariatesAndromeda$covariatesContinuous |> head()
 
-
-
-  # covariateSettings <- covariateData_preComputed(
-  #   resultsDatabaseSchema = cohortTableHandler$resultsDatabaseSchema,
-  #   personCodeCountsTable = personCodeCountsTable,
-  #   covariateGroups = preComputedAnalysis,
-  #   covariateTypes = c("Binary")
-  # )
-
-  # covariate_control <- FeatureExtraction::getDbCovariateData(
-  #   connection = connection,
-  #   cohortTable = cohortTableName,
-  #   cohortDatabaseSchema = cohortDatabaseSchema,
-  #   cdmDatabaseSchema = cdmDatabaseSchema,
-  #   covariateSettings = covariateSettings,
-  #   cohortIds = 1,
-  #   aggregated = TRUE
-  # )
 
 })
