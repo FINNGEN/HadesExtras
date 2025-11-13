@@ -640,40 +640,40 @@ makeShortName <- function(name, id) {
 
   # if name contains an operation, treat specially
   operation_keywords <- c("NOT_IN", "AND", "OR")
-  contains_op <- any(stringr::str_detect(name, operation_keywords))
+  contains_op <- any(stringr::str_detect(name, paste(operation_keywords, collapse = "|")))
 
   if (contains_op) {
 
-    # split into tokens
-    tokens <- unlist(strsplit(name, "\\s+"))
-
-    # rebuild tokens without noise
+    # Split into tokens
+    tokens <- unlist(stringr::str_split(name, "\\s+"))
     tokens <- tokens[tokens != ""]
 
-    # find operation token
-    op_token <- tokens[tokens %in% c("AND", "OR", "NOT_IN")]
-
-    # map readable tokens to short forms
+    # Map operation tokens to readable symbols
     op_map <- c(
-      "AND" = "AND",
-      "OR" = "OR",
-      "NOT_IN" = "NOTI"
+      "AND"    = "&",
+      "OR"     = "|",
+      "NOT_IN" = "~"
     )
-    op_short <- op_map[op_token]
 
-    # we assume structure: <name1> <op> <name2>
-    # extract the two cohort short names (first and last meaningful words)
-    first_part <- tokens[1]
-    last_part  <- tokens[length(tokens)]
+    # Build output parts
+    output_parts <- c()
 
-    first_short <- toupper(substr(first_part, 1, 4))
-    last_short  <- toupper(substr(last_part, 1, 4))
+    for (tok in tokens) {
 
-    # final operated short name
-    shortName <- paste0(first_short, op_short, last_short)
+      if (tok %in% operation_keywords) {
+        # operator → symbol
+        output_parts <- c(output_parts, op_map[tok])
+      } else {
+        # cohort name → first 4 letters
+        short <- toupper(substr(tok, 1, 3))
+        output_parts <- c(output_parts, short)
+      }
+    }
+
+    # Join with spaces
+    shortName <- paste(output_parts, collapse = "")
     return(shortName)
   }
-
 
   # split on space, underscore, dash, dot
   parts <- unlist(stringr::str_split(name, "[-_\\.\\s]+"))
