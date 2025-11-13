@@ -49,6 +49,6 @@ test_that("preComputed returns correct value", {
   covariatesAndromeda$conceptRef |> head()
   covariatesAndromeda$covariates |> head()
   covariatesAndromeda$covariatesContinuous |> head()
-
+  covariatesAndromeda$cohortCounts |> head()
 
 })
