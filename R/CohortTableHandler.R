@@ -198,7 +198,7 @@ CohortTableHandler <- R6::R6Class(
       cohortDefinitionSet <- cohortDefinitionSet |>
         dplyr::mutate(
           shortName = dplyr::if_else(is.na(shortName),
-            purrr::map2_chr(.x = cohortName, .y = cohortId, .f = .makeShortName),
+            purrr::map2_chr(.x = cohortName, .y = cohortId, .f = makeShortName),
             shortName
           )
         )
@@ -616,23 +616,64 @@ createCohortTableHandlerFromList <- function(
 
 #' @title Cohort Short Name Utilities
 #' @description
-#' Internal utilities to generate concise, human-readable short names for cohorts, 
+#' Function to generate concise, human-readable short names for cohorts,
 #' and to resolve conflicts to ensure uniqueness of cohort short names.
 #'
 #' @param name Character. The full name of the cohort.
 #' @param id Integer or character. The id of the cohort.
-#' @return \code{.makeShortName}: A character value representing the short cohort name.
+#' @return \code{makeShortName}: A character value representing the short cohort name.
+#' @export
 #'
 #' @importFrom stringr str_remove_all str_trim str_split str_sub
 #' @importFrom tibble tibble
 #' @importFrom dplyr group_by mutate row_number if_else pull
-#' 
-.makeShortName <- function(name, id) {
+#'
+makeShortName <- function(name, id) {
   shortName <- paste0("C", id)
 
   # remove bracketed parts: [ ... ] or ( ... )
   name <- stringr::str_remove_all(name, "\\[.*?\\]|\\(.*?\\)")
   name <- stringr::str_trim(name)
+
+  # remove file extension at the end (e.g., .txt, .csv, .json, .rds)
+  name <- sub("\\.[A-Za-z0-9]+$", "", name)
+
+  # if name contains an operation, treat specially
+  operation_keywords <- c("NOT_IN", "AND", "OR")
+  contains_op <- any(stringr::str_detect(name, paste(operation_keywords, collapse = "|")))
+
+  if (contains_op) {
+
+    # Split into tokens
+    tokens <- unlist(stringr::str_split(name, "\\s+"))
+    tokens <- tokens[tokens != ""]
+
+    # Map operation tokens to readable symbols
+    op_map <- c(
+      "AND"    = "&",
+      "OR"     = "|",
+      "NOT_IN" = "~"
+    )
+
+    # Build output parts
+    output_parts <- c()
+
+    for (tok in tokens) {
+
+      if (tok %in% operation_keywords) {
+        # operator → symbol
+        output_parts <- c(output_parts, op_map[tok])
+      } else {
+        # cohort name → first 4 letters
+        short <- toupper(substr(tok, 1, 3))
+        output_parts <- c(output_parts, short)
+      }
+    }
+
+    # Join with spaces
+    shortName <- paste(output_parts, collapse = "")
+    return(shortName)
+  }
 
   # split on space, underscore, dash, dot
   parts <- unlist(stringr::str_split(name, "[-_\\.\\s]+"))
@@ -662,10 +703,10 @@ createCohortTableHandlerFromList <- function(
 #' @param newShortNames Character vector. The newly generated short names to be made unique.
 #' @param existingShortNames Character vector. The set of existing short names to avoid conflicts with.
 #' @return A character vector of unique short names.
-#' 
+#'
 #' @importFrom tibble tibble
 #' @importFrom dplyr group_by mutate row_number if_else pull
-#' 
+#'
 .solveShortNameConflicts <- function(newShortNames, existingShortNames) {
   allShortNames <- c(existingShortNames, newShortNames)
   duplicatedShortNames <- allShortNames[which(duplicated(allShortNames))] |> unique()

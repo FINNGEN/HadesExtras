@@ -674,45 +674,54 @@ test_that("getYearOfBirthTests handles edge case with one subject", {
 })
 
 #
-# .makeShortName
+# makeShortName
 #
-test_that(".makeShortName creates short names correctly", {
+test_that("makeShortName creates short names correctly", {
   # Single word
-  expect_equal(.makeShortName("Asthma", 10), "ASTH")
-  
+  expect_equal(makeShortName("Asthma", 10), "ASTH")
+
   # Multiple words
-  expect_equal(.makeShortName("Asthma Cohort", 10), "ASTHCOHO")
-  
+  expect_equal(makeShortName("Asthma Cohort", 10), "ASTHCOHO")
+
   # Removes bracketed parts
-  expect_equal(.makeShortName("Asthma [Primary]", 10), "ASTH")
-  expect_equal(.makeShortName("Cohort (Test)", 10), "COHO")
-  expect_equal(.makeShortName("Asthma [Primary] Cohort", 10), "ASTHCOHO")
-  
-  # Handles underscores, dashes, and dots
-  expect_equal(.makeShortName("Asthma_Cohort", 10), "ASTHCOHO")
-  expect_equal(.makeShortName("Asthma-Cohort", 10), "ASTHCOHO")
-  expect_equal(.makeShortName("Asthma.Cohort", 10), "ASTHCOHO")
-  
+  expect_equal(makeShortName("Asthma [Primary]", 10), "ASTH")
+  expect_equal(makeShortName("Cohort (Test)", 10), "COHO")
+  expect_equal(makeShortName("Asthma [Primary] Cohort", 10), "ASTHCOHO")
+
+  # Handles underscores, dashes
+  expect_equal(makeShortName("Asthma_Cohort", 10), "ASTHCOHO")
+  expect_equal(makeShortName("Asthma-Cohort", 10), "ASTHCOHO")
+
   # Handles multiple spaces
-  expect_equal(.makeShortName("Asthma   Cohort", 10), "ASTHCOHO")
-  
+  expect_equal(makeShortName("Asthma   Cohort", 10), "ASTHCOHO")
+
   # Handles words shorter than 4 characters
-  expect_equal(.makeShortName("Asthma Co", 10), "ASTHCO")
-  expect_equal(.makeShortName("A B", 10), "AB")
-  
+  expect_equal(makeShortName("Asthma Co", 10), "ASTHCO")
+  expect_equal(makeShortName("A B", 10), "AB")
+
   # Handles words longer than 4 characters
-  expect_equal(.makeShortName("Asthma Cohort Definition", 10), "ASTHDEFI")
-  
+  expect_equal(makeShortName("Asthma Cohort Definition", 10), "ASTHDEFI")
+
   # Returns uppercase
-  expect_equal(.makeShortName("asthma cohort", 10), "ASTHCOHO")
-  
+  expect_equal(makeShortName("asthma cohort", 10), "ASTHCOHO")
+
   # Handles empty or whitespace-only names
-  expect_equal(.makeShortName("", 10), "C10")
-  expect_equal(.makeShortName("   ", 10), "C10")
-  
+  expect_equal(makeShortName("", 10), "C10")
+  expect_equal(makeShortName("   ", 10), "C10")
+
   # Handles names with only brackets
-  expect_equal(.makeShortName("[Test]", 10), "C10")
-  expect_equal(.makeShortName("(Test)", 10), "C10")
+  expect_equal(makeShortName("[Test]", 10), "C10")
+  expect_equal(makeShortName("(Test)", 10), "C10")
+
+  # handle extentions
+  expect_equal(makeShortName("Asthma.Cohort", 10), "ASTH")
+  expect_equal(makeShortName("Asthma.tsv", 10), "ASTH")
+
+  # handle cohort operation names
+  expect_equal(makeShortName("COPYFRAC AND ASTHCONT AND ASTH", 10), "COP&AST&AST")
+  expect_equal(makeShortName("COPYFRAC AND ASTHCONT NOT_IN ASTH", 10), "COP&AST~AST")
+
+
 })
 
 #
@@ -724,37 +733,37 @@ test_that(".solveShortNameConflicts resolves conflicts correctly", {
     .solveShortNameConflicts(c("ASTH", "COHO"), c("FRAC", "DIAB")),
     c("ASTH", "COHO")
   )
-  
+
   # Conflicts with existing names
   expect_equal(
     .solveShortNameConflicts(c("ASTH", "COHO"), c("ASTH", "DIAB")),
     c("ASTH1", "COHO")
   )
-  
+
   # Duplicates within new names
   expect_equal(
     .solveShortNameConflicts(c("ASTH", "ASTH", "COHO"), character(0)),
     c("ASTH1", "ASTH2", "COHO")
   )
-  
+
   # Empty existing names
   expect_equal(
     .solveShortNameConflicts(c("ASTH", "COHO"), character(0)),
     c("ASTH", "COHO")
   )
-  
+
   # Empty new names
   expect_equal(
     .solveShortNameConflicts(character(0), c("ASTH", "COHO")),
     character(0)
   )
-  
+
   # Single name
   expect_equal(
     .solveShortNameConflicts(c("ASTH"), c("COHO")),
     "ASTH"
   )
-  
+
   # Multiple conflicts
   expect_equal(
     .solveShortNameConflicts(c("ASTH", "COHO", "FRAC"), c("ASTH", "COHO")),
