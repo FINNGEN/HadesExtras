@@ -50,11 +50,13 @@
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-render_apex_plot.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-sexTibbleToStr.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-sexTibbleToTooltipStr.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/dot-solveShortNameConflicts.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-tippyText.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/getCohortDataFromCohortTable.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/getCohortNamesFromCohortDefinitionTable.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/getListOfAnalysis.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/index.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/makeShortName.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/operationStringToSQL.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/reactable_connectionStatus.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/readAndParseYaml.html</loc></url>
