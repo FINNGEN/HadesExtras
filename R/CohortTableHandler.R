@@ -631,8 +631,8 @@ createCohortTableHandlerFromList <- function(
 makeShortName <- function(name, id) {
   shortName <- paste0("C", id)
 
-  # remove bracketed parts: [ ... ] or ( ... )
-  name <- stringr::str_remove_all(name, "\\[.*?\\]|\\(.*?\\)")
+  # remove brackets
+  name <- stringr::str_remove_all(name, "[\\[\\](){}]")
   name <- stringr::str_trim(name)
 
   # remove file extension at the end (e.g., .txt, .csv, .json, .rds)
@@ -661,16 +661,20 @@ makeShortName <- function(name, id) {
     for (tok in tokens) {
 
       if (tok %in% operation_keywords) {
-        # operator → symbol
         output_parts <- c(output_parts, op_map[tok])
       } else {
-        # cohort name → first 4 letters
-        short <- toupper(substr(tok, 1, 3))
+        # Extract letters and trailing digits
+        letters_part <- toupper(substr(tok, 1, 3))
+        digits_part  <- stringr::str_extract(tok, "\\d+$")
+
+        short <- ifelse(is.na(digits_part),
+                        letters_part,
+                        paste0(letters_part, digits_part))
+
         output_parts <- c(output_parts, short)
       }
     }
 
-    # Join with spaces
     shortName <- paste(output_parts, collapse = "")
     return(shortName)
   }
