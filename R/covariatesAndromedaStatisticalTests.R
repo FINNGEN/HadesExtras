@@ -4,13 +4,19 @@ addStatisticalTestsToCovariatesAndromeda <- function(
   analysisTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous")
 ) {
     covariatesAndromeda |> checkmate::assertClass("Andromeda")
-    caseControlTible |> checkmate::assertTibble(
-        col.names = c("caseCohortId", "controlCohortId"),
-        types = c("integer", "integer")
-    )
+    caseControlTible |> names()  |> checkmate::assertSubset(c("caseCohortId", "controlCohortId"))
 
     covariatesAndromeda$caseControl <- caseControlTible
 
+    covariatesAndromeda$statisticalTests <- tibble::tibble(
+        analysisId = integer(),
+        caseCohortId = integer(),
+        controlCohortId = integer(),
+        conceptId = integer(),
+        pValue = numeric(),
+        oddsRatio = numeric(),
+        testName = character()
+    )
 
     if ("Binary" %in% analysisTypes) {
         binaryCovariatesTible <- covariatesAndromeda$analysisRef |>
@@ -26,19 +32,25 @@ addStatisticalTestsToCovariatesAndromeda <- function(
                 caseCohortId = caseCohortId,
                 controlCohortId = controlCohortId,
                 conceptId = conceptId,
-                n_cases_yes = sumValue.x,
-                n_cases_no = cohortSubjects.x - sumValue.x,
-                n_controls_yes = sumValue.y,
-                n_controls_no = cohortSubjects.y - sumValue.y
+                nCasesYes = sumValue.x,
+                nCasesNo = cohortSubjects.x - sumValue.x,
+                nControlsYes = sumValue.y,
+                nControlsNo = cohortSubjects.y - sumValue.y
             ) |>
             dplyr::collect()
 
-        binaryCovariatesTible <- .addParallel(binaryCovariatesTible, "Binary")
+        binaryCovariatesTible <- .addStatisticalTestsParallel(binaryCovariatesTible, "Binary")
+        binaryCovariatesTible <- binaryCovariatesTible |>
+            dplyr::select(analysisId, caseCohortId, controlCohortId, conceptId, pValue, oddsRatio, testName)
+
+        Andromeda::appendToTable(covariatesAndromeda$statisticalTests, binaryCovariatesTible)
+        rm(binaryCovariatesTible)
     }
 
 
-    # clean up
-    covariatesAndromeda$caseControl <- NULL
+    # add statistical tests results to covariatesAndromeda
+    
+    
 
 
     return(covariatesAndromeda)
@@ -54,12 +66,10 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 #' @importFrom furrr future_map_dfr
 #' @importFrom dplyr bind_rows
 #' @importFrom future plan multisession
-
-.addParallel <- function(covariatesTible, analysisType, n_chunks = future::availableCores() - 1, ...) {
+.addStatisticalTestsParallel <- function(covariatesTible, analysisType, n_chunks = future::availableCores() - 1, ...) {
     # Load required packages
     requireNamespace("furrr", quietly = TRUE)
     requireNamespace("future", quietly = TRUE)
-
 
     analysisType |> checkmate::assertChoice(c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"))
     n_chunks |> checkmate::assertNumber(upper = future::availableCores() - 1)
@@ -69,9 +79,9 @@ addStatisticalTestsToCovariatesAndromeda <- function(
         covariatesTible |>
             names() |>
             checkmate::testSubset(
-                c("analysisId", "caseCohortId", "controlCohortId", "conceptId", "n_cases_yes", "n_cases_no", "n_controls_yes", "n_controls_no")
+                c("analysisId", "caseCohortId", "controlCohortId", "conceptId", "nCasesYes", "nCasesNo", "nControlsYes", "nControlsNo")
             )
-        fun <- .addFisherTestToCodeCounts
+        fun <- .addFisherOrChiSquareTest
     }
 
     # Set up parallel plan
@@ -99,12 +109,13 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 #' @export
 #' @importFrom dplyr setdiff bind_cols select mutate if_else
 #' @importFrom purrr pmap_df
-.addFisherTestToCodeCounts <- function(binaryCovariatesTible) {
-    missing_collumns <- dplyr::setdiff(c("n_cases_yes", "n_cases_no", "n_controls_yes", "n_controls_no"), names(binaryCovariatesTible))
+.addFisherOrChiSquareTest <- function(binaryCovariatesTible) {
+    missing_collumns <- dplyr::setdiff(c("nCasesYes", "nCasesNo", "nControlsYes", "nControlsNo"), names(binaryCovariatesTible))
     if (length(missing_collumns) != 0) {
         stop("case_controls_counts is missing the following columns: ", missing_collumns)
     }
 
+    # Needs to be in the same function to be used in parallel
     .fisher <- function(a, b, c, d) {
         data <- matrix(c(a, b, c, d), ncol = 2)
         if (a < 10 | b < 10 | c < 10 | d < 10) {
@@ -133,16 +144,16 @@ addStatisticalTestsToCovariatesAndromeda <- function(
             }
         }
         return(list(
-            counts_p_value = p.value,
-            counts_odds_ratio = odds.ratio,
-            counts_test = test
+            pValue = p.value,
+            oddsRatio = odds.ratio,
+            testName = test
         ))
     }
 
     binaryCovariatesTible <- binaryCovariatesTible |>
         dplyr::bind_cols(
             binaryCovariatesTible |>
-                dplyr::select(n_cases_yes, n_cases_no, n_controls_yes, n_controls_no) |>
+                dplyr::select(nCasesYes, nCasesNo, nControlsYes, nControlsNo) |>
                 purrr::pmap_df(~ .fisher(..1, ..2, ..3, ..4))
         )
 

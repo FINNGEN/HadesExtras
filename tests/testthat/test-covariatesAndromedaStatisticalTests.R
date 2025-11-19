@@ -11,4 +11,7 @@ test_that("addStatisticalTestsToCovariatesAndromeda returns correct value", {
     analysisTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous")
   )
 
+  covariatesAndromeda |> names() |> checkmate::assertSetEqual(c("analysisRef", "conceptRef", "covariates", "covariatesContinuous", "cohortCounts", "statisticalTests"))
+
+
 })
