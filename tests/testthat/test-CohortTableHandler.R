@@ -684,8 +684,8 @@ test_that("makeShortName creates short names correctly", {
   expect_equal(makeShortName("Asthma Cohort", 10), "ASTHCOHO")
 
   # Removes bracketed parts
-  expect_equal(makeShortName("Asthma [Primary]", 10), "ASTH")
-  expect_equal(makeShortName("Cohort (Test)", 10), "COHO")
+  expect_equal(makeShortName("Asthma [Primary]", 10), "ASTHPRIM")
+  expect_equal(makeShortName("Cohort (Test)", 10), "COHOTEST")
   expect_equal(makeShortName("Asthma [Primary] Cohort", 10), "ASTHCOHO")
 
   # Handles underscores, dashes
@@ -710,8 +710,8 @@ test_that("makeShortName creates short names correctly", {
   expect_equal(makeShortName("   ", 10), "C10")
 
   # Handles names with only brackets
-  expect_equal(makeShortName("[Test]", 10), "C10")
-  expect_equal(makeShortName("(Test)", 10), "C10")
+  expect_equal(makeShortName("[Test]", 10), "TEST")
+  expect_equal(makeShortName("(Test)", 10), "TEST")
 
   # handle extentions
   expect_equal(makeShortName("Asthma.Cohort", 10), "ASTH")
@@ -720,6 +720,8 @@ test_that("makeShortName creates short names correctly", {
   # handle cohort operation names
   expect_equal(makeShortName("COPYFRAC AND ASTHCONT AND ASTH", 10), "COP&AST&AST")
   expect_equal(makeShortName("COPYFRAC AND ASTHCONT NOT_IN ASTH", 10), "COP&AST~AST")
+  expect_equal(makeShortName("(COPYFRAC1 AND ASTHCONT) NOT_IN ASTH", 10), "COP1&AST~AST")
+
 
 
 })
