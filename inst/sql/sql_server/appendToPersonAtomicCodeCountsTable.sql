@@ -13,8 +13,8 @@ SELECT
         {@domain_id == 'Drug'} ? { CAST(SUM(ccm.value) AS FLOAT) } : {
         {@domain_id == 'Measurement'} ? { CAST(AVG(ccm.value) AS FLOAT) } : 
         { NULL }} AS aggregated_value,
-        CAST(MAX(COALESCE(ccm.value_unit, 0)) AS INT) AS aggregated_value_unit,
-        CAST(MAX(COALESCE(ccm.category, 0)) AS INT) AS aggregated_category
+        CAST(MAX(ccm.value_unit) AS INT) AS aggregated_value_unit,
+        CAST(MAX(ccm.category) AS INT) AS aggregated_category
 FROM (
         -- get all person_ids with the concept_id with in a valid observation period
         -- calculate the calendar year, gender_concept_id, age_decile
@@ -31,9 +31,9 @@ FROM (
                 { NULL }} AS value,
                 {@domain_id == 'Drug'} ? { 8512 } : {
                 {@domain_id == 'Measurement'} ? { t.unit_concept_id } : 
-                { 0 }} AS value_unit,
-                {@domain_id == 'Measurement'} ? { t.value_as_concept_id } : 
-                { 0 } AS category
+                { NULL }} AS value_unit,
+                {@domain_id == 'Measurement'} ? { COALESCE(t.value_as_concept_id, 0) } : 
+                { NULL } AS category
         FROM
                 @cdmDatabaseSchema.@table_name t
         JOIN 

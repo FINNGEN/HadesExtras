@@ -128,8 +128,13 @@ getPreComputedCovariatesAggregated <- function(
       analysisId = analysisGroupId + typeId,
       analysisType = covariateType,
       analysisGroupId = analysisGroupId,
-      domainId = dplyr::if_else(analysisGroup %in% c("Condition", "Procedure", "Observation", "Device", "Measurements"), analysisGroup, "Source")
-    )
+      domainId = dplyr::if_else(
+        analysisGroup %in% c("Condition", "Procedure", "Observation", "Device", "Measurements"), 
+        analysisGroup, 
+        paste0("Source:", analysisGroup)
+      )
+    ) |> 
+    dplyr::distinct()
 
   cohortCounts <- CohortGenerator::getCohortCounts(
     connection = connection,

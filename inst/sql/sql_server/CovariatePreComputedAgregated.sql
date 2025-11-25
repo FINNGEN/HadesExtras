@@ -38,16 +38,16 @@ FROM (
 			cohort_definition_id,
 			150 + analysis_group_id AS analysis_id,
 			concept_id AS concept_id,
-			0 AS category_id,
+			NULL AS category_id,
 			COUNT(*) AS sum_value
-		FROM #pre_computed_cohort
+		FROM (SELECT DISTINCT cohort_definition_id, analysis_group_id, concept_id, subject_id FROM #pre_computed_cohort) AS pct
 		GROUP BY cohort_definition_id, analysis_group_id, concept_id
 	}
 	{@include_binary & @include_categorical} ? {
 		UNION ALL
 	}
 	{@include_categorical} ? {
-		-- 3.2. Categorical
+		-- 3.2. Categorical (Aggregated Category)
 		SELECT
 			cohort_definition_id,
 			250 + analysis_group_id AS analysis_id,

@@ -67,7 +67,7 @@ SELECT
 FROM @resultsDatabaseSchema.temp_concept_ancestor AS tca
 INNER JOIN @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac
     ON tca.descendant_concept_id = pcac.concept_id
-WHERE pcac.domain_id != 'Drug' AND pcac.domain_id != 'Measurement'
+WHERE pcac.domain_id != 'Drug' AND pcac.domain_id != 'Measurement' AND pcac.concept_id != 0
 GROUP BY
     pcac.domain_id,
     tca.ancestor_concept_id,
@@ -136,6 +136,7 @@ SELECT DISTINCT
     pcac.aggregated_value AS aggregated_value,
     pcac.aggregated_value_unit AS aggregated_value_unit,
     pcac.aggregated_category AS aggregated_category
-FROM @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac;
+FROM @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac
+WHERE pcac.concept_id != 0;
 
 DROP TABLE IF EXISTS @resultsDatabaseSchema.temp_concept_ancestor;

@@ -88,7 +88,7 @@ test_that("createPersonCodeAtomicCountsTable condition", {
   # aggregated_value_unit
   atomicCountsTable |> dplyr::filter(aggregated_value_unit == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
   # aggregated_category
-   atomicCountsTable |> dplyr::filter(aggregated_category == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
+   atomicCountsTable |> dplyr::filter(is.na(aggregated_category)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
 })
 
 
@@ -133,7 +133,7 @@ test_that("createPersonCodeAtomicCountsTable Drug", {
   # aggregated_value_unit
   atomicCountsTable |> dplyr::filter(aggregated_value_unit == 8512) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
   # aggregated_category
-   atomicCountsTable |> dplyr::filter(aggregated_category == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
+   atomicCountsTable |>  dplyr::filter(is.na(aggregated_category)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
 })
 
 
@@ -173,7 +173,16 @@ test_that("createPersonCodeAtomicCountsTable Measurement", {
   atomicCountsTable |> dplyr::filter(is.na(first_date)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # first_age
   atomicCountsTable |> dplyr::filter(is.na(first_age)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_value
+  #atomicCountsTable |> dplyr::filter(is.na(aggregated_value)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_value_unit
+  #atomicCountsTable |> dplyr::filter(aggregated_value_unit == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_category
+  atomicCountsTable |> dplyr::filter(is.na(aggregated_category)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
 
+  # person_id and concept_id should be unique and maps_to_concept_id should be the same as concept_id
+  atomicCountsTable |> dplyr::distinct(person_id, concept_id)  |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
+  atomicCountsTable |> dplyr::filter(concept_id != maps_to_concept_id) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
 })
 
 
@@ -199,16 +208,30 @@ test_that("createPersonCodeAtomicCountsTable all", {
   atomicCountsTable |> dplyr::distinct(domain_id) |> dplyr::pull(domain_id) |> checkmate::expect_subset(c("Condition", "Drug", "Measurement", "Observation", "Device", "Procedure"))
   # person_id
   atomicCountsTable |> dplyr::filter(is.na(person_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  atomicCountsTable |> dplyr::filter(person_id == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # concept_id
   atomicCountsTable |> dplyr::filter(is.na(concept_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # maps_to_concept_id
   atomicCountsTable |> dplyr::filter(is.na(maps_to_concept_id)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  atomicCountsTable |> dplyr::filter(maps_to_concept_id == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # n_records
   atomicCountsTable |> dplyr::filter(is.na(n_records)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  atomicCountsTable |> dplyr::filter(n_records == 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # first_date
   atomicCountsTable |> dplyr::filter(is.na(first_date)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # first_age
   atomicCountsTable |> dplyr::filter(is.na(first_age)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  #atomicCountsTable |> dplyr::filter(first_age < 0) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
 
+  # aggregated_value: only 'Measurements' and 'ATC' should have aggregated_value
+  atomicCountsTable |> dplyr::filter(domain_id != 'Measurement' & domain_id != 'Drug' & !is.na(aggregated_value)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_value_unit: only 'Measurements' and 'ATC' should have aggregated_value_unit
+  atomicCountsTable |> dplyr::filter(domain_id != 'Measurement' & domain_id != 'Drug' & !is.na(aggregated_value_unit)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  # aggregated_category: only 'Measurements' should have aggregated_category
+  atomicCountsTable |> dplyr::filter(domain_id != 'Measurement' & !is.na(aggregated_category)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+  atomicCountsTable |> dplyr::filter(domain_id == 'Measurement' & is.na(aggregated_category)) |> 
+  dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
 })
-
