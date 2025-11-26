@@ -12,12 +12,14 @@ addStatisticalTestsToCovariatesAndromeda <- function(
     covariatesAndromeda |> checkmate::assertClass("Andromeda")
     caseControlTible |>
         names() |>
-        checkmate::assertSubset(c("caseCohortId", "controlCohortId"))
+        checkmate::assertSubset(c("comparisonId", "caseCohortId", "controlCohortId"))
 
     covariatesAndromeda$caseControl <- caseControlTible
 
     covariatesAndromeda$statisticalTests <- tibble::tibble(
+        comparisonId = integer(),
         analysisId = integer(),
+        unit = character(),
         caseCohortId = integer(),
         controlCohortId = integer(),
         conceptId = integer(),
@@ -26,45 +28,59 @@ addStatisticalTestsToCovariatesAndromeda <- function(
         standarizeMeanDifference = numeric(),
         testName = character()
     )
-
+    
     if ("Binary" %in% analysisTypes) {
         ParallelLogger::logInfo("Adding statistical tests to binary covariates")
-        binaryCovariatesTible <- covariatesAndromeda$analysisRef |>
+    
+        analysisCaseControl <- covariatesAndromeda$analysisRef |>
             dplyr::filter(analysisType == "Binary") |>
             dplyr::select(analysisId) |>
-            dplyr::cross_join(covariatesAndromeda$caseControl) |>
-            dplyr::inner_join(covariatesAndromeda$covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |> 
-            dplyr::left_join(covariatesAndromeda$cohortCounts, by = c("caseCohortId" = "cohortId")) |>
-            dplyr::left_join(covariatesAndromeda$covariates, by = c(
-                "analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId",
-                "conceptId" = "conceptId"
-            )) |>
-            dplyr::left_join(covariatesAndromeda$cohortCounts, by = c("controlCohortId" = "cohortId")) |>
+            dplyr::cross_join(covariatesAndromeda$caseControl)
+
+        binaryCovariatesTible <- dplyr::full_join(
+            # Case
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, caseCohortId, rememberControlCohortId = controlCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |>
+                dplyr::left_join(covariatesAndromeda$cohortCounts, by = c("caseCohortId" = "cohortId")),
+            # Control
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, controlCohortId, rememberCaseCohortId = caseCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariates, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")) |>
+                dplyr::left_join(covariatesAndromeda$cohortCounts, by = c("controlCohortId" = "cohortId")),
+            #
+            by = c("comparisonId", "analysisId", "conceptId", "categoryId")
+        ) |>
             dplyr::transmute(
+                comparisonId = comparisonId,
                 analysisId = analysisId,
-                caseCohortId = caseCohortId,
-                controlCohortId = controlCohortId,
+                caseCohortId = dplyr::if_else(is.na(caseCohortId), rememberCaseCohortId, caseCohortId),
+                controlCohortId = dplyr::if_else(is.na(controlCohortId), rememberControlCohortId, controlCohortId),
                 conceptId = conceptId,
-                nCasesYes = sumValue.x,
-                nCasesNo = cohortSubjects.x - sumValue.x,
-                nControlsYes = sumValue.y,
-                nControlsNo = cohortSubjects.y - sumValue.y
+                sumValue.x = dplyr::if_else(is.na(sumValue.x), 0, sumValue.x),
+                sumValue.y = dplyr::if_else(is.na(sumValue.y), 0, sumValue.y), 
+                cohortSubjects.x = cohortSubjects.x,
+                cohortSubjects.y = cohortSubjects.y
             ) |>
             dplyr::collect() |>
-            dplyr::group_by(analysisId, caseCohortId, controlCohortId, conceptId) |>
+            dplyr::group_by(comparisonId, analysisId, caseCohortId, controlCohortId, conceptId) |>
             dplyr::summarize(
-                contingencyTable = list({
-                    mat <- matrix(c(nCasesYes, nCasesNo, nControlsYes, nControlsNo), nrow = 2, byrow = TRUE)
-                    colnames(mat) <- c("Yes", "No")
-                    rownames(mat) <- c("cases", "controls")
-                    mat
-                }),
+                contingencyTable = purrr::pmap(
+                    .l = list(sumValue.x, cohortSubjects.x - sumValue.x, sumValue.y, cohortSubjects.y - sumValue.y),
+                    .f = function(nCasesYes, nCasesNo, nControlsYes, nControlsNo) {
+                        mat <- matrix(c(nCasesYes, nCasesNo, nControlsYes, nControlsNo), nrow = 2, byrow = TRUE)
+                        colnames(mat) <- c("Yes", "No")
+                        rownames(mat) <- c("cases", "controls")
+                        mat
+                    }
+                ),
                 .groups = "drop"
             )
 
         binaryCovariatesTible <- .addStatisticalTestsParallel(binaryCovariatesTible, "BinaryTest", nChunks)
         binaryCovariatesTible <- binaryCovariatesTible |>
-            dplyr::select(analysisId, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
+            dplyr::mutate(unit = NA_character_) |>
+            dplyr::select(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
 
         Andromeda::appendToTable(covariatesAndromeda$statisticalTests, binaryCovariatesTible)
         rm(binaryCovariatesTible)
@@ -72,36 +88,35 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 
     if ("Categorical" %in% analysisTypes) {
         ParallelLogger::logInfo("Adding statistical tests to categorical covariates")
-        categoricalCovariatesTible <- covariatesAndromeda$analysisRef |>
+        analysisCaseControl <- covariatesAndromeda$analysisRef |>
             dplyr::filter(analysisType == "Categorical") |>
             dplyr::select(analysisId) |>
-            dplyr::cross_join(covariatesAndromeda$caseControl) |>
-            dplyr::inner_join(covariatesAndromeda$covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |> 
-            dplyr::left_join(covariatesAndromeda$covariates, by = c(
-                "analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId",
-                "conceptId" = "conceptId"
-            )) |>
-            dplyr::filter(
-                categoryId.x == categoryId.y |
-                    is.na(categoryId.x) & !is.na(categoryId.y) |
-                    !is.na(categoryId.x) & is.na(categoryId.y)
-            ) |>
-            dplyr::mutate(
-                categoryId = dplyr::if_else(is.na(categoryId.x), categoryId.y, categoryId.x),
+            dplyr::cross_join(covariatesAndromeda$caseControl)
+
+        categoricalCovariatesTible <- dplyr::full_join(
+            # Case
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, caseCohortId, rememberControlCohortId = controlCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")),
+            # Control
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, controlCohortId, rememberCaseCohortId = caseCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariates, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")),
+            #
+            by = c("comparisonId", "analysisId", "conceptId", "categoryId")
+        ) |>
+            dplyr::transmute(
+                comparisonId = comparisonId,
+                analysisId = analysisId,
+                caseCohortId = dplyr::if_else(is.na(caseCohortId), rememberCaseCohortId, caseCohortId),
+                controlCohortId = dplyr::if_else(is.na(controlCohortId), rememberControlCohortId, controlCohortId),
+                conceptId = conceptId,
+                categoryId = categoryId,
                 sumValue.x = dplyr::if_else(is.na(sumValue.x), 0, sumValue.x),
                 sumValue.y = dplyr::if_else(is.na(sumValue.y), 0, sumValue.y)
             ) |>
-            dplyr::transmute(
-                analysisId = analysisId,
-                caseCohortId = caseCohortId,
-                controlCohortId = controlCohortId,
-                conceptId = conceptId,
-                categoryId = categoryId,
-                sumValue.x = sumValue.x,
-                sumValue.y = sumValue.y
-            ) |>
             dplyr::collect() |>
-            dplyr::group_by(analysisId, caseCohortId, controlCohortId, conceptId) |>
+            dplyr::group_by(comparisonId, analysisId, caseCohortId, controlCohortId, conceptId) |>
             dplyr::summarize(
                 contingencyTable = list({
                     mat <- matrix(c(sumValue.x, sumValue.y), nrow = 2, byrow = TRUE)
@@ -118,37 +133,51 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 
         categoricalCovariatesTible <- .addStatisticalTestsParallel(categoricalCovariatesTible, "CategoricalTest", nChunks)
         categoricalCovariatesTible <- categoricalCovariatesTible |>
-            dplyr::select(analysisId, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
+            dplyr::mutate(unit = NA_character_) |>
+            dplyr::select(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
 
         Andromeda::appendToTable(covariatesAndromeda$statisticalTests, categoricalCovariatesTible)
         rm(categoricalCovariatesTible)
     }
-
+    
     if ("Counts" %in% analysisTypes) {
         ParallelLogger::logInfo("Adding statistical tests to counts covariates")
-        countsCovariatesTible <- covariatesAndromeda$analysisRef |>
+        analysisCaseControl <- covariatesAndromeda$analysisRef |>
             dplyr::filter(analysisType == "Counts") |>
             dplyr::select(analysisId) |>
-            dplyr::cross_join(covariatesAndromeda$caseControl) |>
-            dplyr::inner_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |> 
-            dplyr::left_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId", "conceptId" = "conceptId")) |>
+            dplyr::cross_join(covariatesAndromeda$caseControl)
+
+        countsCovariatesTible <- dplyr::full_join(
+            # Case
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, caseCohortId, rememberControlCohortId = controlCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")),
+            # Control
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, controlCohortId, rememberCaseCohortId = caseCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")), 
+            #
+            by = c("comparisonId", "analysisId", "conceptId", "unit")
+        ) |>
             dplyr::transmute(
+                comparisonId = comparisonId,
                 analysisId = analysisId,
-                caseCohortId = caseCohortId,
-                controlCohortId = controlCohortId,
+                unit = unit,
+                caseCohortId = dplyr::if_else(is.na(caseCohortId), rememberCaseCohortId, caseCohortId),
+                controlCohortId = dplyr::if_else(is.na(controlCohortId), rememberControlCohortId, controlCohortId),
                 conceptId = conceptId,
-                meanValueCases = averageValue.x,
-                sdValueCases = standardDeviation.x,
-                nCasesYesWithValue = countValue.x,
-                meanValueControls = averageValue.y,
-                sdValueControls = standardDeviation.y,
-                nControlsYesWithValue = countValue.y
+                countValue.x = dplyr::if_else(is.na(countValue.x), 0, countValue.x),
+                countValue.y = dplyr::if_else(is.na(countValue.y), 0, countValue.y),
+                averageValue.x = averageValue.x,
+                averageValue.y = averageValue.y,
+                standardDeviation.x = standardDeviation.x,
+                standardDeviation.y = standardDeviation.y
             ) |>
-            dplyr::collect()
+            dplyr::collect() 
 
         countsCovariatesTible <- .addStatisticalTestsParallel(countsCovariatesTible, "CountsTest", nChunks)
         countsCovariatesTible <- countsCovariatesTible |>
-            dplyr::select(analysisId, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
+            dplyr::select(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
 
         Andromeda::appendToTable(covariatesAndromeda$statisticalTests, countsCovariatesTible)
         rm(countsCovariatesTible)
@@ -156,37 +185,42 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 
     if (any(c("Continuous", "AgeFirstEvent", "DaysToFirstEvent") %in% analysisTypes)) {
         ParallelLogger::logInfo("Adding statistical tests to continuous, age first event, and days to first event covariates")
-        continuousCovariatesTible <- covariatesAndromeda$analysisRef |>
+        analysisCaseControl <- covariatesAndromeda$analysisRef |>
             dplyr::filter(analysisType %in% c("Continuous", "AgeFirstEvent", "DaysToFirstEvent")) |>
             dplyr::select(analysisId) |>
-            dplyr::cross_join(covariatesAndromeda$caseControl) |> 
-            dplyr::inner_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |>
-            dplyr::left_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId", "conceptId" = "conceptId")) |>
+            dplyr::cross_join(covariatesAndromeda$caseControl)
+
+        continuousCovariatesTible <- dplyr::full_join(
+            # Case
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, caseCohortId, rememberControlCohortId = controlCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")),
+            # Control
+            analysisCaseControl |>
+                dplyr::select(comparisonId, analysisId, controlCohortId, rememberCaseCohortId = caseCohortId) |>
+                dplyr::inner_join(covariatesAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")), 
+            #
+            by = c("comparisonId", "analysisId", "conceptId", "unit")
+        ) |>
             dplyr::transmute(
+                comparisonId = comparisonId,
                 analysisId = analysisId,
-                caseCohortId = caseCohortId,
-                controlCohortId = controlCohortId,
+                unit = unit,
+                caseCohortId = dplyr::if_else(is.na(caseCohortId), rememberCaseCohortId, caseCohortId),
+                controlCohortId = dplyr::if_else(is.na(controlCohortId), rememberControlCohortId, controlCohortId),
                 conceptId = conceptId,
-                meanValueCases = averageValue.x,
-                sdValueCases = standardDeviation.x,
-                nCasesYesWithValue = countValue.x,
-                meanValueControls = averageValue.y,
-                sdValueControls = standardDeviation.y,
-                nControlsYesWithValue = countValue.y
+                countValue.x = dplyr::if_else(is.na(countValue.x), 0, countValue.x),
+                countValue.y = dplyr::if_else(is.na(countValue.y), 0, countValue.y),
+                averageValue.x = averageValue.x,
+                averageValue.y = averageValue.y,
+                standardDeviation.x = standardDeviation.x,
+                standardDeviation.y = standardDeviation.y
             ) |>
-            dplyr::mutate(
-                meanValueCases = dplyr::if_else(is.na(meanValueCases), 0, meanValueCases),
-                sdValueCases = dplyr::if_else(is.na(sdValueCases), 0, sdValueCases),
-                nCasesYesWithValue = dplyr::if_else(is.na(nCasesYesWithValue), 0, nCasesYesWithValue),
-                meanValueControls = dplyr::if_else(is.na(meanValueControls), 0, meanValueControls),
-                sdValueControls = dplyr::if_else(is.na(sdValueControls), 0, sdValueControls),
-                nControlsYesWithValue = dplyr::if_else(is.na(nControlsYesWithValue), 0, nControlsYesWithValue)
-            ) |> 
             dplyr::collect()
 
         continuousCovariatesTible <- .addStatisticalTestsParallel(continuousCovariatesTible, "ContinuousTest", nChunks)
         continuousCovariatesTible <- continuousCovariatesTible |>
-            dplyr::select(analysisId, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
+            dplyr::select(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId, pValue, effectSize, standarizeMeanDifference, testName)
 
         Andromeda::appendToTable(covariatesAndromeda$statisticalTests, continuousCovariatesTible)
         rm(continuousCovariatesTible)
@@ -281,7 +315,7 @@ addStatisticalTestsToCovariatesAndromeda <- function(
     .fisher <- function(contingencyTable) {
         # Extract the matrix from the list
         mat <- contingencyTable
-        
+
         # Check if we have a valid contingency table
         if (is.null(mat) || ncol(mat) < 2 || nrow(mat) != 2) {
             return(list(
@@ -367,7 +401,7 @@ addStatisticalTestsToCovariatesAndromeda <- function(
             # SMD = (p1 - p2) / sqrt((p1(1-p1) + p2(1-p2)) / 2)
             denominator <- sqrt((p1 * (1 - p1) + p2 * (1 - p2)) / 2)
             if (is.na(denominator) || denominator == 0) {
-                h <- NA_real_
+                h <- .Machine$double.xmax
             } else {
                 h <- (p1 - p2) / denominator
             }
@@ -437,13 +471,12 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 #'
 #'
 .addNegativeBinomialTest <- function(countsCovariatesTible) {
-    missing_collumns <- dplyr::setdiff(c("meanValueCases", "sdValueCases", "nCasesYesWithValue", "meanValueControls", "sdValueControls", "nControlsYesWithValue"), names(countsCovariatesTible))
+    missing_collumns <- dplyr::setdiff(c("averageValue.x", "standardDeviation.x", "countValue.x", "averageValue.y", "standardDeviation.y", "countValue.y"), names(countsCovariatesTible))
     if (length(missing_collumns) != 0) {
         stop("countsCovariatesTible is missing the following columns: ", missing_collumns)
     }
 
     .negativeBinomial <- function(mu1, sd1, n1, mu2, sd2, n2) {
-
         # special case
         if (n1 <= 2 | n2 <= 2) {
             return(list(
@@ -486,7 +519,7 @@ addStatisticalTestsToCovariatesAndromeda <- function(
     countsCovariatesTible <- countsCovariatesTible |>
         dplyr::bind_cols(
             countsCovariatesTible |>
-                dplyr::select(meanValueCases, sdValueCases, nCasesYesWithValue, meanValueControls, sdValueControls, nControlsYesWithValue) |>
+                dplyr::select(averageValue.x, standardDeviation.x, countValue.x, averageValue.y, standardDeviation.y, countValue.y) |>
                 purrr::pmap_df(~ .negativeBinomial(..1, ..2, ..3, ..4, ..5, ..6))
         )
 
@@ -511,7 +544,7 @@ addStatisticalTestsToCovariatesAndromeda <- function(
 .addWelchTTest <- function(
   continuousCovariatesTible
 ) {
-    missing_collumns <- dplyr::setdiff(c("meanValueCases", "sdValueCases", "nCasesYesWithValue", "meanValueControls", "sdValueControls", "nControlsYesWithValue"), names(continuousCovariatesTible))
+    missing_collumns <- dplyr::setdiff(c("averageValue.x", "standardDeviation.x", "countValue.x", "averageValue.y", "standardDeviation.y", "countValue.y"), names(continuousCovariatesTible))
     if (length(missing_collumns) != 0) {
         stop("continuousCovariatesTible is missing the following columns: ", missing_collumns)
     }
@@ -522,7 +555,7 @@ addStatisticalTestsToCovariatesAndromeda <- function(
     # n1, n2: the same sizes
     # m0: the null value for the difference in means to be tested for. Default is 0.
     # equal.variance: whether or not to assume equal variance. Default is FALSE.
-    .welchTTest <- function(m1, m2, s1, s2, n1, n2, m0 = 0, equal.variance = FALSE) {
+    .welchTTest <- function(m1, s1, n1, m2, s2, n2, m0 = 0, equal.variance = FALSE) {
         # special case
         if (n1 <= 10 | n2 <= 10) {
             return(list(
@@ -567,7 +600,7 @@ addStatisticalTestsToCovariatesAndromeda <- function(
     continuousCovariatesTible <- continuousCovariatesTible |>
         dplyr::bind_cols(
             continuousCovariatesTible |>
-                dplyr::select(meanValueCases, sdValueCases, nCasesYesWithValue, meanValueControls, sdValueControls, nControlsYesWithValue) |>
+                dplyr::select(averageValue.x, standardDeviation.x, countValue.x, averageValue.y, standardDeviation.y, countValue.y) |>
                 purrr::pmap_df(~ .welchTTest(..1, ..2, ..3, ..4, ..5, ..6))
         )
 

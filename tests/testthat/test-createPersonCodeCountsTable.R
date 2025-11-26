@@ -14,6 +14,8 @@ test_that("createPersonCodeCountsTable", {
 
   nRows  <- personCodeCounts |> dplyr::count() |> dplyr::pull(n) 
   nRows |> expect_gt(0)
+  # multicolumnar validation
+  personCodeCounts |> distinct(analysis_group, concept_class_id, person_id, concept_id) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
   # analysis_group
   personCodeCounts |> dplyr::filter(is.na(analysis_group)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # concept_class_id, only Standard for Condition, Procedure, Observation, Device

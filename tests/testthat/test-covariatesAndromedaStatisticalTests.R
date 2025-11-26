@@ -2,18 +2,21 @@ test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct val
   covariatesAndromeda <- Andromeda::loadAndromeda("covariatesAndromeda.zip")
 
   caseControlTible <- tibble::tibble(
+    comparisonId = 1,
     caseCohortId = 1,
     controlCohortId = 2
   )
 
-  t0 <- Sys.time()
+#  t0 <- Sys.time()
   covariatesAndromeda <- addStatisticalTestsToCovariatesAndromeda(
     covariatesAndromeda = covariatesAndromeda,
     caseControlTible = caseControlTible,
     analysisTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"),
     nChunks = NULL
   )
-  td <- Sys.time() - t0
+#  td <- Sys.time() - t0
+
+  covariatesAndromeda |> Andromeda::saveAndromeda("covariatesTestsAndromeda.zip", maintainConnection = TRUE )
 
   covariatesAndromeda |>
     names() |>
@@ -22,7 +25,7 @@ test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct val
     )
 
   statisticalTests <- covariatesAndromeda$statisticalTests 
-  statisticalTests |> names() |> expect_setequal(c("analysisId", "caseCohortId", "controlCohortId", "conceptId", "pValue", "effectSize", "standarizeMeanDifference", "testName"))
+  statisticalTests |> names() |> expect_setequal(c("comparisonId", "analysisId", "unit", "caseCohortId", "controlCohortId", "conceptId", "pValue", "effectSize", "standarizeMeanDifference", "testName"))
   
   # analysisId
   statisticalTests |> dplyr::filter(is.na(analysisId)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
@@ -41,6 +44,3 @@ test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct val
   # testName
   statisticalTests |> dplyr::filter(is.na(testName)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
 })
-
-
-

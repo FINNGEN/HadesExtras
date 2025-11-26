@@ -1,4 +1,3 @@
-
 #' getPreComputedCovariates
 #'
 #' @description
@@ -36,7 +35,6 @@ getPreComputedCovariatesAggregated <- function(
   covariateTypes,
   minCharacterizationMean = 0
 ) {
-
   # VALIDATE
   connection |> checkmate::assertClass("DatabaseConnectorConnection")
   cdmDatabaseSchema |> checkmate::assertString()
@@ -58,7 +56,7 @@ getPreComputedCovariatesAggregated <- function(
     dplyr::group_by(analysisGroup) |>
     dplyr::mutate(analysisGroupId = dplyr::cur_group_id()) |>
     dplyr::ungroup()
-  
+
   DatabaseConnector::insertTable(
     connection = connection,
     tableName = "covariate_groups",
@@ -116,6 +114,11 @@ getPreComputedCovariatesAggregated <- function(
     snakeCaseToCamelCase = TRUE
   )
 
+  analysisIdsInDatabase <- union(
+    covariatesAndromeda$covariates |> dplyr::select(analysisId) |> dplyr::distinct() |> dplyr::pull(analysisId),
+    covariatesAndromeda$covariatesContinuous |> dplyr::select(analysisId) |> dplyr::distinct() |> dplyr::pull(analysisId)
+  ) |> unique()
+
   covariatesAndromeda$analysisRef <- covariateGroups |>
     dplyr::cross_join(
       tibble::tibble(
@@ -129,12 +132,14 @@ getPreComputedCovariatesAggregated <- function(
       analysisType = covariateType,
       analysisGroupId = analysisGroupId,
       domainId = dplyr::if_else(
-        analysisGroup %in% c("Condition", "Procedure", "Observation", "Device", "Measurements"), 
-        analysisGroup, 
+        analysisGroup %in% c("Condition", "Procedure", "Observation", "Device", "Measurements"),
+        analysisGroup,
         paste0("Source:", analysisGroup)
       )
-    ) |> 
-    dplyr::distinct()
+    ) |>
+    dplyr::distinct() |>
+    dplyr::filter(analysisId %in% analysisIdsInDatabase)
+
 
   cohortCounts <- CohortGenerator::getCohortCounts(
     connection = connection,
@@ -148,6 +153,3 @@ getPreComputedCovariatesAggregated <- function(
 
   return(covariatesAndromeda)
 }
-
-
-

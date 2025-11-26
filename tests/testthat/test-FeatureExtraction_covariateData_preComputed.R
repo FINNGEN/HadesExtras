@@ -64,7 +64,9 @@ test_that("preComputed returns correct value", {
     #
     cohortSubjects.is.integer = is.numeric(cohortSubjects),
     cohortSubjects.not.missing = !is.na(cohortSubjects),
-    cohortSubjects.is.positive = cohortSubjects > 0
+    cohortSubjects.is.positive = cohortSubjects > 0,
+    # multicolumnar validation
+    key.is.unique = is_unique(cohortId)
   )
   results <- validate::confront(cohortCounts, rules)
   validate::summary(results) |>
@@ -92,7 +94,9 @@ test_that("preComputed returns correct value", {
     analysisGroupId.is.integer = is.numeric(analysisGroupId),
     #
     domainId.not.missing = !is.na(domainId),
-    domainId.is.character = is.character(domainId)
+    domainId.is.character = is.character(domainId),
+    # multicolumnar validation
+    key.is.unique = is_unique(analysisId, analysisType, analysisGroupId, domainId)
   )
   results <- validate::confront(analysisRef, rules)
   validate::summary(results)$fails |>
@@ -152,8 +156,9 @@ test_that("preComputed returns correct value", {
     sumValue.is.integer = is.numeric(sumValue),
     sumValue.not.missing = !is.na(sumValue),
     sumValue.is.positive = sumValue > 0,
-    sumValue.is.less.than.or.equal.to.cohortSubjects = sumValue <= cohortSubjects
-    #
+    sumValue.is.less.than.or.equal.to.cohortSubjects = sumValue <= cohortSubjects,
+    # multicolumnar validation
+    key.is.unique = is_unique(cohortDefinitionId, analysisId, conceptId, categoryId)
   )
   results <- validate::confront(covariates, rules)
   validate::summary(results) |>
@@ -211,7 +216,9 @@ test_that("preComputed returns correct value", {
     #
     maxValue.is.numeric = is.numeric(maxValue),
     maxValue.not.missing = !is.na(maxValue),
-    maxValue.is.positive.for.counts = (analysisType == "Counts" & maxValue > 0) | (analysisType != "Counts")
+    maxValue.is.positive.for.counts = (analysisType == "Counts" & maxValue > 0) | (analysisType != "Counts"),
+    # multicolumnar validation
+    key.is.unique = is_unique(cohortDefinitionId, analysisId, conceptId, unit)
   )
   results <- validate::confront(covariatesContinuous, rules)
   validate::summary(results) |>
