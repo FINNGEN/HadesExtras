@@ -1,7 +1,8 @@
 test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct value", {
   covariatesAndromeda <- Andromeda::loadAndromeda("covariatesAndromeda.zip")
+  covariatesAndromeda <- Andromeda::copyAndromeda(covariatesAndromeda)
 
-  caseControlTible <- tibble::tibble(
+  comparisonsTible <- tibble::tibble(
     comparisonId = 1,
     caseCohortId = 1,
     controlCohortId = 2
@@ -10,7 +11,7 @@ test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct val
 #  t0 <- Sys.time()
   covariatesAndromeda <- addStatisticalTestsToCovariatesAndromeda(
     covariatesAndromeda = covariatesAndromeda,
-    caseControlTible = caseControlTible,
+    comparisonsTible = comparisonsTible,
     analysisTypes = c("Binary", "Categorical", "Counts", "AgeFirstEvent", "DaysToFirstEvent", "Continuous"),
     nChunks = NULL
   )
@@ -21,12 +22,12 @@ test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct val
   covariatesAndromeda |>
     names() |>
     expect_setequal(
-      c("analysisRef", "caseControl", "cohortCounts", "conceptRef", "covariates", "covariatesContinuous", "statisticalTests")
+      c("analysisRef", "comparisons", "cohortCounts", "conceptRef", "covariates", "covariatesContinuous", "statisticalTests")
     )
 
   statisticalTests <- covariatesAndromeda$statisticalTests 
   statisticalTests |> names() |> expect_setequal(c("comparisonId", "analysisId", "unit", "caseCohortId", "controlCohortId", "conceptId", "pValue", "effectSize", "standarizeMeanDifference", "testName"))
-  
+  nRows <- statisticalTests |> dplyr::count() |> dplyr::pull(n)
   # analysisId
   statisticalTests |> dplyr::filter(is.na(analysisId)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # caseCohortId
@@ -43,4 +44,7 @@ test_that("addStatisticalTestsToCovariatesAndromeda parallel returns correct val
   statisticalTests |>  dplyr::filter(!stringr::str_detect(testName, "Error")) |> dplyr::filter(is.na(standarizeMeanDifference)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
   # testName
   statisticalTests |> dplyr::filter(is.na(testName)) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(0)
+
+  #
+  statisticalTests |> dplyr::distinct(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId) |> dplyr::count() |> dplyr::pull(n) |> expect_equal(nRows)
 })

@@ -166,8 +166,6 @@ test_that("preComputed returns correct value", {
     nrow() |>
     expect_equal(0)
 
-  covariates |> dplyr::filter(sumValue > cohortSubjects) |> print(n = Inf)
-
   # measurements: binary and aggregated categorical should have the same sumValue
   covBinaryMeasurements <- covariates |>
     dplyr::filter(analysisId == 165 & is.na(categoryId)) |>

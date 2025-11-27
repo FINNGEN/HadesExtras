@@ -21,4 +21,4 @@ renv.lock
 docs
 .RData
 
-covariatesAndromeda.zip
+*.zip

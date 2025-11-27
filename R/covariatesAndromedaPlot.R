@@ -1,84 +1,124 @@
-plotCovariatesTestsAndromeda <- function(covariatesTestsAndromeda) {
+plotCovariatesTestsAndromeda <- function(covariatesTestsAndromeda, comparisonIds = NULL, conceptIds = NULL) {
+    #
+    # Validate input
+    #
     covariatesTestsAndromeda |> checkmate::assertClass("Andromeda")
     covariatesTestsAndromeda |>
         names() |>
-        checkmate::assertSubset(c("analysisRef", "caseControl", "cohortCounts", "conceptRef", "covariates", "covariatesContinuous", "statisticalTests"))
+        checkmate::assertSubset(c("analysisRef", "comparisons", "cohortCounts", "conceptRef", "covariates", "covariatesContinuous", "statisticalTests"))
 
+    if (!is.null(comparisonIds)) {
+        comparisonIds |> checkmate::assertSubset(covariatesTestsAndromeda$comparisons |> dplyr::pull(comparisonId))
+        comparisons <- covariatesTestsAndromeda$comparisons |>
+            dplyr::filter(comparisonId %in% comparisonIds)
+    } else {
+        comparisons <- covariatesTestsAndromeda$comparisons
+    }
+
+    if (!is.null(conceptIds)) {
+        conceptIds |> checkmate::assertSubset(covariatesTestsAndromeda$conceptRef |> dplyr::pull(conceptId))
+        covariates <- covariatesTestsAndromeda$covariates |>
+            dplyr::filter(conceptId %in% conceptIds)
+        covariatesContinuous <- covariatesTestsAndromeda$covariatesContinuous |>
+            dplyr::filter(conceptId %in% conceptIds)
+    } else {
+        covariates <- covariatesTestsAndromeda$covariates
+        covariatesContinuous <- covariatesTestsAndromeda$covariatesContinuous
+    }
+
+
+    #
+    # Function
+    #
 
     # Extract binary covariates
-    binaryCovariatesTible <- covariatesTestsAndromeda$analysisRef |>
+    analysisCaseControl <- covariatesTestsAndromeda$analysisRef |>
         dplyr::filter(analysisType == "Binary") |>
         dplyr::select(analysisId) |>
-        dplyr::cross_join(covariatesTestsAndromeda$caseControl) |>
-        dplyr::inner_join(covariatesTestsAndromeda$covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |>
-        dplyr::left_join(covariatesTestsAndromeda$cohortCounts, by = c("caseCohortId" = "cohortId")) |>
-        dplyr::left_join(covariatesTestsAndromeda$covariates, by = c(
-            "analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId",
-            "conceptId" = "conceptId"
-        )) |>
-        dplyr::left_join(covariatesTestsAndromeda$cohortCounts, by = c("controlCohortId" = "cohortId")) |>
+        dplyr::cross_join(comparisons)
+
+    binaryCovariatesTible <- dplyr::full_join(
+        # Case
+        analysisCaseControl |>
+            dplyr::select(comparisonId, analysisId, caseCohortId, controlCohortId) |>
+            dplyr::inner_join(covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |>
+            dplyr::left_join(covariatesTestsAndromeda$cohortCounts, by = c("caseCohortId" = "cohortId")),
+        # Control
+        analysisCaseControl |>
+            dplyr::select(comparisonId, analysisId, caseCohortId, controlCohortId) |>
+            dplyr::inner_join(covariates, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")) |>
+            dplyr::left_join(covariatesTestsAndromeda$cohortCounts, by = c("controlCohortId" = "cohortId")),
+        #
+        by = c("comparisonId", "analysisId", "conceptId", "caseCohortId", "controlCohortId")
+    ) |>
         dplyr::transmute(
+            comparisonId = comparisonId,
             analysisId = analysisId,
+            unit = "",
             caseCohortId = caseCohortId,
             controlCohortId = controlCohortId,
             conceptId = conceptId,
-            nCasesYes = sumValue.x,
-            nCasesNo = cohortSubjects.x - sumValue.x,
-            nControlsYes = sumValue.y,
-            nControlsNo = cohortSubjects.y - sumValue.y
+            sumValue.x = dplyr::if_else(is.na(sumValue.x), 0, sumValue.x),
+            sumValue.y = dplyr::if_else(is.na(sumValue.y), 0, sumValue.y),
+            cohortSubjects.x = cohortSubjects.x,
+            cohortSubjects.y = cohortSubjects.y
         ) |>
         dplyr::collect() |>
-        dplyr::group_by(analysisId, caseCohortId, controlCohortId, conceptId) |>
+        dplyr::group_by(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId) |>
         dplyr::summarize(
-            contingencyTable = list({
-                mat <- matrix(c(nCasesYes, nCasesNo, nControlsYes, nControlsNo), nrow = 2, byrow = TRUE)
-                colnames(mat) <- c("Yes", "No")
-                rownames(mat) <- c("cases", "controls")
-                mat
-            }),
+            contingencyTable = purrr::pmap(
+                .l = list(sumValue.x, cohortSubjects.x - sumValue.x, sumValue.y, cohortSubjects.y - sumValue.y),
+                .f = function(nCasesYes, nCasesNo, nControlsYes, nControlsNo) {
+                    mat <- matrix(c(nCasesYes, nCasesNo, nControlsYes, nControlsNo), nrow = 2, byrow = TRUE)
+                    colnames(mat) <- c("Yes", "No")
+                    rownames(mat) <- c("cases", "controls")
+                    mat
+                }
+            ),
             .groups = "drop"
         ) |>
+        #
         dplyr::mutate(
             n = purrr::map_chr(.x = contingencyTable, .f = ~ paste0(as.integer(.x[1, 1]), "<br>", as.integer(.x[2, 1]))),
             s = "",
             p = purrr::map_chr(.x = contingencyTable, .f = .createProportionBars)
-        )
+        ) |>
+        dplyr::select(-contingencyTable)
 
     # Extract categorical covariates
-    categoricalCovariatesTible <- covariatesTestsAndromeda$analysisRef |>
+    analysisCaseControl <- covariatesTestsAndromeda$analysisRef |>
         dplyr::filter(analysisType == "Categorical") |>
         dplyr::select(analysisId) |>
-        dplyr::cross_join(covariatesTestsAndromeda$caseControl) |>
-        dplyr::inner_join(covariatesTestsAndromeda$covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |>
-        dplyr::left_join(covariatesTestsAndromeda$covariates, by = c(
-            "analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId",
-            "conceptId" = "conceptId"
-        )) |>
-        dplyr::filter(
-            categoryId.x == categoryId.y |
-                is.na(categoryId.x) & !is.na(categoryId.y) |
-                !is.na(categoryId.x) & is.na(categoryId.y)
-        ) |>
-        dplyr::mutate(
-            categoryId = dplyr::if_else(is.na(categoryId.x), categoryId.y, categoryId.x),
-            sumValue.x = dplyr::if_else(is.na(sumValue.x), 0, sumValue.x),
-            sumValue.y = dplyr::if_else(is.na(sumValue.y), 0, sumValue.y)
-        ) |>
+        dplyr::cross_join(comparisons)
+
+    categoricalCovariatesTible <- dplyr::full_join(
+        # Case
+        analysisCaseControl |>
+            dplyr::select(comparisonId, analysisId, caseCohortId, controlCohortId) |>
+            dplyr::inner_join(covariates, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")),
+        # Control
+        analysisCaseControl |>
+            dplyr::select(comparisonId, analysisId, caseCohortId, controlCohortId) |>
+            dplyr::inner_join(covariates, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")),
+        #
+        by = c("comparisonId", "analysisId", "conceptId", "categoryId", "caseCohortId", "controlCohortId")
+    ) |>
         dplyr::transmute(
+            comparisonId = comparisonId,
             analysisId = analysisId,
+            unit = "",
             caseCohortId = caseCohortId,
             controlCohortId = controlCohortId,
             conceptId = conceptId,
             categoryId = categoryId,
-            sumValue.x = sumValue.x,
-            sumValue.y = sumValue.y
+            sumValue.x = dplyr::if_else(is.na(sumValue.x), 0, sumValue.x),
+            sumValue.y = dplyr::if_else(is.na(sumValue.y), 0, sumValue.y)
         ) |>
         dplyr::collect() |>
-        dplyr::group_by(analysisId, caseCohortId, controlCohortId, conceptId) |>
+        dplyr::group_by(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId) |>
         dplyr::summarize(
             contingencyTable = list({
-                # Create matrix with cases and controls as rows, categories as columns
-                mat <- rbind(sumValue.x, sumValue.y)
+                mat <- matrix(c(sumValue.x, sumValue.y), nrow = 2, byrow = TRUE)
                 colnames(mat) <- as.character(categoryId)
                 rownames(mat) <- c("cases", "controls")
                 if (ncol(mat) == 1) {
@@ -100,17 +140,31 @@ plotCovariatesTestsAndromeda <- function(covariatesTestsAndromeda) {
             }),
             s = "",
             p = purrr::map_chr(.x = contingencyTable, .f = .createProportionBarsTableN)
-        )
+        ) |>
+        dplyr::select(-contingencyTable)
 
     # Extract counts covariates
-    countsCovariatesTible <- covariatesTestsAndromeda$analysisRef |>
+    analysisCaseControl <- covariatesTestsAndromeda$analysisRef |>
         dplyr::filter(analysisType %in% c("Counts", "Continuous", "AgeFirstEvent", "DaysToFirstEvent")) |>
         dplyr::select(analysisId) |>
-        dplyr::cross_join(covariatesTestsAndromeda$caseControl) |>
-        dplyr::inner_join(covariatesTestsAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")) |> 
-        dplyr::left_join(covariatesTestsAndromeda$covariatesContinuous, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId", "conceptId" = "conceptId")) |> count()
+        dplyr::cross_join(comparisons)
+
+    continuousCovariatesTible <- dplyr::full_join(
+        # Case
+        analysisCaseControl |>
+            dplyr::select(comparisonId, analysisId, caseCohortId, controlCohortId) |>
+            dplyr::inner_join(covariatesContinuous, by = c("analysisId" = "analysisId", "caseCohortId" = "cohortDefinitionId")),
+        # Control
+        analysisCaseControl |>
+            dplyr::select(comparisonId, analysisId, caseCohortId, controlCohortId) |>
+            dplyr::inner_join(covariatesContinuous, by = c("analysisId" = "analysisId", "controlCohortId" = "cohortDefinitionId")),
+        #
+        by = c("comparisonId", "analysisId", "conceptId", "unit", "caseCohortId", "controlCohortId")
+    ) |>
         dplyr::transmute(
+            comparisonId = comparisonId,
             analysisId = analysisId,
+            unit = unit,
             caseCohortId = caseCohortId,
             controlCohortId = controlCohortId,
             conceptId = conceptId,
@@ -138,50 +192,67 @@ plotCovariatesTestsAndromeda <- function(covariatesTestsAndromeda) {
             p90ValueControls = dplyr::if_else(is.na(p90Value.y), 0, p90Value.y)
         ) |>
         dplyr::collect() |>
-        dplyr::group_by(analysisId, caseCohortId, controlCohortId, conceptId) |>
+        dplyr::group_by(comparisonId, analysisId, unit, caseCohortId, controlCohortId, conceptId) |>
         dplyr::summarize(
             n = paste0(as.integer(nCasesYesWithValue), "<br>", as.integer(nControlsYesWithValue)),
             s = paste0(round(meanValueCases, 2), " (", round(sdValueCases, 2), ")", "<br>", round(meanValueControls, 2), " (", round(sdValueControls, 2), ")"),
-            p = dplyr::if_else(analysisId > 650,
-                purrr::pmap_chr(
+            p = purrr::pmap_chr(
                     .l = list(
                         medianValueCases, medianValueControls, p10ValueCases, p10ValueControls,
                         p25ValueCases, p25ValueControls, p75ValueCases, p75ValueControls,
                         p90ValueCases, p90ValueControls
                     ),
                     .f = .createBoxplot
-                ), ""
-            ),
+                ), 
             .groups = "drop"
         )
 
     # Merge the three tibbles
-    tibble <- dplyr::bind_rows(binaryCovariatesTible, categoricalCovariatesTible, countsCovariatesTible)
-
-    countsCovariatesTible|> 
+    tibble <- dplyr::bind_rows(binaryCovariatesTible, categoricalCovariatesTible, continuousCovariatesTible)
+    browser()
+    toPrintTible <- tibble |>
         dplyr::left_join(
             covariatesTestsAndromeda$statisticalTests |> dplyr::collect(),
-            by = c("analysisId", "caseCohortId", "controlCohortId", "conceptId")
+            by = c("comparisonId", "analysisId", "unit", "caseCohortId", "controlCohortId", "conceptId")
         ) |>
-        dplyr::select( -caseCohortId, -controlCohortId) |>
+        dplyr::select(-comparisonId, -caseCohortId, -controlCohortId) |>
         dplyr::left_join(
-            covariatesTestsAndromeda$analysisRef |> dplyr::select(analysisId, analysisType) |> dplyr::collect(),
+            covariatesTestsAndromeda$analysisRef |> dplyr::select(analysisId, analysisType, domainId) |> dplyr::collect(),
             by = c("analysisId" = "analysisId")
         ) |>
-        dplyr::select(-analysisId) |> 
+        dplyr::select(-analysisId) |>
         dplyr::left_join(
             covariatesTestsAndromeda$conceptRef |> dplyr::select(conceptId, conceptName, conceptCode) |> dplyr::collect(),
             by = c("conceptId" = "conceptId")
         ) |>
-        dplyr::select(-conceptId) 
+        dplyr::transmute(
+            info = paste0(conceptName, "<br>", conceptCode, "<br>", domainId, "<br>", conceptId),
+            analysisType = analysisType,
+            n = n,
+            s = s,
+            p = p,
+            mpLog10 = -log10(pValue) |> round(2),
+            effectSize = effectSize |> round(2),
+            standarizeMeanDifference = standarizeMeanDifference |> round(2),
+            testName = testName
+        )
 
     table <- reactable::reactable(
-        countsCovariatesTible,
+        toPrintTible,
         columns = list(
+            info = reactable::colDef(
+                html = TRUE, 
+                minWidth = 300
+            ),
             n = reactable::colDef(html = TRUE),
             s = reactable::colDef(html = TRUE),
             p = reactable::colDef(html = TRUE)
-        )
+        ),
+        filterable = TRUE,
+        searchable = TRUE, 
+        resizable = TRUE, 
+        groupBy = c("info"),
+        defaultExpanded = TRUE
     )
 
     # Save to temporary HTML file and open in browser
