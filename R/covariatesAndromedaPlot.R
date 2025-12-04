@@ -209,7 +209,7 @@ plotCovariatesTestsAndromeda <- function(covariatesTestsAndromeda, comparisonIds
 
     # Merge the three tibbles
     tibble <- dplyr::bind_rows(binaryCovariatesTible, categoricalCovariatesTible, continuousCovariatesTible)
-    browser()
+    
     toPrintTible <- tibble |>
         dplyr::left_join(
             covariatesTestsAndromeda$statisticalTests |> dplyr::collect(),
@@ -244,9 +244,17 @@ plotCovariatesTestsAndromeda <- function(covariatesTestsAndromeda, comparisonIds
                 html = TRUE, 
                 minWidth = 300
             ),
-            n = reactable::colDef(html = TRUE),
-            s = reactable::colDef(html = TRUE),
-            p = reactable::colDef(html = TRUE)
+            n = reactable::colDef(
+                name = "n Cases <br> n Controls",
+                html = TRUE
+            ),
+            s = reactable::colDef(
+                name = "Mean (SD) Cases <br> Mean (SD) Controls",
+                html = TRUE),
+            p = reactable::colDef(
+                name = "Distribution Cases<br>Distribution Controls",
+                html = TRUE
+            )
         ),
         filterable = TRUE,
         searchable = TRUE, 

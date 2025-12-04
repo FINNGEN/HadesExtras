@@ -76,3 +76,17 @@ if (testingDatabase |> stringr::str_starts("AtlasDevelopment")) {
 #
 message("************* Testing on: ")
 message("Database: ", testingDatabase)
+
+
+
+connectionDetails <- DatabaseConnector::createDbiConnectionDetails(
+  dbms = "bigquery",
+  drv = bigrquery::bigquery(),
+  project = "atlas-development-270609",
+  billing = "atlas-development-270609",
+  bigint = "integer64"
+)
+
+connection <- DatabaseConnector::connect(connectionDetails)
+
+dplyr::tbl(connection, "atlas-development-270609.sandbox.code_counts") |> dplyr::collect()

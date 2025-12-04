@@ -137,6 +137,6 @@ SELECT DISTINCT
     pcac.aggregated_value_unit AS aggregated_value_unit,
     pcac.aggregated_category AS aggregated_category
 FROM @resultsDatabaseSchema.@personCodeAtomicCountsTable AS pcac
-WHERE pcac.concept_id != 0;
+WHERE pcac.concept_id != 0 AND pcac.domain_id = 'Measurement';
 
 DROP TABLE IF EXISTS @resultsDatabaseSchema.temp_concept_ancestor;

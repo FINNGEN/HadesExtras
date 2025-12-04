@@ -25,35 +25,6 @@ getListOfAnalysis <- function() {
 }
 
 
-getListOfPreComputedAnalysis <- function(
-  CDMdbHandler,
-  personCodeCountsTable = "person_code_counts"
-) {
-  #
-  # VALIDATE
-  #
-  CDMdbHandler |> checkmate::assertClass("CDMdbHandler")
-  personCodeCountsTable |> checkmate::assertString()
-  connection <- CDMdbHandler$connectionHandler$getConnection()
-  resultsDatabaseSchema <- CDMdbHandler$resultsDatabaseSchema
-
-  #
-  # FUNCTION
-  #
-  sql <- "SELECT DISTINCT analysis_group, concept_class_id FROM @resultsDatabaseSchema.@personCodeCountsTable"
-  preComputedAnalysis <- DatabaseConnector::renderTranslateQuerySql(
-    connection = connection,
-    sql = sql,
-    resultsDatabaseSchema = resultsDatabaseSchema,
-    personCodeCountsTable = personCodeCountsTable, 
-    snakeCaseToCamelCase = TRUE
-  ) |> 
-    dplyr::tibble()
-
-  return(preComputedAnalysis)
-}
-
-
 #' Create Temporal Covariate Settings From List
 #'
 #' This function creates temporal covariate settings based on a list of analysis IDs, temporal start days, and temporal end days.

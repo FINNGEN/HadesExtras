@@ -9,3 +9,11 @@ test_that("plotStatisticalTests returns a ggplot object", {
   expect_true(is.reactable(covariates_reactable))
 })
 
+
+
+
+covariatesTestsAndromeda$covariates |> 
+filter(conceptId == 201826) |> 
+left_join(covariatesTestsAndromeda$analysisRef, by = c("analysisId" = "analysisId")) |> 
+collect() |> 
+View()
