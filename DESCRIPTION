@@ -43,7 +43,8 @@ Imports:
     Andromeda
 Remotes: 
     OHDSI/ROhdsiWebApi,
-    javier-gracia-tabuenca-tuni/DatabaseConnector@bigquery-DBI-2
+    javier-gracia-tabuenca-tuni/DatabaseConnector@bigquery-DBI-2,
+    OHDSI/CohortGenerator@v0.12.2
 Suggests: 
     devtools,
     ROhdsiWebApi,
