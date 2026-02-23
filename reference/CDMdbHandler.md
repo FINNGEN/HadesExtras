@@ -70,6 +70,8 @@ A class for handling CDM database connections and operations
 
 - [`CDMdbHandler$loadConnection()`](#method-CDMdbHandler-loadConnection)
 
+- [`CDMdbHandler$closeConnection()`](#method-CDMdbHandler-closeConnection)
+
 - [`CDMdbHandler$clone()`](#method-CDMdbHandler-clone)
 
 ------------------------------------------------------------------------
@@ -133,7 +135,7 @@ Returns the results database schema name.
 ### Method `loadConnection()`
 
 Updates the connection status by checking the database connection,
-vocabulary database schema, and CDM database schema.
+vocabulary database schema, and CDM database schema. Close Connection
 
 #### Usage
 
@@ -144,6 +146,17 @@ vocabulary database schema, and CDM database schema.
 - `loadConnectionChecksLevel`:
 
   Level of connection checks to perform
+
+------------------------------------------------------------------------
+
+### Method `closeConnection()`
+
+Explicitly closes the database connection. This method should be called
+when you're done with the CDMdbHandler to properly clean up resources.
+
+#### Usage
+
+    CDMdbHandler$closeConnection()
 
 ------------------------------------------------------------------------
 

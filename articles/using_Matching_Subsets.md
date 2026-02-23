@@ -26,7 +26,7 @@ if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
 # Get the path to the Eunomia database
 pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
 #> attempting to download GiBleed
-#> attempting to extract and load: /tmp/RtmpM6JzVm/GiBleed_5.3.zip to: /tmp/RtmpM6JzVm/GiBleed_5.3.sqlite
+#> attempting to extract and load: /tmp/RtmpbP71TN/GiBleed_5.3.zip to: /tmp/RtmpbP71TN/GiBleed_5.3.sqlite
 ```
 
 ## Configuration
@@ -66,7 +66,7 @@ As in `CDMHandled`, to create a `CohortTableHandles`, for convenience
 ``` r
 cohortTableHandler <- createCohortTableHandlerFromList(config)
 #> Connecting using SQLite driver
-#> Inserting data took 0.00838 secs
+#> Inserting data took 0.00886 secs
 #> Creating cohort tables
 #> - Created table main.test_cohort_table
 #> - Created table main.test_cohort_table
@@ -75,7 +75,8 @@ cohortTableHandler <- createCohortTableHandlerFromList(config)
 #> - Created table main.test_cohort_table_inclusion_stats
 #> - Created table main.test_cohort_table_summary_stats
 #> - Created table main.test_cohort_table_censor_stats
-#> Creating cohort tables took 0.04secs
+#> - Created table main.test_cohort_table_checksum
+#> Creating cohort tables took 0.08secs
 ```
 
 In addition to the checks performed by `CDMHandled`,
@@ -116,7 +117,7 @@ cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
 ``` r
 # Match to sex and bday, match ratio 10
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
-    name = "",
+    name = "test",
     definitionId = 20,
     subsetOperators = list(
       createMatchingSubset(
@@ -138,30 +139,31 @@ cohortDefinitionSetWithSubsetDef <- cohortDefinitionSet |>
   CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 20)
 
 cohortDefinitionSetWithSubsetDef |>  tibble::as_tibble() |> dplyr::select(-sql, -json)
-#> # A tibble: 3 × 5
-#>   cohortId cohortName                   subsetParent isSubset subsetDefinitionId
-#>      <dbl> <chr>                               <dbl> <lgl>                 <dbl>
-#> 1       10 Matching cases                         10 FALSE                    NA
-#> 2       20 Matching controls                      20 FALSE                    NA
-#> 3    20020 Matching controls -  Match …           20 TRUE                     20
+#> # A tibble: 3 × 6
+#>   cohortId cohortName subsetParent isSubset isTemplatedCohort subsetDefinitionId
+#>      <dbl> <chr>             <dbl> <lgl>    <lgl>                          <dbl>
+#> 1       10 Matching …           10 FALSE    FALSE                             NA
+#> 2       20 Matching …           20 FALSE    FALSE                             NA
+#> 3    20020 Matching …           20 TRUE     FALSE                             20
 ```
 
 Build cohorts
 
 ``` r
 cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef )
+#> Skipping cohorts already generated:  
 #> Initiating cluster consisting only of main thread
 #> 1/3- Generating cohort: Matching cases (id = 10)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00715 secs
+#> Executing SQL took 0.00575 secs
 #> 2/3- Generating cohort: Matching controls (id = 20)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00576 secs
-#> 3/3- Generating cohort: Matching controls -  Match to cohort 10 by sex and birth year with ratio 1:10 (id = 20020)
+#> Executing SQL took 0.00552 secs
+#> 3/3- Generating cohort: Matching controls - test (id = 20020)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  10%  |                                                                              |==============                                                        |  20%  |                                                                              |=====================                                                 |  30%  |                                                                              |============================                                          |  40%  |                                                                              |===================================                                   |  50%  |                                                                              |==========================================                            |  60%  |                                                                              |=================================================                     |  70%  |                                                                              |========================================================              |  80%  |                                                                              |===============================================================       |  90%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0124 secs
-#> Generating cohort set took 0.12 secs
-#> getCohortDemograpics took 0.101 secs
+#> Executing SQL took 0.00935 secs
+#> Generating cohort set took 0.24 secs
+#> getCohortDemograpics took 0.0814 secs
 ```
 
 ``` r

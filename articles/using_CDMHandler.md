@@ -16,7 +16,7 @@ if (dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER")) == FALSE) {
 # Get the path to the Eunomia database
 pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
 #> attempting to download GiBleed
-#> attempting to extract and load: /tmp/RtmpeBIox9/GiBleed_5.3.zip to: /tmp/RtmpeBIox9/GiBleed_5.3.sqlite
+#> attempting to extract and load: /tmp/RtmprYflSA/GiBleed_5.3.zip to: /tmp/RtmprYflSA/GiBleed_5.3.sqlite
 ```
 
 ## Configuration
@@ -78,7 +78,7 @@ Or for convenience `createCDMdbHandlerFromList` can be used.
 ``` r
 CDMdb <- createCDMdbHandlerFromList(config)
 #> Connecting using SQLite driver
-#> Inserting data took 0.00817 secs
+#> Inserting data took 0.00845 secs
 ```
 
 First thing to do is to check the status of the connection.

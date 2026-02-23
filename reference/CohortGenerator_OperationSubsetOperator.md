@@ -30,6 +30,7 @@ Inherited methods
 - [`CohortGenerator::SubsetOperator$getQueryBuilder()`](https://ohdsi.github.io/CohortGenerator/reference/SubsetOperator.html#method-getQueryBuilder)
 - [`CohortGenerator::SubsetOperator$initialize()`](https://ohdsi.github.io/CohortGenerator/reference/SubsetOperator.html#method-initialize)
 - [`CohortGenerator::SubsetOperator$isEqualTo()`](https://ohdsi.github.io/CohortGenerator/reference/SubsetOperator.html#method-isEqualTo)
+- [`CohortGenerator::SubsetOperator$print()`](https://ohdsi.github.io/CohortGenerator/reference/SubsetOperator.html#method-print)
 - [`CohortGenerator::SubsetOperator$publicFields()`](https://ohdsi.github.io/CohortGenerator/reference/SubsetOperator.html#method-publicFields)
 - [`CohortGenerator::SubsetOperator$toJSON()`](https://ohdsi.github.io/CohortGenerator/reference/SubsetOperator.html#method-toJSON)
 

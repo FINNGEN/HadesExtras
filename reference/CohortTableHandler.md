@@ -8,6 +8,12 @@ CDMdbHandler.
 [`HadesExtras::CDMdbHandler`](https://finngen.github.io/HadesExtras/reference/CDMdbHandler.md)
 -\> `CohortTableHandler`
 
+## Public fields
+
+- `incrementalFolder`:
+
+  Path to folder for incremental operations
+
 ## Active bindings
 
 - `cohortDatabaseSchema`:
@@ -69,6 +75,8 @@ CDMdbHandler.
 - [`CohortTableHandler$getSexFisherTest()`](#method-CohortTableHandler-getSexFisherTest)
 
 - [`CohortTableHandler$getYearOfBirthTests()`](#method-CohortTableHandler-getYearOfBirthTests)
+
+- [`CohortTableHandler$closeConnection()`](#method-CohortTableHandler-closeConnection)
 
 - [`CohortTableHandler$clone()`](#method-CohortTableHandler-clone)
 
@@ -451,6 +459,20 @@ births in the two cohorts have similar distribution.
 a list with with three members ttestResult (R htest object),
 kstestResult (R htest object), cohend result (list of meanInCases,
 meanInControls, pooledsd, and cohend)
+
+Close Connection
+
+------------------------------------------------------------------------
+
+### Method `closeConnection()`
+
+Closes the database connection and cleans up cohort-specific resources.
+This method extends the parent closeConnection to also drop cohort stats
+tables.
+
+#### Usage
+
+    CohortTableHandler$closeConnection()
 
 ------------------------------------------------------------------------
 

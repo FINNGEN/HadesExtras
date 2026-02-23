@@ -10,8 +10,7 @@ CohortGenerator_deleteCohortFromCohortTable(
   connection = NULL,
   cohortDatabaseSchema,
   cohortTableNames,
-  cohortIds,
-  incrementalFolder = NULL
+  cohortIds
 )
 ```
 
@@ -36,10 +35,6 @@ CohortGenerator_deleteCohortFromCohortTable(
 - cohortIds:
 
   Numeric vector of cohort IDs to be deleted.
-
-- incrementalFolder:
-
-  The folder where the incremental file is stored (optional).
 
 ## Value
 

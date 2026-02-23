@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">HadesExtras</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,9 +54,9 @@
 
 
 
-<script src="using_CDMHandler_files/core-js-2.5.3/shim.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react-dom.min.js"></script><script src="using_CDMHandler_files/reactwidget-2.0.0/react-tools.js"></script><link href="using_CDMHandler_files/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
-<script src="using_CDMHandler_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="using_CDMHandler_files/reactable-0.4.4/reactable.css" rel="stylesheet">
-<script src="using_CDMHandler_files/reactable-binding-0.4.4/reactable.js"></script><div class="row">
+<script src="using_CDMHandler_files/core-js-2.5.3/shim.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react.min.js"></script><script src="using_CDMHandler_files/react-18.2.0/react-dom.min.js"></script><script src="using_CDMHandler_files/reactwidget-2.0.0/react-tools.js"></script><link href="using_CDMHandler_files/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="using_CDMHandler_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="using_CDMHandler_files/reactable-0.4.5/reactable.css" rel="stylesheet">
+<script src="using_CDMHandler_files/reactable-binding-0.4.5/reactable.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Using CDMHandler</h1>
@@ -83,7 +83,7 @@
 <span><span class="co"># Get the path to the Eunomia database</span></span>
 <span><span class="va">pathToGiBleedEunomiaSqlite</span> <span class="op">&lt;-</span> <span class="fu">Eunomia</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/Eunomia/reference/getDatabaseFile.html" class="external-link">getDatabaseFile</a></span><span class="op">(</span><span class="st">"GiBleed"</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; attempting to download GiBleed</span></span>
-<span><span class="co">#&gt; attempting to extract and load: /tmp/RtmpeBIox9/GiBleed_5.3.zip to: /tmp/RtmpeBIox9/GiBleed_5.3.sqlite</span></span></code></pre></div>
+<span><span class="co">#&gt; attempting to extract and load: /tmp/RtmprYflSA/GiBleed_5.3.zip to: /tmp/RtmprYflSA/GiBleed_5.3.sqlite</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a>
@@ -139,7 +139,7 @@ used.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">CDMdb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCDMdbHandlerFromList.html">createCDMdbHandlerFromList</a></span><span class="op">(</span><span class="va">config</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Connecting using SQLite driver</span></span>
-<span><span class="co">#&gt; Inserting data took 0.00817 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Inserting data took 0.00845 secs</span></span></code></pre></div>
 <p>First thing to do is to check the status of the connection.
 <code>CDMdb$connectionStatusLog</code> not only shows if the connection
 is correct, but also if the <code>tempEmulationSchema</code> works, and
@@ -203,7 +203,7 @@ interactive table with this information.</p>
 <span><span class="co">#&gt; Note: method with signature 'DBIConnection#SQL' chosen for function 'dbQuoteIdentifier',</span></span>
 <span><span class="co">#&gt;  target signature 'DatabaseConnectorDbiConnection#SQL'.</span></span>
 <span><span class="co">#&gt;  "DatabaseConnectorConnection#character" would also be valid</span></span></code></pre></div>
-<p><img src="using_CDMHandler_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" width="700"></p>
+<p><img src="using_CDMHandler_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

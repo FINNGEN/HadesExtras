@@ -22,8 +22,7 @@ CohortGenerator_generateCohortSet(
   cohortTableNames = CohortGenerator::getCohortTableNames(),
   cohortDefinitionSet = NULL,
   stopOnError = TRUE,
-  incremental = FALSE,
-  incrementalFolder = NULL
+  incremental = FALSE
 )
 ```
 
@@ -62,10 +61,6 @@ CohortGenerator_generateCohortSet(
   as in CohortGenerator::generateCohortSet.
 
 - incremental:
-
-  as in CohortGenerator::generateCohortSet.
-
-- incrementalFolder:
 
   as in CohortGenerator::generateCohortSet.
 
