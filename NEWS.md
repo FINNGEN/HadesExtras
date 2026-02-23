@@ -1,3 +1,6 @@
+# HadesExtras 2.1.1
+- Updated to work with CohortGenerator v1
+
 # HadesExtras 2.1.0
 - CohortTableHandler automatically creates a default short name for the cohorts
 

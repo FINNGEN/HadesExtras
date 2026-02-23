@@ -10,6 +10,13 @@ Inherits from CDMdbHandler.
 \section{Super class}{
 \code{\link[HadesExtras:CDMdbHandler]{HadesExtras::CDMdbHandler}} -> \code{CohortTableHandler}
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{incrementalFolder}}{Path to folder for incremental operations}
+}
+\if{html}{\out{</div>}}
+}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
@@ -46,6 +53,7 @@ Inherits from CDMdbHandler.
 \item \href{#method-CohortTableHandler-getNumberOfOverlappingSubjects}{\code{CohortTableHandler$getNumberOfOverlappingSubjects()}}
 \item \href{#method-CohortTableHandler-getSexFisherTest}{\code{CohortTableHandler$getSexFisherTest()}}
 \item \href{#method-CohortTableHandler-getYearOfBirthTests}{\code{CohortTableHandler$getYearOfBirthTests()}}
+\item \href{#method-CohortTableHandler-closeConnection}{\code{CohortTableHandler$closeConnection()}}
 \item \href{#method-CohortTableHandler-clone}{\code{CohortTableHandler$clone()}}
 }
 }
@@ -377,7 +385,20 @@ to evaluate if year of births in the two cohorts have similar distribution.
 }
 \subsection{Returns}{
 a list with with three members ttestResult (R htest object), kstestResult (R htest object), cohend result (list of meanInCases, meanInControls, pooledsd, and cohend)
+
+Close Connection
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CohortTableHandler-closeConnection"></a>}}
+\if{latex}{\out{\hypertarget{method-CohortTableHandler-closeConnection}{}}}
+\subsection{Method \code{closeConnection()}}{
+Closes the database connection and cleans up cohort-specific resources.
+This method extends the parent closeConnection to also drop cohort stats tables.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CohortTableHandler$closeConnection()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CohortTableHandler-clone"></a>}}

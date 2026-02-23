@@ -1,5 +1,5 @@
 test_that("reactable_connectionStatus works", {
-  log <- HadesExtras::LogTibble$new()
+  log <- LogTibble$new()
   log$INFO("step 1", "example info")
   log$WARNING("step 2", "example warning")
   log$ERROR("step 3", "example error")

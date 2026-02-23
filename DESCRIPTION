@@ -1,10 +1,11 @@
 Package: HadesExtras
 Title: HadesExtras
-Version: 2.1.0
+Version: 2.1.1
 Authors@R: 
     person("Javier", "Gracia-Tabuenca", , "javier.graciatabuenca@tuni.fi", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2455-0598"))
-Description: Functions to complement Hades packages
+Description: Provides additional functions to complement Hades packages for 
+    observational health data analysis
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
@@ -43,7 +44,6 @@ Imports:
     Andromeda
 Remotes: 
     OHDSI/ROhdsiWebApi,
-    OHDSI/CohortGenerator@v0.11.2,
     javier-gracia-tabuenca-tuni/DatabaseConnector@bigquery-DBI-2
 Suggests: 
     devtools,
@@ -53,7 +53,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     here,
-    yaml, 
     usethis,
     withr,
     spelling,
