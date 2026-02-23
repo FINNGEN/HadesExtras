@@ -44,12 +44,7 @@ CDMdbHandler <- R6::R6Class(
     .CDMInfo = NULL,
     #
     .getTblVocabularySchema = NULL,
-    .getTblCDMSchema = NULL,
-    
-    # Finalize method - closes the connection if active
-    finalize = function() {
-      private$.connectionHandler$closeConnection()
-    }
+    .getTblCDMSchema = NULL
   ),
   active = list(
     databaseId = function() {
@@ -312,6 +307,17 @@ CDMdbHandler <- R6::R6Class(
       private$.connectionStatusLog <- connectionStatusLog
       private$.getTblVocabularySchema <- getTblVocabularySchema
       private$.getTblCDMSchema <- getTblCDMSchema
+    },
+    
+    #' Close Connection
+    #' @description
+    #' Explicitly closes the database connection. This method should be called
+    #' when you're done with the CDMdbHandler to properly clean up resources.
+    closeConnection = function() {
+      if (!is.null(private$.connectionHandler)) {
+        private$.connectionHandler$closeConnection()
+      }
+      invisible(self)
     }
   )
 )

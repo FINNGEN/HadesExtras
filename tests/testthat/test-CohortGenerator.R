@@ -4,6 +4,7 @@
 test_that("CohortGenerator_createCohortTables creates a cohort table", {
   testthat::skip_if_not(testingDatabase |> stringr::str_starts("AtlasDevelopment"))
 
+  test_cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig()
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
@@ -47,6 +48,7 @@ test_that("CohortGenerator_createCohortTables creates a cohort table", {
 # CohortGenerator_deleteCohortFromCohortTable
 #
 test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
+  test_cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig()
   connection <- helper_createNewConnection()
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
@@ -67,21 +69,13 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
     cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
-  if (interactive()) {
-    basePath <- here::here("inst/")
-    packageName <- NULL
-  } else {
-    basePath <- ""
-    packageName <- "HadesExtras"
-  }
-
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
-    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
-    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
+    settingsFileName = helper_getTestDataPath("testdata/matching/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/matching/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = packageName,
+    packageName = NULL,
     verbose = FALSE
   )
 
@@ -91,10 +85,20 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
     cohortDatabaseSchema = cohortDatabaseSchema,
     cohortTableNames = getCohortTableNames(cohortTableName),
     cohortDefinitionSet = cohortDefinitionSet,
-    incremental = FALSE
+    incremental = TRUE
   )
 
   generatedCohorts$cohortId |> expect_equal(c(10, 20))
+
+  CohortGenerator::getLastGeneratedCohortChecksums(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName)
+  ) |> 
+    dplyr::pull(cohortDefinitionId) |> 
+    sort() |> 
+    expect_equal(c(10, 20))
+  
 
   resultDelete <- CohortGenerator_deleteCohortFromCohortTable(
     connection = connection,
@@ -112,6 +116,15 @@ test_that("CohortGenerator_deleteCohortFromCohortTable deletes a cohort", {
   )
 
   codeCounts$cohortId |> expect_equal(20)
+
+  CohortGenerator::getLastGeneratedCohortChecksums(
+    connection = connection,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName)
+  ) |> 
+    dplyr::pull(cohortDefinitionId) |> 
+    sort() |> 
+    expect_equal(20)
 })
 
 
@@ -159,7 +172,6 @@ test_that("cohortDataToCohortDefinitionSet works", {
   )
 
   # function
-  start_time <- Sys.time()
   cohortGeneratorResults <- CohortGenerator_generateCohortSet(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -168,8 +180,7 @@ test_that("cohortDataToCohortDefinitionSet works", {
     cohortTableNames = getCohortTableNames(cohortTableName),
     incremental = FALSE
   )
-  end_time <- Sys.time()
-  print(end_time - start_time)
+
   # expectations
   cohortGeneratorResults |> checkmate::expect_tibble()
   cohortGeneratorResults |>
@@ -494,19 +505,13 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
     cohortData = cohort_data
   )
 
-  incrementalFolder <- file.path(tempdir(), digest::digest(Sys.time()))
-  withr::defer({
-    unlink(incrementalFolder, recursive = TRUE)
-  })
-
   cohortGeneratorResults <- CohortGenerator_generateCohortSet(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortDatabaseSchema = cohortDatabaseSchema,
     cohortDefinitionSet = cohortDefinitionSet,
     cohortTableNames = getCohortTableNames(cohortTableName),
-    incremental = TRUE,
-    incrementalFolder = incrementalFolder
+    incremental = TRUE
   )
 
   # expectations first run
@@ -532,8 +537,7 @@ test_that("cohortDataToCohortDefinitionSet incremental mode do not create the tm
     cohortDatabaseSchema = cohortDatabaseSchema,
     cohortDefinitionSet = cohortDefinitionSet,
     cohortTableNames = getCohortTableNames(cohortTableName),
-    incremental = TRUE,
-    incrementalFolder = incrementalFolder
+    incremental = TRUE
   )
 
   # expectations firt run

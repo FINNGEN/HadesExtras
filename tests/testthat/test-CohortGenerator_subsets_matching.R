@@ -35,8 +35,9 @@ test_that("Matching subset naming and instantitation", {
 test_that("Matching Subset works", {
   connection <- helper_createNewConnection()
 
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig()
+  cohortDatabaseSchema <- cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   withr::defer({
@@ -55,21 +56,13 @@ test_that("Matching Subset works", {
     cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
-  if (interactive()) {
-    basePath <- here::here("inst/")
-    packageName <- NULL
-  } else {
-    basePath <- ""
-    packageName <- "HadesExtras"
-  }
-
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
-    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
-    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
+    settingsFileName = helper_getTestDataPath("testdata/matching/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/matching/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = packageName,
+    packageName = NULL,
     verbose = FALSE
   )
 
@@ -85,7 +78,7 @@ test_that("Matching Subset works", {
 
   # Match to sex only, match ratio 20
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
-    name = "",
+    name = "test",
     definitionId = 300,
     subsetOperators = list(
       createMatchingSubset(
@@ -127,8 +120,10 @@ test_that("Matching Subset works", {
 test_that("Matching Subset works for different parameters", {
   testthat::skip_if_not(testingDatabase |> stringr::str_starts("Eunomia"))
 
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
-  cdmDatabaseSchema <- test_cohortTableHandlerConfig$cdm$cdmDatabaseSchema
+  cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig()
+
+  cohortDatabaseSchema <- cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cdmDatabaseSchema <- cohortTableHandlerConfig$cdm$cdmDatabaseSchema
   cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
 
   connection <- helper_createNewConnection()
@@ -148,22 +143,13 @@ test_that("Matching Subset works for different parameters", {
     cohortTableNames = getCohortTableNames(cohortTableName)
   )
 
-  if (interactive()) {
-    basePath <- here::here("inst/")
-    packageName <- NULL
-  } else {
-    basePath <- ""
-    packageName <- "HadesExtras"
-  }
-
-
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
-    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
-    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
+    settingsFileName = helper_getTestDataPath("testdata/matching/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/matching/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = packageName,
+    packageName = NULL,
     verbose = FALSE
   )
 
@@ -179,7 +165,7 @@ test_that("Matching Subset works for different parameters", {
 
   # Match to sex only, match ratio 20
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
-    name = "",
+    name = "test",
     definitionId = 300,
     subsetOperators = list(
       createMatchingSubset(
@@ -219,7 +205,7 @@ test_that("Matching Subset works for different parameters", {
 
   # Match to sex and bday, match ratio 20
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
-    name = "",
+    name = "test",
     definitionId = 300,
     subsetOperators = list(
       createMatchingSubset(
@@ -261,7 +247,7 @@ test_that("Matching Subset works for different parameters", {
 
   # Match to sex and bday and start day with in observation, keep startday
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
-    name = "",
+    name = "test",
     definitionId = 300,
     subsetOperators = list(
       createMatchingSubset(

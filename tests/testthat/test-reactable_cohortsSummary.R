@@ -23,7 +23,7 @@ test_that("rectable_cohortsSummary works", {
       cohortEntries = dplyr::if_else(cohortId == 3, NA, cohortEntries),
       cohortSubjects = dplyr::if_else(cohortId == 3, NA, cohortSubjects)
     ) |>
-    HadesExtras::correctEmptyCohortsInCohortsSummary()
+    correctEmptyCohortsInCohortsSummary()
 
   # table -------------------------------------------------------------------
   reactableResult <- rectable_cohortsSummary(cohortsSummary) # ,  deleteButtonsShinyId = "test")

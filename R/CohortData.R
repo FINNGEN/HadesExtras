@@ -173,7 +173,12 @@ cohortDataToCohortDefinitionSet <- function(
   #
   # Function
   #
-  sqlToRender <- SqlRender::readSql(system.file("sql/sql_server/CohortDataToCohortDefinitionSet.sql", package = "HadesExtras", mustWork = TRUE))
+  sqlPath <- system.file("sql/sql_server/CohortDataToCohortDefinitionSet.sql", package = "HadesExtras")
+  if (sqlPath == "") {
+    # Fallback for development mode (devtools::load_all)
+    sqlPath <- file.path("inst", "sql", "sql_server", "CohortDataToCohortDefinitionSet.sql")
+  }
+  sqlToRender <- SqlRender::readSql(sqlPath)
 
   cohortDefinitionSet <- cohortData |>
     tidyr::nest(.key = "cohort", .by = c("cohort_name")) |>
@@ -281,7 +286,15 @@ getCohortDataFromCohortTable <- function(
 
   #
   # Function
-  sql <- SqlRender::readSql(system.file("sql/sql_server/GetCohortDataFromCohortTables.sql", package = "HadesExtras", mustWork = TRUE))
+  sqlPath <- system.file("sql/sql_server/GetCohortDataFromCohortTables.sql", package = "HadesExtras")
+  if (sqlPath == "") {
+    # Fallback for development mode (devtools::load_all)
+    sqlPath <- system.file("sql/sql_server/GetCohortDataFromCohortTables.sql", package = "HadesExtras", mustWork = FALSE)
+    if (sqlPath == "" || !file.exists(sqlPath)) {
+      sqlPath <- file.path("inst", "sql", "sql_server", "GetCohortDataFromCohortTables.sql")
+    }
+  }
+  sql <- SqlRender::readSql(sqlPath)
   cohortTable <- DatabaseConnector::renderTranslateQuerySql(
     connection = connection,
     sql = sql,

@@ -9,8 +9,7 @@ CohortGenerator_deleteCohortFromCohortTable(
   connection = NULL,
   cohortDatabaseSchema,
   cohortTableNames,
-  cohortIds,
-  incrementalFolder = NULL
+  cohortIds
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ CohortGenerator_deleteCohortFromCohortTable(
 \item{cohortTableNames}{A list containing the name of the cohort table.}
 
 \item{cohortIds}{Numeric vector of cohort IDs to be deleted.}
-
-\item{incrementalFolder}{The folder where the incremental file is stored (optional).}
 }
 \value{
 TRUE if the deletion was successful; otherwise, an error is raised.

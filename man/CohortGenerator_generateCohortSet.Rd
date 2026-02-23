@@ -13,8 +13,7 @@ CohortGenerator_generateCohortSet(
   cohortTableNames = CohortGenerator::getCohortTableNames(),
   cohortDefinitionSet = NULL,
   stopOnError = TRUE,
-  incremental = FALSE,
-  incrementalFolder = NULL
+  incremental = FALSE
 )
 }
 \arguments{
@@ -35,8 +34,6 @@ CohortGenerator_generateCohortSet(
 \item{stopOnError}{as in CohortGenerator::generateCohortSet.}
 
 \item{incremental}{as in CohortGenerator::generateCohortSet.}
-
-\item{incrementalFolder}{as in CohortGenerator::generateCohortSet.}
 }
 \value{
 results from CohortGenerator::generateCohortSet with additional column 'buildInfo'

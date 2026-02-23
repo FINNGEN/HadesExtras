@@ -96,7 +96,7 @@ testthat::test_that("test that .operationStringToBinaryTreeworks", {
 
 # operationStringToSQL
 # "1Ip2"
-testthat::test_that("test that operationStringToSQL works", {
+testthat::test_that("test that operationStringToSQL works 1Ip2", {
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
@@ -158,7 +158,7 @@ testthat::test_that("test that operationStringToSQL works", {
 
 
 # "1Mp2"
-testthat::test_that("test that operationStringToSQL works", {
+testthat::test_that("test that operationStringToSQL works 1Mp2", {
   connection <- helper_createNewConnection()
   
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
@@ -225,7 +225,7 @@ testthat::test_that("test that operationStringToSQL works", {
 
 
 # "1Ip2Mp3"
-testthat::test_that("test that operationStringToSQL works", {
+testthat::test_that("test that operationStringToSQL works 1Ip2Mp3", {
   connection <- helper_createNewConnection()
 
   cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
@@ -288,10 +288,12 @@ testthat::test_that("test that operationStringToSQL works", {
 
 
 # "1Upd2"
-testthat::test_that("test that operationStringToSQL works", {
+testthat::test_that("test that operationStringToSQL works 1Upd2", {
   connection <- helper_createNewConnection()
 
-  cohortDatabaseSchema <- test_cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
+  cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig()
+
+  cohortDatabaseSchema <- cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cohortTableName <- helper_tableNameWithTimestamp("test_operations_table")
 
   withr::defer({

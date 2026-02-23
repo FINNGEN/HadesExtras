@@ -113,7 +113,7 @@ cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
 ```{r}
 # Match to sex and bday, match ratio 10
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
-    name = "",
+    name = "test",
     definitionId = 20,
     subsetOperators = list(
       createMatchingSubset(

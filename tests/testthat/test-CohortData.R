@@ -162,21 +162,13 @@ test_that("getCohortDataFromCohortTable returns a cohort", {
     cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
-  if (interactive()) {
-    basePath <- here::here("inst/")
-    packageName <- NULL
-  } else {
-    basePath <- ""
-    packageName <- "HadesExtras"
-  }
-
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = paste0(basePath, "testdata/matching/Cohorts.csv"),
-    jsonFolder = paste0(basePath, "testdata/matching/cohorts"),
-    sqlFolder = paste0(basePath, "testdata/matching/sql/sql_server"),
+    settingsFileName = helper_getTestDataPath("testdata/matching/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/matching/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = packageName,
+    packageName = NULL,
     verbose = FALSE
   )
 
