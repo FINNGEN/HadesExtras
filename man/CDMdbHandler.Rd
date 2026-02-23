@@ -48,6 +48,7 @@ A class for handling CDM database connections and operations
 \itemize{
 \item \href{#method-CDMdbHandler-new}{\code{CDMdbHandler$new()}}
 \item \href{#method-CDMdbHandler-loadConnection}{\code{CDMdbHandler$loadConnection()}}
+\item \href{#method-CDMdbHandler-closeConnection}{\code{CDMdbHandler$closeConnection()}}
 \item \href{#method-CDMdbHandler-clone}{\code{CDMdbHandler$clone()}}
 }
 }
@@ -97,6 +98,7 @@ Reload connection}
 \if{latex}{\out{\hypertarget{method-CDMdbHandler-loadConnection}{}}}
 \subsection{Method \code{loadConnection()}}{
 Updates the connection status by checking the database connection, vocabulary database schema, and CDM database schema.
+Close Connection
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$loadConnection(loadConnectionChecksLevel)}\if{html}{\out{</div>}}
 }
@@ -108,6 +110,17 @@ Updates the connection status by checking the database connection, vocabulary da
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CDMdbHandler-closeConnection"></a>}}
+\if{latex}{\out{\hypertarget{method-CDMdbHandler-closeConnection}{}}}
+\subsection{Method \code{closeConnection()}}{
+Explicitly closes the database connection. This method should be called
+when you're done with the CDMdbHandler to properly clean up resources.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CDMdbHandler$closeConnection()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CDMdbHandler-clone"></a>}}

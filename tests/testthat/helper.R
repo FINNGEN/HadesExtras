@@ -104,6 +104,26 @@ helper_tableNameWithTimestamp <- function(tableName) {
   return(paste0(tableName, "_", as.character(as.numeric(format(Sys.time(), "%d%m%Y%H%M%OS2")) * 100)))
 }
 
+# Helper function to get test data paths that work in both devtools::test() and R CMD check
+helper_getTestDataPath <- function(relativePath) {
+  # Try system.file first (works during R CMD check when package is installed)
+  installedPath <- system.file(relativePath, package = "HadesExtras")
+  
+  if (installedPath != "" && file.exists(installedPath)) {
+    return(installedPath)
+  }
+  
+  # Fall back to here::here() for development (devtools::test() and devtools::load_all())
+  devPath <- here::here(file.path("inst", relativePath))
+  
+  if (file.exists(devPath)) {
+    return(devPath)
+  }
+  
+  # If neither works, return the dev path and let the caller handle the error
+  return(devPath)
+}
+
 helper_dropTable <-function(connection, cohortDatabaseSchema, cohortTableName) {
   DatabaseConnector::renderTranslateExecuteSql(
     connection = connection,

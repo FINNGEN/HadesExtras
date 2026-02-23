@@ -17,7 +17,6 @@
 #' @param cohortDefinitionSet as in CohortGenerator::generateCohortSet.
 #' @param stopOnError as in CohortGenerator::generateCohortSet.
 #' @param incremental as in CohortGenerator::generateCohortSet.
-#' @param incrementalFolder as in CohortGenerator::generateCohortSet.
 #'
 #' @returns results from CohortGenerator::generateCohortSet with additional column 'buildInfo'
 #'
@@ -290,7 +289,6 @@ CohortGenerator_generateCohortSet <- function(
 #' @param cohortDatabaseSchema The schema name of the cohort database.
 #' @param cohortTableNames A list containing the name of the cohort table.
 #' @param cohortIds Numeric vector of cohort IDs to be deleted.
-#' @param incrementalFolder The folder where the incremental file is stored (optional).
 #'
 #' @importFrom checkmate assertCharacter assertList assertNumeric
 #' @importFrom DatabaseConnector connect disconnect executeSql

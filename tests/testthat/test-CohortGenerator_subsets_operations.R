@@ -42,12 +42,12 @@ test_that("Operation Subset works", {
   )
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = "inst/testdata/matching/Cohorts.csv",
-    jsonFolder = "inst/testdata/matching/cohorts",
-    sqlFolder = "inst/testdata/matching/sql/sql_server",
+    settingsFileName = helper_getTestDataPath("testdata/matching/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/matching/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = NULL,
     verbose = FALSE
   )
 

@@ -10,12 +10,12 @@ test_that("Cohort fracture", {
   })
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = "inst/testdata/fracture/Cohorts.csv",
-    jsonFolder = "inst/testdata/fracture/cohorts",
-    sqlFolder = "inst/testdata/fracture/sql/sql_server",
+    settingsFileName = helper_getTestDataPath("testdata/fracture/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/fracture/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/fracture/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = NULL,
     verbose = FALSE
 )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -35,12 +35,12 @@ test_that("Cohort asthma", {
   })
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = "inst/testdata/asthma/Cohorts.csv",
-    jsonFolder = "inst/testdata/asthma/cohorts",
-    sqlFolder = "inst/testdata/asthma/sql/sql_server",
+    settingsFileName = helper_getTestDataPath("testdata/asthma/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/asthma/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/asthma/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = NULL,
     verbose = FALSE
 )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
@@ -60,12 +60,12 @@ test_that("Cohort matching", {
   })
 
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = "inst/testdata/matching/Cohorts.csv",
-    jsonFolder = "inst/testdata/matching/cohorts",
-    sqlFolder = "inst/testdata/matching/sql/sql_server",
+    settingsFileName = helper_getTestDataPath("testdata/matching/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/matching/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/matching/sql/sql_server"),
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = "HadesExtras",
+    packageName = NULL,
     verbose = FALSE
   )
   cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
