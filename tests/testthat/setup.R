@@ -10,9 +10,18 @@
 testingDatabase <- Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT")
 
 # check correct settings
-possibleDatabases <- c("Eunomia-GiBleed", "Eunomia-MIMIC", "Eunomia-FinnGen", "AtlasDevelopment-5k", "AtlasDevelopment-full")
+possibleDatabases <- c(
+  "Eunomia-GiBleed",
+  "Eunomia-MIMIC",
+  "Eunomia-FinnGen",
+  "AtlasDevelopment-5k",
+  "AtlasDevelopment-full"
+)
 if (!(testingDatabase %in% possibleDatabases)) {
-  message("Please set a valid testing environment in envar HADESEXTAS_TESTING_ENVIRONMENT, from: ", paste(possibleDatabases, collapse = ", "))
+  message(
+    "Please set a valid testing environment in envar HADESEXTAS_TESTING_ENVIRONMENT, from: ",
+    paste(possibleDatabases, collapse = ", ")
+  )
   stop()
 }
 
@@ -21,12 +30,20 @@ if (!(testingDatabase %in% possibleDatabases)) {
 #
 if (testingDatabase |> stringr::str_starts("Eunomia")) {
   if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
-    message("EUNOMIA_DATA_FOLDER not set. Please set this environment variable to the path of the Eunomia data folder.")
+    message(
+      "EUNOMIA_DATA_FOLDER not set. Please set this environment variable to the path of the Eunomia data folder."
+    )
     stop()
   }
 
-  pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
-  pathToMIMICEunomiaSqlite <- Eunomia::getDatabaseFile("MIMIC", overwrite = FALSE)
+  pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile(
+    "GiBleed",
+    overwrite = FALSE
+  )
+  pathToMIMICEunomiaSqlite <- Eunomia::getDatabaseFile(
+    "MIMIC",
+    overwrite = FALSE
+  )
 
   test_databasesConfig <- readAndParseYaml(
     pathToYalmFile = testthat::test_path("config", "databasesConfig.yml"),
@@ -36,13 +53,13 @@ if (testingDatabase |> stringr::str_starts("Eunomia")) {
   )
 
   if (testingDatabase |> stringr::str_ends("GiBleed")) {
-    test_cohortTableHandlerConfig <- test_databasesConfig[[1]]$cohortTableHandle
+    test_cohortTableHandlerConfig <- test_databasesConfig$E1$cohortTableHandle
   }
   if (testingDatabase |> stringr::str_ends("MIMIC")) {
-    test_cohortTableHandlerConfig <- test_databasesConfig[[2]]$cohortTableHandle
+    test_cohortTableHandlerConfig <- test_databasesConfig$E2$cohortTableHandle
   }
   if (testingDatabase |> stringr::str_ends("FinnGen")) {
-    test_cohortTableHandlerConfig <- test_databasesConfig[[4]]$cohortTableHandle
+    test_cohortTableHandlerConfig <- test_databasesConfig$E4$cohortTableHandle
   }
 }
 
@@ -52,7 +69,9 @@ if (testingDatabase |> stringr::str_starts("Eunomia")) {
 #
 if (testingDatabase |> stringr::str_starts("AtlasDevelopment")) {
   if (Sys.getenv("GCP_SERVICE_KEY") == "") {
-    message("GCP_SERVICE_KEY not set. Please set this environment variable to the path of the GCP service key.")
+    message(
+      "GCP_SERVICE_KEY not set. Please set this environment variable to the path of the GCP service key."
+    )
     stop()
   }
 
@@ -63,10 +82,10 @@ if (testingDatabase |> stringr::str_starts("AtlasDevelopment")) {
   )
 
   if (testingDatabase |> stringr::str_ends("5k")) {
-    test_cohortTableHandlerConfig <- test_databasesConfig[[5]]$cohortTableHandler
+    test_cohortTableHandlerConfig <- test_databasesConfig$BQ5K$cohortTableHandler
   }
   if (testingDatabase |> stringr::str_ends("full")) {
-    test_cohortTableHandlerConfig <- test_databasesConfig[[6]]$cohortTableHandler
+    test_cohortTableHandlerConfig <- test_databasesConfig$BQ$cohortTableHandler
   }
 }
 
@@ -76,3 +95,14 @@ if (testingDatabase |> stringr::str_starts("AtlasDevelopment")) {
 #
 message("************* Testing on: ")
 message("Database: ", testingDatabase)
+
+if (interactive()) {
+  options(
+    "hadesextras.cohortTableHandlerConfig" = test_cohortTableHandlerConfig
+  )
+} else {
+  withr::local_options(
+    "hadesextras.cohortTableHandlerConfig" = test_cohortTableHandlerConfig,
+    .local_envir = teardown_env()
+  )
+}

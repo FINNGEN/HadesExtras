@@ -40,14 +40,18 @@ CohortGenerator_generateCohortSet <- function(
   cohortTableNames = CohortGenerator::getCohortTableNames(),
   cohortDefinitionSet = NULL,
   stopOnError = TRUE,
-  incremental = FALSE,
-  incrementalFolder = NULL
+  incremental = FALSE
 ) {
   #
   # Validate parameters
   #
-  checkmate::assertDataFrame(cohortDefinitionSet, min.rows = 1, col.names = "named")
-  checkmate::assertNames(colnames(cohortDefinitionSet),
+  checkmate::assertDataFrame(
+    cohortDefinitionSet,
+    min.rows = 1,
+    col.names = "named"
+  )
+  checkmate::assertNames(
+    colnames(cohortDefinitionSet),
     must.include = c(
       "cohortId",
       "cohortName",
@@ -56,7 +60,9 @@ CohortGenerator_generateCohortSet <- function(
   )
 
   if (is.null(connection) && is.null(connectionDetails)) {
-    stop("You must provide either a database connection or the connection details.")
+    stop(
+      "You must provide either a database connection or the connection details."
+    )
   }
 
   if (is.null(connection)) {
@@ -70,47 +76,66 @@ CohortGenerator_generateCohortSet <- function(
 
   # get cohortType from json
   cohortDefinitionSet <- cohortDefinitionSet |>
-    dplyr::mutate(cohortType = purrr::map_chr(.x = json, .f = ~ {
-      if (RJSONIO::isValidJSON(.x, asText = TRUE)) {
-        l <- RJSONIO::fromJSON(.x)
-        if ("cohortType" %in% names(l)) {
-          return(l[["cohortType"]])
+    dplyr::mutate(
+      cohortType = purrr::map_chr(
+        .x = json,
+        .f = ~ {
+          if (RJSONIO::isValidJSON(.x, asText = TRUE)) {
+            l <- RJSONIO::fromJSON(.x)
+            if ("cohortType" %in% names(l)) {
+              return(l[["cohortType"]])
+            }
+          }
+          return(as.character(NA))
         }
-      }
-      return(as.character(NA))
-    }))
+      )
+    )
 
   cohortDefinitionSetCohortDataType <- cohortDefinitionSet |>
     dplyr::filter(cohortType == "FromCohortData")
 
   # if incremental mode, ignore cohorts that are not changed
   if (incremental == TRUE) {
+    recordKeeping <- CohortGenerator::getLastGeneratedCohortChecksums(
+      connection = connection,
+      cohortDatabaseSchema = cohortDatabaseSchema,
+      cohortTableNames = cohortTableNames
+    ) |>
+      tibble::as_tibble() |>
+      dplyr::rename(previousChecksum = checksum)
+
     cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
-      dplyr::mutate(currentChecksum = CohortGenerator::computeChecksum(sql))
-
-    recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
-    if (file.exists(recordKeepingFile)) {
-      recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE) |>
-        dplyr::rename(previousChecksum = checksum)
-
-      cohortDefinitionSetCohortDataType <- cohortDefinitionSetCohortDataType |>
-        dplyr::left_join(recordKeeping, by = c("cohortId" = "cohortId")) |>
-        dplyr::filter(is.na(previousChecksum) | currentChecksum != previousChecksum) |>
-        dplyr::select(cohortId, cohortName, json, sql, cohortType, currentChecksum)
-    }
+      dplyr::mutate(currentChecksum = CohortGenerator::computeChecksum(sql)) |> 
+      dplyr::left_join(recordKeeping, by = c("cohortId" = "cohortDefinitionId")) |>
+      dplyr::filter(
+        is.na(previousChecksum) | currentChecksum != previousChecksum
+      ) |>
+      dplyr::select(
+        cohortId,
+        cohortName,
+        json,
+        sql,
+        cohortType,
+        currentChecksum
+      )
   }
 
   if (nrow(cohortDefinitionSetCohortDataType) != 0) {
     # separate sql from cohortData
     cohortData <- .jsonToCohortData(cohortDefinitionSetCohortDataType)
     # Insert cohortData to temporary table
-    DatabaseConnector::insertTable(connection, tableName = "cohort_data_temp_table", data = cohortData, tempTable = TRUE, createTable = TRUE)
+    DatabaseConnector::insertTable(
+      connection,
+      tableName = "cohort_data_temp_table",
+      data = cohortData,
+      tempTable = TRUE,
+      createTable = TRUE
+    )
   }
 
   #
   # end function before generateCohortSet
   #
-
   results <- CohortGenerator::generateCohortSet(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -119,29 +144,29 @@ CohortGenerator_generateCohortSet <- function(
     cohortTableNames = cohortTableNames,
     cohortDefinitionSet = cohortDefinitionSet,
     stopOnError = stopOnError,
-    incremental = incremental,
-    incrementalFolder = incrementalFolder
+    incremental = incremental
   )
-
 
   cohortGeneratorResults <- results |>
     dplyr::select(-cohortName) |>
     dplyr::mutate(
       startTime = lubridate::as_datetime(startTime),
       endTime = lubridate::as_datetime(endTime),
-      buildInfo = map(.x = cohortId, .f = ~ {
-        LogTibble$new()
-      })
+      buildInfo = map(
+        .x = cohortId,
+        .f = ~ {
+          LogTibble$new()
+        }
+      )
     )
 
   #
   # start function after generateCohortSet
   #
   if (nrow(cohortDefinitionSetCohortDataType) != 0) {
-    
     # Update buildInfo with cohortDataInfo
-    cohortCounts  <- CohortGenerator::getCohortCounts(
-      connection = connection, 
+    cohortCounts <- CohortGenerator::getCohortCounts(
+      connection = connection,
       cohortDatabaseSchema = cohortDatabaseSchema,
       cohortTable = cohortTableNames$cohortTable,
       cohortIds = cohortDefinitionSetCohortDataType$cohortId
@@ -152,44 +177,42 @@ CohortGenerator_generateCohortSet <- function(
       dplyr::summarise(
         n_source_person = dplyr::n_distinct(person_source_value),
         n_source_entries = dplyr::n(),
-        n_missing_cohort_start = sum(ifelse(is.na(cohort_start_date), 1L, 0L), na.rm = TRUE),
-        n_missing_cohort_end = sum(ifelse(is.na(cohort_end_date), 1L, 0L), na.rm = TRUE)
-      ) |> 
-      dplyr::left_join(cohortCounts, by = c("cohort_definition_id" = "cohortId")) |>
+        n_missing_cohort_start = sum(
+          ifelse(is.na(cohort_start_date), 1L, 0L),
+          na.rm = TRUE
+        ),
+        n_missing_cohort_end = sum(
+          ifelse(is.na(cohort_end_date), 1L, 0L),
+          na.rm = TRUE
+        )
+      ) |>
+      dplyr::left_join(
+        cohortCounts,
+        by = c("cohort_definition_id" = "cohortId")
+      ) |>
       dplyr::mutate(
         n_missing_source_person = n_source_person - cohortSubjects,
         n_missing_source_entries = n_source_entries - cohortEntries
-      ) |> 
+      ) |>
       dplyr::select(-cohortSubjects, -cohortEntries)
 
     #
     cohortGeneratorResults <- cohortGeneratorResults |>
       dplyr::left_join(
-        checkOnCohortData |> tidyr::nest(.key = "cohortDataInfo", .by = "cohort_definition_id"),
+        checkOnCohortData |>
+          tidyr::nest(.key = "cohortDataInfo", .by = "cohort_definition_id"),
         by = c("cohortId" = "cohort_definition_id")
       ) |>
       dplyr::mutate(
-        buildInfo = purrr::map2(.x = buildInfo, .y = cohortDataInfo, .f = .cohortDataInfoToBuildInfo)
+        buildInfo = purrr::map2(
+          .x = buildInfo,
+          .y = cohortDataInfo,
+          .f = .cohortDataInfoToBuildInfo
+        )
       ) |>
       dplyr::select(-cohortDataInfo)
 
     DatabaseConnector::dropEmulatedTempTables(connection)
-
-    # correct recordKeepingFile
-    if (incremental == TRUE) {
-      recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
-      recordKeeping <- readr::read_csv(recordKeepingFile, show_col_types = FALSE)
-
-      recordKeeping <- recordKeeping |>
-        dplyr::left_join(
-          cohortDefinitionSetCohortDataType |> dplyr::select(cohortId, currentChecksum),
-          by = c("cohortId" = "cohortId")
-        ) |>
-        dplyr::mutate(checksum = ifelse(is.na(currentChecksum), checksum, currentChecksum)) |>
-        dplyr::select(-currentChecksum)
-
-      readr::write_csv(recordKeeping, recordKeepingFile)
-    }
   }
 
   #
@@ -210,24 +233,48 @@ CohortGenerator_generateCohortSet <- function(
   cohortDataInfo |> checkmate::assertTibble(nrows = 1)
   cohortDataInfo |>
     names() |>
-    checkmate::assertNames(must.include = c("n_source_person", "n_source_entries", "n_missing_source_person", "n_missing_cohort_start", "n_missing_cohort_end"))
-
+    checkmate::assertNames(
+      must.include = c(
+        "n_source_person",
+        "n_source_entries",
+        "n_missing_source_person",
+        "n_missing_cohort_start",
+        "n_missing_cohort_end"
+      )
+    )
 
   if (cohortDataInfo$n_missing_source_person == 0) {
     buildInfo$SUCCESS("", "All person_source_values were found")
   }
-  if (cohortDataInfo$n_missing_source_person == cohortDataInfo$n_source_person) {
+  if (
+    cohortDataInfo$n_missing_source_person == cohortDataInfo$n_source_person
+  ) {
     buildInfo$ERROR("", "None person_source_values were found")
   }
-  if (cohortDataInfo$n_missing_source_person != 0 & cohortDataInfo$n_missing_source_person != cohortDataInfo$n_source_person) {
-    buildInfo$WARNING("", cohortDataInfo$n_missing_source_person, "person_source_values were not found")
+  if (
+    cohortDataInfo$n_missing_source_person != 0 &
+      cohortDataInfo$n_missing_source_person != cohortDataInfo$n_source_person
+  ) {
+    buildInfo$WARNING(
+      "",
+      cohortDataInfo$n_missing_source_person,
+      "person_source_values were not found"
+    )
   }
 
   if (cohortDataInfo$n_missing_cohort_start != 0) {
-    buildInfo$WARNING("", cohortDataInfo$n_missing_cohort_start, "cohort_start_dates were missing and set to the first observation date")
+    buildInfo$WARNING(
+      "",
+      cohortDataInfo$n_missing_cohort_start,
+      "cohort_start_dates were missing and set to the first observation date"
+    )
   }
   if (cohortDataInfo$n_missing_cohort_end != 0) {
-    buildInfo$WARNING("", cohortDataInfo$n_missing_cohort_end, "cohort_end_dates were missing and set to the first observation date")
+    buildInfo$WARNING(
+      "",
+      cohortDataInfo$n_missing_cohort_end,
+      "cohort_end_dates were missing and set to the first observation date"
+    )
   }
 
   return(buildInfo)
@@ -259,14 +306,15 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
   connection = NULL,
   cohortDatabaseSchema,
   cohortTableNames,
-  cohortIds,
-  incrementalFolder = NULL
+  cohortIds
 ) {
   #
   # Validate parameters
   #
   if (is.null(connection) && is.null(connectionDetails)) {
-    stop("You must provide either a database connection or the connection details.")
+    stop(
+      "You must provide either a database connection or the connection details."
+    )
   }
 
   if (is.null(connection)) {
@@ -280,11 +328,16 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
 
   #
   # Function
-  sql <- SqlRender::readSql(system.file("sql/sql_server/DeleteCohortFromCohortTables.sql", package = "HadesExtras", mustWork = TRUE))
+  sql <- SqlRender::readSql(system.file(
+    "sql/sql_server/DeleteCohortFromCohortTables.sql",
+    package = "HadesExtras",
+    mustWork = TRUE
+  ))
   sql <- SqlRender::render(
     sql = sql,
     cohort_database_schema = cohortDatabaseSchema,
     cohort_table = cohortTableNames$cohortTable,
+    cohort_table_checksum = cohortTableNames$cohortChecksumTable,
     cohort_ids = paste0("(", paste0(cohortIds, collapse = " ,"), ")"),
     warnOnMissingParameters = TRUE
   )
@@ -292,19 +345,12 @@ CohortGenerator_deleteCohortFromCohortTable <- function(
     sql = sql,
     targetDialect = connection@dbms
   )
-  DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
-
-  if (!is.null(incrementalFolder)) {
-    recordKeepingFile <- file.path(incrementalFolder, "GeneratedCohorts.csv")
-    generatedCohorts <- readr::read_csv(recordKeepingFile, show_col_types = FALSE)
-    generatedCohorts <- generatedCohorts |>
-      dplyr::filter(!cohortId %in% cohortIds)
-    if (nrow(generatedCohorts) == 0) {
-      unlink(recordKeepingFile)
-    } else {
-      readr::write_csv(generatedCohorts, recordKeepingFile)
-    }
-  }
+  DatabaseConnector::executeSql(
+    connection,
+    sql,
+    progressBar = FALSE,
+    reportOverallTime = FALSE
+  )
 
   return(TRUE)
 }
@@ -341,12 +387,14 @@ CohortGenerator_getCohortDemograpics <- function(
   cohortDatabaseSchema,
   cohortTable = "cohort",
   cohortIds = c(),
-  toGet = c("histogramCohortStartYear",
-            "histogramCohortEndYear",
-            "histogramBirthYear",
-            "histogramBirthYearAllEvents",
-            "sexCounts",
-            "sexCountsAllEvents"),
+  toGet = c(
+    "histogramCohortStartYear",
+    "histogramCohortEndYear",
+    "histogramBirthYear",
+    "histogramBirthYearAllEvents",
+    "sexCounts",
+    "sexCountsAllEvents"
+  ),
   cohortDefinitionSet = NULL,
   databaseId = NULL
 ) {
@@ -360,20 +408,36 @@ CohortGenerator_getCohortDemograpics <- function(
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
-  tablesInServer <- tolower(DatabaseConnector::getTableNames(conn = connection, databaseSchema = cohortDatabaseSchema))
+  tablesInServer <- tolower(DatabaseConnector::getTableNames(
+    conn = connection,
+    databaseSchema = cohortDatabaseSchema
+  ))
   if (!(tolower(cohortTable) %in% tablesInServer)) {
     warning("Cohort table was not found. Was it created?")
     return(NULL)
   }
 
-  toGet |> checkmate::assertSubset(c("histogramCohortStartYear", "histogramCohortEndYear", "histogramBirthYear", "histogramBirthYearAllEvents", "sexCounts", "sexCountsAllEvents"))
+  toGet |>
+    checkmate::assertSubset(c(
+      "histogramCohortStartYear",
+      "histogramCohortEndYear",
+      "histogramBirthYear",
+      "histogramBirthYearAllEvents",
+      "sexCounts",
+      "sexCountsAllEvents"
+    ))
 
   #
   # function
   #
 
   # Read and render the SQL template
-  sqlPath <- system.file("sql", "sql_server", "GetCohortDemographics.sql", package = "HadesExtras")
+  sqlPath <- system.file(
+    "sql",
+    "sql_server",
+    "GetCohortDemographics.sql",
+    package = "HadesExtras"
+  )
   sql <- SqlRender::readSql(sqlPath)
   renderedSql <- SqlRender::render(
     sql,
@@ -391,11 +455,16 @@ CohortGenerator_getCohortDemograpics <- function(
     sexCounts = "sexCounts" %in% toGet,
     sexCountsAllEvents = "sexCountsAllEvents" %in% toGet
   )
-  translatedSql <- SqlRender::translate(renderedSql, targetDialect = DatabaseConnector::dbms(connection))
+  translatedSql <- SqlRender::translate(
+    renderedSql,
+    targetDialect = DatabaseConnector::dbms(connection)
+  )
 
   demographicsData <- DatabaseConnector::querySql(connection, translatedSql) |>
     tibble::as_tibble()
-  names(demographicsData) <- SqlRender::snakeCaseToCamelCase(names(demographicsData))
+  names(demographicsData) <- SqlRender::snakeCaseToCamelCase(names(
+    demographicsData
+  ))
 
   cohortCounts <- demographicsData |>
     dplyr::filter(feature %in% c("cohortEntries", "cohortSubjects")) |>
@@ -409,7 +478,11 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramCohortStartYear" %in% toGet) {
     histogramCohortStartYear <- demographicsData |>
       dplyr::filter(feature == "histogramCohortStartYear") |>
-      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::transmute(
+        cohortId = cohortId,
+        year = as.numeric(bin),
+        n = counts
+      ) |>
       dplyr::nest_by(cohortId, .key = "histogramCohortStartYear")
   }
 
@@ -417,7 +490,11 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramCohortEndYear" %in% toGet) {
     histogramCohortEndYear <- demographicsData |>
       dplyr::filter(feature == "histogramCohortStartYear") |>
-      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::transmute(
+        cohortId = cohortId,
+        year = as.numeric(bin),
+        n = counts
+      ) |>
       dplyr::nest_by(cohortId, .key = "histogramCohortEndYear")
   }
 
@@ -425,7 +502,11 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramBirthYear" %in% toGet) {
     histogramBirthYear <- demographicsData |>
       dplyr::filter(feature == "histogramBirthYear") |>
-      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::transmute(
+        cohortId = cohortId,
+        year = as.numeric(bin),
+        n = counts
+      ) |>
       dplyr::nest_by(cohortId, .key = "histogramBirthYear")
   }
 
@@ -433,7 +514,11 @@ CohortGenerator_getCohortDemograpics <- function(
   if ("histogramBirthYearAllEvents" %in% toGet) {
     histogramBirthYearAllEvents <- demographicsData |>
       dplyr::filter(feature == "histogramBirthYearAllEvents") |>
-      dplyr::transmute(cohortId = cohortId, year = as.numeric(bin), n = counts) |>
+      dplyr::transmute(
+        cohortId = cohortId,
+        year = as.numeric(bin),
+        n = counts
+      ) |>
       dplyr::nest_by(cohortId, .key = "histogramBirthYearAllEvents")
   }
 
@@ -461,9 +546,12 @@ CohortGenerator_getCohortDemograpics <- function(
     dplyr::left_join(sexCounts, by = "cohortId") |>
     dplyr::left_join(sexCountsAllEvents, by = "cohortId")
 
-
   delta <- Sys.time() - start
-  ParallelLogger::logInfo(paste("getCohortDemograpics took", signif(delta, 3), attr(delta, "units")))
+  ParallelLogger::logInfo(paste(
+    "getCohortDemograpics took",
+    signif(delta, 3),
+    attr(delta, "units")
+  ))
 
   return(cohortDemograpics)
 }
@@ -502,7 +590,9 @@ CohortGenerator_getCohortsOverlaps <- function(
   # Validate parameters
   #
   if (is.null(connection) && is.null(connectionDetails)) {
-    stop("You must provide either a database connection or the connection details.")
+    stop(
+      "You must provide either a database connection or the connection details."
+    )
   }
 
   if (is.null(connection)) {
@@ -516,7 +606,11 @@ CohortGenerator_getCohortsOverlaps <- function(
 
   #
   # Function
-  sql <- SqlRender::readSql(system.file("sql/sql_server/CalculateCohortsOverlap.sql", package = "HadesExtras", mustWork = TRUE))
+  sql <- SqlRender::readSql(system.file(
+    "sql/sql_server/CalculateCohortsOverlap.sql",
+    package = "HadesExtras",
+    mustWork = TRUE
+  ))
   sql <- SqlRender::render(
     sql = sql,
     cohort_database_schema = cohortDatabaseSchema,
@@ -529,7 +623,11 @@ CohortGenerator_getCohortsOverlaps <- function(
     targetDialect = connection@dbms
   )
 
-  overlaps <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE) |>
+  overlaps <- DatabaseConnector::querySql(
+    connection,
+    sql,
+    snakeCaseToCamelCase = TRUE
+  ) |>
     tibble::as_tibble() |>
     dplyr::mutate(cohortIdCombinations = paste0("-", cohortIdCombinations, "-"))
 
@@ -564,12 +662,15 @@ removeCohortIdsFromCohortOverlapsTable <- function(cohortOverlaps, cohortIds) {
 
   cohortOverlaps <- cohortOverlaps |>
     dplyr::mutate(
-      cohortIdCombinations = purrr::map_chr(cohortIdCombinations, ~ {
-        a <- stringr::str_split(.x, "-")[[1]] |>
-          setdiff(c("", as.character(cohortIds))) |>
-          paste0(collapse = "-")
-        a <- paste0("-", a, "-")
-      }),
+      cohortIdCombinations = purrr::map_chr(
+        cohortIdCombinations,
+        ~ {
+          a <- stringr::str_split(.x, "-")[[1]] |>
+            setdiff(c("", as.character(cohortIds))) |>
+            paste0(collapse = "-")
+          a <- paste0("-", a, "-")
+        }
+      ),
     ) |>
     dplyr::filter(!stringr::str_detect(cohortIdCombinations, "--")) |>
     dplyr::group_by(cohortIdCombinations) |>
@@ -607,7 +708,9 @@ CohortGenerator_createCohortTables <- function(
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
-  if (connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)) {
+  if (
+    connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)
+  ) {
     strings <- strsplit(cohortDatabaseSchema, "\\.")
     bq_project <- strings[[1]][1]
     bq_dataset <- strings[[1]][2]
@@ -655,6 +758,13 @@ CohortGenerator_createCohortTables <- function(
       lost_count = as.integer()
     )
 
+    cohortChecksumTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      checksum = as.character(),
+      start_time = as.numeric(),
+      end_time = as.numeric()
+    )
+
     # Create or replace tables based on templates
     tableTemplates <- list(
       cohortTable = cohortTableTemplate,
@@ -662,17 +772,20 @@ CohortGenerator_createCohortTables <- function(
       inclusionResultTable = inclusionResultTableTemplate,
       inclusionStatsTable = inclusionStatsTableTemplate,
       summaryStatsTable = summaryStatsTableTemplate,
-      censorStatsTable = censorStatsTableTemplate
+      censorStatsTable = censorStatsTableTemplate,
+      cohortChecksumTable = cohortChecksumTableTemplate
     )
 
     for (tableName in names(tableTemplates)) {
-      tableSuffix <- switch(tableName,
+      tableSuffix <- switch(
+        tableName,
         "cohortTable" = "",
         "inclusionTable" = "_inclusion",
         "inclusionResultTable" = "_inclusion_result",
         "inclusionStatsTable" = "_inclusion_stats",
         "summaryStatsTable" = "_summary_stats",
-        "censorStatsTable" = "_censor_stats"
+        "censorStatsTable" = "_censor_stats",
+        "cohortChecksumTable" = "_checksum"
       )
 
       fullTableName <- paste0(cohortTableNames$cohortTable, tableSuffix)
@@ -681,12 +794,18 @@ CohortGenerator_createCohortTables <- function(
       if (bigrquery::bq_table_exists(bq_table) && !incremental) {
         message(paste("Replacing bigquery table", fullTableName))
         bigrquery::bq_table_delete(bq_table)
-        bigrquery::bq_table_create(bq_table, fields = tableTemplates[[tableName]])
+        bigrquery::bq_table_create(
+          bq_table,
+          fields = tableTemplates[[tableName]]
+        )
       }
 
       if (!bigrquery::bq_table_exists(bq_table)) {
         message(paste("Creating bigquery table", fullTableName))
-        bigrquery::bq_table_create(bq_table, fields = tableTemplates[[tableName]])
+        bigrquery::bq_table_create(
+          bq_table,
+          fields = tableTemplates[[tableName]]
+        )
       }
     }
   } else {
@@ -723,7 +842,9 @@ CohortGenerator_dropCohortStatsTables <- function(
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
-  if (connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)) {
+  if (
+    connection@dbms == "bigquery" && "dbiConnection" %in% slotNames(connection)
+  ) {
     strings <- strsplit(cohortDatabaseSchema, "\\.")
     bq_project <- strings[[1]][1]
     bq_dataset <- strings[[1]][2]

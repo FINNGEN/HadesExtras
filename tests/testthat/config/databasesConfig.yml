@@ -104,7 +104,7 @@ BQ5K:
         cohortDatabaseSchema: atlas-development-270609.sandbox
         cohortTableName: hadesextras_test_cohort_table_<timestamp>
 # AtlasDevelopment-full
-BQ5:
+BQ:
   cohortTableHandler:
     database:
       databaseId: BQ

@@ -1,10 +1,15 @@
+helper_getTestCohortTableHandlerConfig <- function() {
+  return(getOption("hadesextras.cohortTableHandlerConfig"))
+}
+
 helper_createNewConnection <- function() {
 
   # by default use the one from setup.R
-  connectionDetailsSettings <- test_cohortTableHandlerConfig$connection$connectionDetailsSettings
+  cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig() # set by setup.R
+  connectionDetailsSettings <- cohortTableHandlerConfig$connection$connectionDetailsSettings
 
-  if (!is.null(test_cohortTableHandlerConfig$connection$tempEmulationSchema)) {
-    options(sqlRenderTempEmulationSchema = test_cohortTableHandlerConfig$connection$tempEmulationSchema)
+  if (!is.null(cohortTableHandlerConfig$connection$tempEmulationSchema)) {
+    options(sqlRenderTempEmulationSchema = cohortTableHandlerConfig$connection$tempEmulationSchema)
   } else {
     options(sqlRenderTempEmulationSchema = NULL)
   }
@@ -28,8 +33,7 @@ helper_createNewConnection <- function() {
 helper_createNewCohortTableHandler <- function(loadConnectionChecksLevel = "basicChecks") {
 
   # by default use the one from setup.R
-  cohortTableHandlerConfig <- test_cohortTableHandlerConfig # set by setup.R
-
+  cohortTableHandlerConfig <- helper_getTestCohortTableHandlerConfig() 
   cohortTableHandler <- createCohortTableHandlerFromList(cohortTableHandlerConfig, loadConnectionChecksLevel)
 
   return(cohortTableHandler)

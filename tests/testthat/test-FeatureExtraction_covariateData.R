@@ -191,21 +191,13 @@ test_that("covariateData_ATCgroups returns correct value", {
     cohortTableNames = getCohortTableNames(cohortTableName),
   )
 
-  if (interactive()) {
-    basePath <- here::here("inst/")
-    packageName <- NULL
-  } else {
-    basePath <- ""
-    packageName <- "HadesExtras"
-  }
-
   cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = paste0(basePath, "testdata/asthma/Cohorts.csv"),
-    jsonFolder = paste0(basePath, "testdata/asthma/cohorts"),
-    sqlFolder = paste0(basePath, "testdata/asthma/sql/sql_server"),
+    settingsFileName = "inst/testdata/asthma/Cohorts.csv",
+    jsonFolder = "inst/testdata/asthma/cohorts",
+    sqlFolder = "inst/testdata/asthma/sql/sql_server",
     cohortFileNameFormat = "%s",
     cohortFileNameValue = c("cohortId"),
-    packageName = packageName,
+    packageName = "HadesExtras",
     verbose = FALSE
   )
 

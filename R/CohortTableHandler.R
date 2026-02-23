@@ -35,24 +35,11 @@ CohortTableHandler <- R6::R6Class(
     # database parameters
     .cohortDatabaseSchema = NULL,
     .cohortTableNames = NULL,
-    .incrementalFolder = NULL,
     # Internal cohorts data
     .cohortDefinitionSet = NULL,
     .cohortGeneratorResults = NULL,
     .cohortDemograpics = NULL,
-    .cohortsOverlap = NULL,
-    
-    # Finalize method - closes the connection if active
-    finalize = function() {
-      CohortGenerator_dropCohortStatsTables(
-        connection = self$connectionHandler$getConnection(),
-        cohortDatabaseSchema = self$cohortDatabaseSchema,
-        cohortTableNames = self$cohortTableNames
-      )
-      unlink(private$.incrementalFolder, recursive = TRUE)
-
-      super$finalize()
-    }
+    .cohortsOverlap = NULL
   ),
   active = list(
     # Read-only parameters
@@ -62,9 +49,6 @@ CohortTableHandler <- R6::R6Class(
     },
     cohortTableNames = function() {
       return(private$.cohortTableNames)
-    },
-    incrementalFolder = function() {
-      return(private$.incrementalFolder)
     },
     # Internal cohorts data
     cohortDefinitionSet = function() {
@@ -115,7 +99,6 @@ CohortTableHandler <- R6::R6Class(
         cohortTableName <- cohortTableName |> stringr::str_replace("<timestamp>", timestamp)
       }
       private$.cohortTableNames <- CohortGenerator::getCohortTableNames(cohortTableName)
-      private$.incrementalFolder <- file.path(tempdir(), timestamp)
 
       private$.cohortDefinitionSet <- tibble::tibble(
         cohortId = 0,
@@ -269,8 +252,7 @@ CohortTableHandler <- R6::R6Class(
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
         cohortDefinitionSet = cohortDefinitionSet,
-        incremental = TRUE,
-        incrementalFolder = private$.incrementalFolder
+        incremental = TRUE
       ) |>
         dplyr::arrange(cohortId)
 
@@ -336,8 +318,7 @@ CohortTableHandler <- R6::R6Class(
         connection = self$connectionHandler$getConnection(),
         cohortDatabaseSchema = self$cohortDatabaseSchema,
         cohortTableNames = self$cohortTableNames,
-        cohortIds = cohortIds,
-        incrementalFolder = private$.incrementalFolder
+        cohortIds = cohortIds
       )
 
       private$.cohortDefinitionSet <- private$.cohortDefinitionSet |>
@@ -590,6 +571,31 @@ CohortTableHandler <- R6::R6Class(
       cohendresult =  c(meanInCases = meanCases, meanInControls = meanControls,pooledsd = pooled_sd, cohend=cohen_d)
 
       return(list(ttestResult = ttestResult, ksResult = ks_result,cohendResult = cohendresult))
+    },
+    
+    #' Close Connection
+    #' @description
+    #' Explicitly closes the database connection and cleans up cohort tables. 
+    #' This method should be called when you're done with the CohortTableHandler 
+    #' to properly clean up resources.
+    closeConnection = function() {
+      # Drop cohort stats tables
+      if (!is.null(self$connectionHandler) && !is.null(self$cohortDatabaseSchema) && !is.null(self$cohortTableNames)) {
+        tryCatch({
+          CohortGenerator_dropCohortStatsTables(
+            connection = self$connectionHandler$getConnection(),
+            cohortDatabaseSchema = self$cohortDatabaseSchema,
+            cohortTableNames = self$cohortTableNames
+          )
+        }, error = function(e) {
+          # Silently ignore errors during cleanup
+        })
+      }
+      
+      # Call parent closeConnection
+      super$closeConnection()
+      
+      invisible(self)
     }
   )
 )
