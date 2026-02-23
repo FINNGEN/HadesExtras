@@ -39,19 +39,7 @@ CohortTableHandler <- R6::R6Class(
     .cohortDefinitionSet = NULL,
     .cohortGeneratorResults = NULL,
     .cohortDemograpics = NULL,
-    .cohortsOverlap = NULL,
-
-    # Finalize method - closes the connection if active
-    finalize = function() {
-      CohortGenerator_dropCohortStatsTables(
-        connection = self$connectionHandler$getConnection(),
-        cohortDatabaseSchema = self$cohortDatabaseSchema,
-        cohortTableNames = self$cohortTableNames
-      )
-      unlink(private$.incrementalFolder, recursive = TRUE)
-
-      super$finalize()
-    }
+    .cohortsOverlap = NULL
   ),
   active = list(
     # Read-only parameters
@@ -558,6 +546,27 @@ CohortTableHandler <- R6::R6Class(
       cohendresult <- c(meanInCases = meanCases, meanInControls = meanControls, pooledsd = pooled_sd, cohend = cohen_d)
 
       return(list(ttestResult = ttestResult, ksResult = ks_result, cohendResult = cohendresult))
+    },
+    
+    #' Close Connection
+    #' @description
+    #' Closes the database connection and cleans up cohort-specific resources.
+    #' This method extends the parent closeConnection to also drop cohort stats tables.
+    closeConnection = function() {
+      tryCatch({
+        if (!is.null(self$connectionHandler) && self$connectionHandler$dbIsValid()) {
+          CohortGenerator_dropCohortStatsTables(
+            connection = self$connectionHandler$getConnection(),
+            cohortDatabaseSchema = self$cohortDatabaseSchema,
+            cohortTableNames = self$cohortTableNames
+          )
+        }
+      }, error = function(e) {
+        # Silently ignore errors during cleanup
+      })
+      
+      super$closeConnection()
+      invisible(self)
     }
   )
 )
