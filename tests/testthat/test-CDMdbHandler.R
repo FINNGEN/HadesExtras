@@ -50,3 +50,57 @@ test_that("createCDMdbHandlerFromList works with basicChecks", {
   CDMdb$getTblVocabularySchema$vocabulary() |> checkmate::expect_class("tbl_dbi")
 })
 
+
+test_that("CDMdbHandler includes resultsDatabaseSchema", {
+  config <- test_cohortTableHandlerConfig
+  
+  CDMdb <- createCDMdbHandlerFromList(
+    config,
+    loadConnectionChecksLevel = "allChecks"
+  )
+  
+  withr::defer({
+    CDMdb$closeConnection()
+    rm(CDMdb)
+    gc()
+  })
+
+  # Verify no errors in connection status log
+  CDMdb$connectionStatusLog |>
+    dplyr::filter(type == "ERROR") |>
+    nrow() |>
+    expect_equal(0)
+
+  if(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") |> stringr::str_starts("Eunomia")){
+    CDMdb$connectionStatusLog |>
+    dplyr::filter(type == "WARNING") |>
+    nrow() |>
+    expect_equal(1)
+  }
+})
+
+
+test_that("CDMdbHandler resultsDatabaseSchema can be set to different value", {
+  skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") |> stringr::str_starts("AtlasDevelopment"), "This test is for checking that resultsDatabaseSchema can be set to a different value, but in Eunomia it is set to the same as cdmDatabaseSchema, so skipping this test in Eunomia environment.")
+  
+  # Get the test config and modify it to include a custom resultsDatabaseSchema
+  config <- test_cohortTableHandlerConfig
+  config$cdm$resultsDatabaseSchema <- "wrong_schema"  # Explicitly set wrong one
+  
+  suppressWarnings({
+    CDMdb <- createCDMdbHandlerFromList(config, loadConnectionChecksLevel = "allChecks")
+  })
+
+  withr::defer({
+    CDMdb$closeConnection()
+    rm(CDMdb)
+    gc()
+  })
+  
+  # Verify there is an error in connection
+  CDMdb$connectionStatusLog |>
+    dplyr::filter(type == "ERROR") |>
+    nrow() |>
+    expect_equal(1)
+})
+
