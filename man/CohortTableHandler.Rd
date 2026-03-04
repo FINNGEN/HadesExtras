@@ -14,6 +14,8 @@ Inherits from CDMdbHandler.
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{incrementalFolder}}{Path to folder for incremental operations}
+
+\item{\code{resultsDatabaseSchema}}{Schema name for the results database}
 }
 \if{html}{\out{</div>}}
 }
@@ -33,6 +35,8 @@ Inherits from CDMdbHandler.
 \item{\code{cohortDemograpics}}{Demographic information for cohorts}
 
 \item{\code{cohortsOverlap}}{Information about overlapping cohorts}
+
+\item{\code{resultsDatabaseSchema}}{Schema name for the results database}
 }
 \if{html}{\out{</div>}}
 }
@@ -70,6 +74,7 @@ Initialize the CohortTableHandler object
   databaseDescription,
   cdmDatabaseSchema,
   vocabularyDatabaseSchema = cdmDatabaseSchema,
+  resultsDatabaseSchema = cdmDatabaseSchema,
   cohortDatabaseSchema,
   cohortTableName,
   loadConnectionChecksLevel = "allChecks"
@@ -90,6 +95,8 @@ Initialize the CohortTableHandler object
 \item{\code{cdmDatabaseSchema}}{Name of the CDM database schema.}
 
 \item{\code{vocabularyDatabaseSchema}}{Name of the vocabulary database schema. Default is the same as the CDM database schema.}
+
+\item{\code{resultsDatabaseSchema}}{(Optional) Name of the results database schema (default is cdmDatabaseSchema).}
 
 \item{\code{cohortDatabaseSchema}}{Name of the cohort database schema.}
 

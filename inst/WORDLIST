@@ -10,6 +10,7 @@ CohortTableHandler
 CohortsSummary
 ConnectionHandler
 DDD
+DatabaseConnector
 Eunomia
 FeatureExtraction
 Gracia
@@ -21,9 +22,7 @@ ORCID
 OperationSubsetOperator
 Tabuenca
 Tippy
-Tooltip
 Upd
-YAML
 YearOfBirth
 addLog
 allChecks
@@ -35,10 +34,9 @@ bq
 buildInfo
 cdm
 cdmDatabaseSchema
-cloneable
+closeConnection
 cohen's
 cohend
-cohendresult
 cohors
 cohortData
 cohortDataToCohortDefinitionSet
@@ -89,6 +87,7 @@ postgres
 pre
 reactable
 readCohortData
+resultsDatabaseSchema
 sexCounts
 sexCountsAllEvents
 sql
@@ -97,7 +96,6 @@ tibble
 tibbles
 tibles
 tippy
-tooltip
 ttestResult
 updateCohortNames
 yaml

@@ -11,6 +11,7 @@
 #' @field cohortGeneratorResults Results from cohort generation process
 #' @field cohortDemograpics Demographic information for cohorts
 #' @field cohortsOverlap Information about overlapping cohorts
+#' @field resultsDatabaseSchema Schema name for the results database
 #'
 #' @param databaseId ID of the database to connect to
 #' @param loadConnectionChecksLevel Level of checks to perform during connection
@@ -74,6 +75,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param databaseDescription    A text description for the database the it connects to
     #' @param cdmDatabaseSchema Name of the CDM database schema.
     #' @param vocabularyDatabaseSchema Name of the vocabulary database schema. Default is the same as the CDM database schema.
+    #' @param resultsDatabaseSchema (Optional) Name of the results database schema (default is cdmDatabaseSchema).
     #' @param cohortDatabaseSchema Name of the cohort database schema.
     #' @param cohortTableName Name of the cohort table.
     #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
@@ -83,12 +85,14 @@ CohortTableHandler <- R6::R6Class(
                           databaseDescription,
                           cdmDatabaseSchema,
                           vocabularyDatabaseSchema = cdmDatabaseSchema,
+                          resultsDatabaseSchema = cdmDatabaseSchema,
                           cohortDatabaseSchema,
                           cohortTableName,
                           loadConnectionChecksLevel = "allChecks") {
       checkmate::assertClass(connectionHandler, "ConnectionHandler")
       checkmate::assertString(cdmDatabaseSchema)
       checkmate::assertString(vocabularyDatabaseSchema)
+      checkmate::assertString(resultsDatabaseSchema)
       checkmate::assertString(cohortDatabaseSchema)
       checkmate::assertString(cohortTableName)
 
@@ -122,6 +126,7 @@ CohortTableHandler <- R6::R6Class(
         connectionHandler = connectionHandler,
         cdmDatabaseSchema = cdmDatabaseSchema,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        resultsDatabaseSchema = resultsDatabaseSchema,
         loadConnectionChecksLevel = loadConnectionChecksLevel
       )
     },
@@ -155,6 +160,22 @@ CohortTableHandler <- R6::R6Class(
         private$.connectionStatusLog$ERROR("Create cohort tables", errorMessage)
       } else {
         private$.connectionStatusLog$SUCCESS("Create cohort tables", "Created cohort tables")
+      }
+
+     # Checks resultsDatabaseSchema, Error if not exists in the database, warning if the same as cdmDatabaseSchema
+    resultsSchemaExists <- TRUE
+      tryCatch({
+        tables <- DatabaseConnector::getTableNames(self$connectionHandler$getConnection(), self$resultsDatabaseSchema)
+      }, error = function(e) {
+        resultsSchemaExists <<- FALSE
+      })
+
+      if (!resultsSchemaExists) {
+        private$.connectionStatusLog$ERROR("Check results database schema", paste0("Results database schema ", self$resultsDatabaseSchema, " does not exist in the database"))
+      } else if (self$resultsDatabaseSchema == self$cdmDatabaseSchema) {
+        private$.connectionStatusLog$WARNING("Check results database schema", "Results database schema is the same as CDM database schema, results will be stored in the CDM database schema")
+      } else {
+        private$.connectionStatusLog$SUCCESS("Check results database schema", "Results database schema exists in the database")
       }
     },
     #'
@@ -608,6 +629,7 @@ createCohortTableHandlerFromList <- function(
     databaseDescription = cohortTableHandlerConfig$database$databaseDescription,
     cdmDatabaseSchema = cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = cohortTableHandlerConfig$cdm$vocabularyDatabaseSchema,
+    resultsDatabaseSchema = if (!is.null(cohortTableHandlerConfig$cdm$resultsDatabaseSchema)) cohortTableHandlerConfig$cdm$resultsDatabaseSchema else cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
     cohortDatabaseSchema = cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
     cohortTableName = cohortTableHandlerConfig$cohortTable$cohortTableName,
     loadConnectionChecksLevel = loadConnectionChecksLevel

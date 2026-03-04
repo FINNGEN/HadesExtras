@@ -763,6 +763,16 @@ CohortGenerator_createCohortTables <- function(
       end_time = as.numeric()
     )
 
+    cohortSubsetAttritionTableTemplate <- tibble::tibble(
+      cohort_definition_id = as.integer(),
+      subset_definition_id = as.integer(),
+      subset_parent_id = as.integer(),
+      mode_id = as.integer(),
+      cohort_entry = as.integer(),
+      operator_sequence = as.integer(),
+      count_value = as.integer()
+    )
+
     # Create or replace tables based on templates
     tableTemplates <- list(
       cohortTable = cohortTableTemplate,
@@ -771,7 +781,8 @@ CohortGenerator_createCohortTables <- function(
       inclusionStatsTable = inclusionStatsTableTemplate,
       summaryStatsTable = summaryStatsTableTemplate,
       censorStatsTable = censorStatsTableTemplate,
-      cohortChecksumTable = cohortChecksumTableTemplate
+      cohortChecksumTable = cohortChecksumTableTemplate,
+      cohortSubsetAttritionTable = cohortSubsetAttritionTableTemplate
     )
 
     for (tableName in names(tableTemplates)) {
@@ -783,7 +794,8 @@ CohortGenerator_createCohortTables <- function(
         "inclusionStatsTable" = "_inclusion_stats",
         "summaryStatsTable" = "_summary_stats",
         "censorStatsTable" = "_censor_stats",
-        "cohortChecksumTable" = "_checksum"
+        "cohortChecksumTable" = "_checksum",
+        "cohortSubsetAttritionTable" = "_subset_attrition"
       )
 
       fullTableName <- paste0(cohortTableNames$cohortTable, tableSuffix)
@@ -854,7 +866,8 @@ CohortGenerator_dropCohortStatsTables <- function(
       "_inclusion_result",
       "_inclusion_stats",
       "_summary_stats",
-      "_censor_stats"
+      "_censor_stats",
+      "_subset_attrition"
     )
 
     # Delete all related tables
