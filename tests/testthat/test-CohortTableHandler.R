@@ -10,7 +10,7 @@ test_that("CohortTableHandler creates object with correct params", {
   cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
   cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
   cohortTableHandler$connectionStatusLog |>
-    dplyr::slice(-6) |> # resultsDatabaseSchema handled below
+    dplyr::slice(-5) |> # resultsDatabaseSchema handled below
     dplyr::filter(type != "SUCCESS") |>
     nrow() |>
     expect_equal(0)
@@ -33,12 +33,12 @@ test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks",
   cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
   cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
   cohortTableHandler$connectionStatusLog |>
-    dplyr::slice(-6) |> # resultsDatabaseSchema handled below
+    dplyr::slice(-5) |> # resultsDatabaseSchema handled below
     dplyr::filter(type == "SUCCESS") |>
     nrow() |>
     expect_equal(4)
   cohortTableHandler$connectionStatusLog |>
-    dplyr::slice(-6) |> # resultsDatabaseSchema handled below
+    dplyr::slice(-5) |> # resultsDatabaseSchema handled below
     dplyr::filter(type == "WARNING") |>
     nrow() |>
     expect_equal(1)

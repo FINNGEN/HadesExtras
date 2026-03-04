@@ -14,6 +14,7 @@ test_that("createConnectionHandler works", {
   CDMdb$databaseName |> checkmate::assertString()
   CDMdb$connectionStatusLog |> checkmate::expect_tibble()
   CDMdb$connectionStatusLog |>
+    dplyr::slice(-5) |> # Remove the last 5 rows which are about resultsDatabaseSchema checks that are not relevant for this test
     dplyr::filter(type != "SUCCESS") |>
     nrow() |>
     expect_equal(0)
@@ -39,10 +40,12 @@ test_that("createCDMdbHandlerFromList works with basicChecks", {
   CDMdb$databaseName |> checkmate::assertString()
   CDMdb$connectionStatusLog |> checkmate::expect_tibble()
   CDMdb$connectionStatusLog |>
+    dplyr::slice(-5) |> # Remove the last 6 rows which are about resultsDatabaseSchema checks that are not relevant for this test
     dplyr::filter(type == "WARNING") |>
     nrow() |>
     expect_equal(1)
   CDMdb$connectionStatusLog |>
+    dplyr::slice(-5) |> # Remove the last 6 rows which are about resultsDatabaseSchema checks that are not relevant for this test
     dplyr::filter(type == "WARNING") |>
     dplyr::pull(step) |>
     expect_equal("Check temp table creation")
@@ -99,6 +102,7 @@ test_that("CDMdbHandler resultsDatabaseSchema can be set to different value", {
   
   # Verify there is an error in connection
   CDMdb$connectionStatusLog |>
+    dplyr::slice(-5) |> # Remove the last 6 rows which are about resultsDatabaseSchema checks that are not relevant for this test
     dplyr::filter(type == "ERROR") |>
     nrow() |>
     expect_equal(1)
