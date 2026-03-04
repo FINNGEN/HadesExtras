@@ -1,3 +1,6 @@
+# HadesExtras 2.1.2
+- Added resultsDatabaseSchema parameter to CohortTableHandler
+
 # HadesExtras 2.1.1
 - Updated to work with CohortGenerator v1
 
