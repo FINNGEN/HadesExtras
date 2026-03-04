@@ -100,6 +100,7 @@ BQ5K:
     cdm:
         cdmDatabaseSchema: atlas-development-270609.finngen_omop_dev_5k
         vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_dev_5k
+        resultsDatabaseSchema: atlas-development-270609.finngen_omop_results_dev_5k
     cohortTable:
         cohortDatabaseSchema: atlas-development-270609.sandbox
         cohortTableName: hadesextras_test_cohort_table_<timestamp>
@@ -121,6 +122,7 @@ BQ:
     cdm:
         cdmDatabaseSchema: atlas-development-270609.finngen_omop_dev
         vocabularyDatabaseSchema: atlas-development-270609.finngen_omop_dev
+        resultsDatabaseSchema: atlas-development-270609.finngen_omop_results_dev
     cohortTable:
         cohortDatabaseSchema: atlas-development-270609.sandbox
         cohortTableName: hadesextras_test_cohort_table_<timestamp>

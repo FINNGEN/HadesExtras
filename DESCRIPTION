@@ -24,7 +24,7 @@ Imports:
     lubridate,
     ParallelLogger,
     purrr,
-    R6,
+    R6, 
     reactable,
     readr,
     RJSONIO,
