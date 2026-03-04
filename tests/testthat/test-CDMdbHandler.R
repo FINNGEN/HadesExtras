@@ -61,6 +61,6 @@ test_that("createCDMdbHandlerFromList includes resultsDatabaseSchema", {
   })
   
   CDMdb$resultsDatabaseSchema |> checkmate::assertString()
-  CDMdb$resultsDatabaseSchema |> expect_equal(CDMdb$cdmDatabaseSchema)
-  
+  CDMdb$resultsDatabaseSchema |> expect_equal(config$cdm$resultsDatabaseSchema)
+
 })
