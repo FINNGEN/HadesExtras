@@ -87,6 +87,7 @@ postgres
 pre
 reactable
 readCohortData
+resultsDatabaseSchema
 sexCounts
 sexCountsAllEvents
 sql
