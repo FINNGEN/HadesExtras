@@ -10,23 +10,12 @@ Inherits from CDMdbHandler.
 \section{Super class}{
 \code{\link[HadesExtras:CDMdbHandler]{HadesExtras::CDMdbHandler}} -> \code{CohortTableHandler}
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{incrementalFolder}}{Path to folder for incremental operations}
-
-\item{\code{resultsDatabaseSchema}}{Schema name for the results database}
-}
-\if{html}{\out{</div>}}
-}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{cohortDatabaseSchema}}{Schema where cohort tables are stored}
 
 \item{\code{cohortTableNames}}{Names of the cohort tables in the database}
-
-\item{\code{incrementalFolder}}{Path to folder for incremental operations}
 
 \item{\code{cohortDefinitionSet}}{Set of cohort definitions}
 
@@ -35,8 +24,6 @@ Inherits from CDMdbHandler.
 \item{\code{cohortDemograpics}}{Demographic information for cohorts}
 
 \item{\code{cohortsOverlap}}{Information about overlapping cohorts}
-
-\item{\code{resultsDatabaseSchema}}{Schema name for the results database}
 }
 \if{html}{\out{</div>}}
 }

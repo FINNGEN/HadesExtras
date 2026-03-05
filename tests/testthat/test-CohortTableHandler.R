@@ -10,7 +10,7 @@ test_that("CohortTableHandler creates object with correct params", {
   cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
   cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
   cohortTableHandler$connectionStatusLog |>
-    dplyr::slice(-6) |> # resultsDatabaseSchema handled below
+    dplyr::slice(-5) |> # resultsDatabaseSchema handled below
     dplyr::filter(type != "SUCCESS") |>
     nrow() |>
     expect_equal(0)
@@ -33,12 +33,12 @@ test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks",
   cohortTableHandler |> checkmate::expect_class("CohortTableHandler")
   cohortTableHandler$connectionStatusLog |> checkmate::expect_tibble()
   cohortTableHandler$connectionStatusLog |>
-    dplyr::slice(-6) |> # resultsDatabaseSchema handled below
+    dplyr::slice(-5) |> # resultsDatabaseSchema handled below
     dplyr::filter(type == "SUCCESS") |>
     nrow() |>
     expect_equal(4)
   cohortTableHandler$connectionStatusLog |>
-    dplyr::slice(-6) |> # resultsDatabaseSchema handled below
+    dplyr::slice(-5) |> # resultsDatabaseSchema handled below
     dplyr::filter(type == "WARNING") |>
     nrow() |>
     expect_equal(1)
@@ -49,55 +49,6 @@ test_that("CohortTableHandler works with loadConnectionChecksLevel basicChecks",
   cohortTableHandler$getCohortsSummary() |> assertCohortsSummary()
 })
 
-
-test_that("CohortTableHandler includes resultsDatabaseSchema", {
-  cohortTableHandler <- helper_createNewCohortTableHandler(loadConnectionChecksLevel = "allChecks")
-  
-  withr::defer({
-    cohortTableHandler$closeConnection()
-    rm(cohortTableHandler)
-    gc()
-  })
-
-  # Verify no errors in connection status log
-  cohortTableHandler$connectionStatusLog |>
-    dplyr::filter(type == "ERROR") |>
-    nrow() |>
-    expect_equal(0)
-
-  if(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") |> stringr::str_starts("Eunomia")){
-    cohortTableHandler$connectionStatusLog |>
-    dplyr::filter(type == "WARNING") |>
-    nrow() |>
-    expect_equal(1)
-  }
-  
-
-})
-
-
-test_that("CohortTableHandler resultsDatabaseSchema can be set to different value", {
-  skip_if_not(Sys.getenv("HADESEXTAS_TESTING_ENVIRONMENT") |> stringr::str_starts("AtlasDevelopment"), "This test is for checking that resultsDatabaseSchema can be set to a different value, but in Eunomia it is set to the same as cdmDatabaseSchema, so skipping this test in Eunomia environment.")
-  # Get the test config and modify it to include a custom resultsDatabaseSchema
-  config <- helper_getTestCohortTableHandlerConfig()
-  config$cdm$resultsDatabaseSchema <- "wrong_schema"  # Explicitly set wrong one
-  
-  suppressWarnings({
-    cohortTableHandler <- createCohortTableHandlerFromList(config, loadConnectionChecksLevel = "allChecks")
-  })
-
-  withr::defer({
-    cohortTableHandler$closeConnection()
-    rm(cohortTableHandler)
-    gc()
-  })
-  
-  # Verify no errors in connection
-  cohortTableHandler$connectionStatusLog |>
-    dplyr::filter(type == "ERROR") |>
-    nrow() |>
-    expect_equal(1)
-})
 
 #
 # insertOrUpdateCohorts

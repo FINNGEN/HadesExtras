@@ -20,3 +20,4 @@ renv.lock
 .Rprofile
 docs
 .RData
+renv/settings.json

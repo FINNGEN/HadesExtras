@@ -6,19 +6,16 @@
 #'
 #' @field cohortDatabaseSchema Schema where cohort tables are stored
 #' @field cohortTableNames Names of the cohort tables in the database
-#' @field incrementalFolder Path to folder for incremental operations
 #' @field cohortDefinitionSet Set of cohort definitions
 #' @field cohortGeneratorResults Results from cohort generation process
 #' @field cohortDemograpics Demographic information for cohorts
 #' @field cohortsOverlap Information about overlapping cohorts
-#' @field resultsDatabaseSchema Schema name for the results database
 #'
 #' @param databaseId ID of the database to connect to
 #' @param loadConnectionChecksLevel Level of checks to perform during connection
 #' @param newCohortName New name to assign to the cohort
 #' @param newShortName New short name to assign to the cohort
 #' @param cohortDefinitionSet Set of cohort definitions to use
-#' @param incrementalFolder Path to folder for incremental operations
 #' @param cohortDatabaseSchema Schema name where cohort tables are stored
 #'
 #' @importFrom R6 R6Class
@@ -162,21 +159,6 @@ CohortTableHandler <- R6::R6Class(
         private$.connectionStatusLog$SUCCESS("Create cohort tables", "Created cohort tables")
       }
 
-     # Checks resultsDatabaseSchema, Error if not exists in the database, warning if the same as cdmDatabaseSchema
-    resultsSchemaExists <- TRUE
-      tryCatch({
-        tables <- DatabaseConnector::getTableNames(self$connectionHandler$getConnection(), self$resultsDatabaseSchema)
-      }, error = function(e) {
-        resultsSchemaExists <<- FALSE
-      })
-
-      if (!resultsSchemaExists) {
-        private$.connectionStatusLog$ERROR("Check results database schema", paste0("Results database schema ", self$resultsDatabaseSchema, " does not exist in the database"))
-      } else if (self$resultsDatabaseSchema == self$cdmDatabaseSchema) {
-        private$.connectionStatusLog$WARNING("Check results database schema", "Results database schema is the same as CDM database schema, results will be stored in the CDM database schema")
-      } else {
-        private$.connectionStatusLog$SUCCESS("Check results database schema", "Results database schema exists in the database")
-      }
     },
     #'
     #' insertOrUpdateCohorts
