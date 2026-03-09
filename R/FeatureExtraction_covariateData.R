@@ -44,7 +44,7 @@ YearOfBirth <- function(
     rowIdField = "subject_id",
     covariateSettings,
     aggregated = FALSE,
-    minCharacterizationMean = 0) {
+    minCharacterizationMean = 0,...) {
   writeLines("Constructing YearOfBirth covariate")
 
   # Some SQL to construct the covariate:
@@ -143,9 +143,9 @@ YearOfBirth <- function(
 #' @param temporalStartDays Start day relative to index (-99999 by default)
 #' @param temporalEndDays End day relative to index (99999 by default)
 #' @param continuous Logical. If TRUE, the covariate data is continuous.
-#' 
+#'
 #' @return A covariate settings object for ATC drug groups
-#' 
+#'
 #' @importFrom DatabaseConnector querySql
 #' @importFrom SqlRender render translate
 #'
@@ -199,7 +199,7 @@ ATCgroups <- function(
     rowIdField = "subject_id",
     covariateSettings,
     aggregated = FALSE,
-    minCharacterizationMean = 0) {
+    minCharacterizationMean = 0,...) {
 
   continuous <- covariateSettings$continuous
 
@@ -242,13 +242,13 @@ ATCgroups <- function(
 
   # Construct covariate reference:
   if (continuous) {
-    covariatesContinuous <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_ddd_covariate_table", snakeCaseToCamelCase = TRUE)  
-    covariateRef <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_ddd_covariate_ref", snakeCaseToCamelCase = TRUE)  
+    covariatesContinuous <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_ddd_covariate_table", snakeCaseToCamelCase = TRUE)
+    covariateRef <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_ddd_covariate_ref", snakeCaseToCamelCase = TRUE)
   } else {
-    covariates <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_covariate_table", snakeCaseToCamelCase = TRUE)  
-    covariateRef <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_covariate_ref", snakeCaseToCamelCase = TRUE)  
+    covariates <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_covariate_table", snakeCaseToCamelCase = TRUE)
+    covariateRef <- DatabaseConnector::renderTranslateQuerySql(connection, "SELECT * FROM #atc_covariate_ref", snakeCaseToCamelCase = TRUE)
   }
-  
+
   # Construct analysis reference:
   analysisRef <- data.frame(
     analysisId = analysisId,
@@ -274,7 +274,7 @@ ATCgroups <- function(
       analysisRef = analysisRef
     )
   }
-  
+
   attr(result, "metaData") <- metaData
   class(result) <- "CovariateData"
 
