@@ -24,6 +24,7 @@ covariateData_YearOfBirth <- function() {
 #' @param covariateSettings A list of settings for the covariate data.
 #' @param aggregated Logical. If TRUE, the covariate data is aggregated.
 #' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#' @param ... Additional arguments (not currently used).
 #'
 #' @importFrom DatabaseConnector querySql
 #' @importFrom SqlRender render translate
@@ -179,6 +180,7 @@ covariateData_ATCgroups <- function(
 #' @param covariateSettings A list of settings for the covariate data.
 #' @param aggregated Logical. If TRUE, the covariate data is aggregated.
 #' @param minCharacterizationMean The minimum mean for the covariate to be included.
+#' @param ... Additional arguments (not currently used).
 #'
 #' @importFrom DatabaseConnector querySql
 #' @importFrom SqlRender render translate
