@@ -10,21 +10,12 @@ Inherits from CDMdbHandler.
 \section{Super class}{
 \code{\link[HadesExtras:CDMdbHandler]{HadesExtras::CDMdbHandler}} -> \code{CohortTableHandler}
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{incrementalFolder}}{Path to folder for incremental operations}
-}
-\if{html}{\out{</div>}}
-}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{cohortDatabaseSchema}}{Schema where cohort tables are stored}
 
 \item{\code{cohortTableNames}}{Names of the cohort tables in the database}
-
-\item{\code{incrementalFolder}}{Path to folder for incremental operations}
 
 \item{\code{cohortDefinitionSet}}{Set of cohort definitions}
 
@@ -70,6 +61,7 @@ Initialize the CohortTableHandler object
   databaseDescription,
   cdmDatabaseSchema,
   vocabularyDatabaseSchema = cdmDatabaseSchema,
+  resultsDatabaseSchema = cdmDatabaseSchema,
   cohortDatabaseSchema,
   cohortTableName,
   loadConnectionChecksLevel = "allChecks"
@@ -90,6 +82,8 @@ Initialize the CohortTableHandler object
 \item{\code{cdmDatabaseSchema}}{Name of the CDM database schema.}
 
 \item{\code{vocabularyDatabaseSchema}}{Name of the vocabulary database schema. Default is the same as the CDM database schema.}
+
+\item{\code{resultsDatabaseSchema}}{(Optional) Name of the results database schema (default is cdmDatabaseSchema).}
 
 \item{\code{cohortDatabaseSchema}}{Name of the cohort database schema.}
 

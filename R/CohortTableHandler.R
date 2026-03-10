@@ -6,7 +6,6 @@
 #'
 #' @field cohortDatabaseSchema Schema where cohort tables are stored
 #' @field cohortTableNames Names of the cohort tables in the database
-#' @field incrementalFolder Path to folder for incremental operations
 #' @field cohortDefinitionSet Set of cohort definitions
 #' @field cohortGeneratorResults Results from cohort generation process
 #' @field cohortDemograpics Demographic information for cohorts
@@ -17,7 +16,6 @@
 #' @param newCohortName New name to assign to the cohort
 #' @param newShortName New short name to assign to the cohort
 #' @param cohortDefinitionSet Set of cohort definitions to use
-#' @param incrementalFolder Path to folder for incremental operations
 #' @param cohortDatabaseSchema Schema name where cohort tables are stored
 #'
 #' @importFrom R6 R6Class
@@ -74,6 +72,7 @@ CohortTableHandler <- R6::R6Class(
     #' @param databaseDescription    A text description for the database the it connects to
     #' @param cdmDatabaseSchema Name of the CDM database schema.
     #' @param vocabularyDatabaseSchema Name of the vocabulary database schema. Default is the same as the CDM database schema.
+    #' @param resultsDatabaseSchema (Optional) Name of the results database schema (default is cdmDatabaseSchema).
     #' @param cohortDatabaseSchema Name of the cohort database schema.
     #' @param cohortTableName Name of the cohort table.
     #' @param loadConnectionChecksLevel     (Optional) Level of checks to perform when loading the connection (default is "allChecks")
@@ -83,12 +82,14 @@ CohortTableHandler <- R6::R6Class(
                           databaseDescription,
                           cdmDatabaseSchema,
                           vocabularyDatabaseSchema = cdmDatabaseSchema,
+                          resultsDatabaseSchema = cdmDatabaseSchema,
                           cohortDatabaseSchema,
                           cohortTableName,
                           loadConnectionChecksLevel = "allChecks") {
       checkmate::assertClass(connectionHandler, "ConnectionHandler")
       checkmate::assertString(cdmDatabaseSchema)
       checkmate::assertString(vocabularyDatabaseSchema)
+      checkmate::assertString(resultsDatabaseSchema)
       checkmate::assertString(cohortDatabaseSchema)
       checkmate::assertString(cohortTableName)
 
@@ -122,6 +123,7 @@ CohortTableHandler <- R6::R6Class(
         connectionHandler = connectionHandler,
         cdmDatabaseSchema = cdmDatabaseSchema,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        resultsDatabaseSchema = resultsDatabaseSchema,
         loadConnectionChecksLevel = loadConnectionChecksLevel
       )
     },
@@ -156,6 +158,7 @@ CohortTableHandler <- R6::R6Class(
       } else {
         private$.connectionStatusLog$SUCCESS("Create cohort tables", "Created cohort tables")
       }
+
     },
     #'
     #' insertOrUpdateCohorts
@@ -608,6 +611,7 @@ createCohortTableHandlerFromList <- function(
     databaseDescription = cohortTableHandlerConfig$database$databaseDescription,
     cdmDatabaseSchema = cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
     vocabularyDatabaseSchema = cohortTableHandlerConfig$cdm$vocabularyDatabaseSchema,
+    resultsDatabaseSchema = if (!is.null(cohortTableHandlerConfig$cdm$resultsDatabaseSchema)) cohortTableHandlerConfig$cdm$resultsDatabaseSchema else cohortTableHandlerConfig$cdm$cdmDatabaseSchema,
     cohortDatabaseSchema = cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema,
     cohortTableName = cohortTableHandlerConfig$cohortTable$cohortTableName,
     loadConnectionChecksLevel = loadConnectionChecksLevel

@@ -14,7 +14,8 @@ ATCgroups(
   rowIdField = "subject_id",
   covariateSettings,
   aggregated = FALSE,
-  minCharacterizationMean = 0
+  minCharacterizationMean = 0,
+  ...
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ ATCgroups(
 \item{aggregated}{Logical. If TRUE, the covariate data is aggregated.}
 
 \item{minCharacterizationMean}{The minimum mean for the covariate to be included.}
+
+\item{...}{Additional arguments (not currently used).}
 }
 \description{
 ATCgroups

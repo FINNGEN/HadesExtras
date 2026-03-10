@@ -300,6 +300,22 @@ CDMdbHandler <- R6::R6Class(
         )
       }
 
+      # Checks resultsDatabaseSchema, Error if not exists in the database, warning if the same as cdmDatabaseSchema
+      resultsSchemaExists <- TRUE
+      tryCatch({
+        tables <- DatabaseConnector::getTableNames(self$connectionHandler$getConnection(), self$resultsDatabaseSchema)
+      }, error = function(e) {
+        resultsSchemaExists <<- FALSE
+      })
+
+      if (!resultsSchemaExists) {
+        connectionStatusLog$ERROR("Check results database schema", paste0("Results database schema ", self$resultsDatabaseSchema, " does not exist in the database"))
+      } else if (self$resultsDatabaseSchema == self$cdmDatabaseSchema) {
+        connectionStatusLog$WARNING("Check results database schema", "Results database schema is the same as CDM database schema, results will be stored in the CDM database schema")
+      } else {
+        connectionStatusLog$SUCCESS("Check results database schema", "Results database schema exists in the database")
+      }
+
 
       # update status
       private$.vocabularyInfo <- vocabularyInfo
