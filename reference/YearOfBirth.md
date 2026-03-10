@@ -15,7 +15,8 @@ YearOfBirth(
   rowIdField = "subject_id",
   covariateSettings,
   aggregated = FALSE,
-  minCharacterizationMean = 0
+  minCharacterizationMean = 0,
+  ...
 )
 ```
 
@@ -61,3 +62,7 @@ YearOfBirth(
 - minCharacterizationMean:
 
   The minimum mean for the covariate to be included.
+
+- ...:
+
+  Additional arguments (not currently used).

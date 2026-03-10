@@ -9,7 +9,7 @@ Inherits from CDMdbHandler."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">HadesExtras</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,14 +52,6 @@ Inherits from CDMdbHandler.</p>
     <p><code><a href="CDMdbHandler.html">HadesExtras::CDMdbHandler</a></code> -&gt; <code>CohortTableHandler</code></p>
     </div>
     <div class="section level2">
-    <h2 id="public-fields">Public fields<a class="anchor" aria-label="anchor" href="#public-fields"></a></h2>
-    <p></p><div class="r6-fields"><dl><dt><code>incrementalFolder</code></dt>
-<dd><p>Path to folder for incremental operations</p></dd>
-
-
-</dl><p></p></div>
-    </div>
-    <div class="section level2">
     <h2 id="active-bindings">Active bindings<a class="anchor" aria-label="anchor" href="#active-bindings"></a></h2>
     <p></p><div class="r6-active-bindings"><dl><dt><code>cohortDatabaseSchema</code></dt>
 <dd><p>Schema where cohort tables are stored</p></dd>
@@ -67,10 +59,6 @@ Inherits from CDMdbHandler.</p>
 
 <dt><code>cohortTableNames</code></dt>
 <dd><p>Names of the cohort tables in the database</p></dd>
-
-
-<dt><code>incrementalFolder</code></dt>
-<dd><p>Path to folder for incremental operations</p></dd>
 
 
 <dt><code>cohortDefinitionSet</code></dt>
@@ -124,6 +112,7 @@ Inherits from CDMdbHandler.</p>
 <span>  <span class="va">databaseDescription</span>,</span>
 <span>  <span class="va">cdmDatabaseSchema</span>,</span>
 <span>  vocabularyDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,</span>
+<span>  resultsDatabaseSchema <span class="op">=</span> <span class="va">cdmDatabaseSchema</span>,</span>
 <span>  <span class="va">cohortDatabaseSchema</span>,</span>
 <span>  <span class="va">cohortTableName</span>,</span>
 <span>  loadConnectionChecksLevel <span class="op">=</span> <span class="st">"allChecks"</span></span>
@@ -154,6 +143,10 @@ Inherits from CDMdbHandler.</p>
 
 <dt><code>vocabularyDatabaseSchema</code></dt>
 <dd><p>Name of the vocabulary database schema. Default is the same as the CDM database schema.</p></dd>
+
+
+<dt><code>resultsDatabaseSchema</code></dt>
+<dd><p>(Optional) Name of the results database schema (default is cdmDatabaseSchema).</p></dd>
 
 
 <dt><code>cohortDatabaseSchema</code></dt>

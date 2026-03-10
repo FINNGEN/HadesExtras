@@ -1,6 +1,7 @@
 # HadesExtras: HadesExtras
 
-Functions to complement Hades packages
+Provides additional functions to complement Hades packages for
+observational health data analysis
 
 ## See also
 

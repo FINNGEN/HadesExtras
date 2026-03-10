@@ -16,7 +16,7 @@ if (dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER")) == FALSE) {
 # Get the path to the Eunomia database
 pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
 #> attempting to download GiBleed
-#> attempting to extract and load: /tmp/RtmprYflSA/GiBleed_5.3.zip to: /tmp/RtmprYflSA/GiBleed_5.3.sqlite
+#> attempting to extract and load: /tmp/Rtmph2039K/GiBleed_5.3.zip to: /tmp/Rtmph2039K/GiBleed_5.3.sqlite
 ```
 
 ## Configuration
@@ -78,7 +78,7 @@ Or for convenience `createCDMdbHandlerFromList` can be used.
 ``` r
 CDMdb <- createCDMdbHandlerFromList(config)
 #> Connecting using SQLite driver
-#> Inserting data took 0.00845 secs
+#> Inserting data took 0.00826 secs
 ```
 
 First thing to do is to check the status of the connection.
@@ -88,13 +88,14 @@ Vocabulary tables are available in the database.
 
 ``` r
 CDMdb$connectionStatusLog
-#> # A tibble: 4 × 5
+#> # A tibble: 5 × 5
 #>   databaseId databaseName type    step                                message   
 #>   <chr>      <chr>        <fct>   <chr>                               <chr>     
 #> 1 E1         GiBleed      SUCCESS Check database connection           Valid con…
 #> 2 E1         GiBleed      SUCCESS Check temp table creation           can creat…
 #> 3 E1         GiBleed      SUCCESS vocabularyDatabaseSchema connection Connected…
 #> 4 E1         GiBleed      SUCCESS cdmDatabaseSchema connection        Connected…
+#> 5 E1         GiBleed      WARNING Check results database schema       Results d…
 ```
 
 Function `reactable_connectionStatus` creates an interactive table with

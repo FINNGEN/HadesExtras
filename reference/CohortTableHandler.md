@@ -8,12 +8,6 @@ CDMdbHandler.
 [`HadesExtras::CDMdbHandler`](https://finngen.github.io/HadesExtras/reference/CDMdbHandler.md)
 -\> `CohortTableHandler`
 
-## Public fields
-
-- `incrementalFolder`:
-
-  Path to folder for incremental operations
-
 ## Active bindings
 
 - `cohortDatabaseSchema`:
@@ -23,10 +17,6 @@ CDMdbHandler.
 - `cohortTableNames`:
 
   Names of the cohort tables in the database
-
-- `incrementalFolder`:
-
-  Path to folder for incremental operations
 
 - `cohortDefinitionSet`:
 
@@ -95,6 +85,7 @@ Initialize the CohortTableHandler object
       databaseDescription,
       cdmDatabaseSchema,
       vocabularyDatabaseSchema = cdmDatabaseSchema,
+      resultsDatabaseSchema = cdmDatabaseSchema,
       cohortDatabaseSchema,
       cohortTableName,
       loadConnectionChecksLevel = "allChecks"
@@ -126,6 +117,11 @@ Initialize the CohortTableHandler object
 
   Name of the vocabulary database schema. Default is the same as the CDM
   database schema.
+
+- `resultsDatabaseSchema`:
+
+  (Optional) Name of the results database schema (default is
+  cdmDatabaseSchema).
 
 - `cohortDatabaseSchema`:
 
