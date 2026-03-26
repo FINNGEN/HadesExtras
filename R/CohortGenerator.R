@@ -137,12 +137,14 @@ CohortGenerator_generateCohortSet <- function(
   #
   # TMP
   # If a cohortDefinitionSet is joined to a cohortDefinitionSetWithSubsetDef, the columns subsetParent and isSubset will have NA values for the rows coming from cohortDefinitionSet. This causes problems in the sql rendering. To avoid that, we set subsetParent to cohortId and isSubset to FALSE for those rows.
-  cohortDefinitionSet <- cohortDefinitionSet |>
-  dplyr::mutate(
-      subsetParent = dplyr::if_else(is.na(subsetParent), cohortId, subsetParent),
-      isSubset = dplyr::if_else(is.na(isSubset), FALSE, isSubset),
-      isTemplatedCohort = FALSE
-    )
+  if (all(c("subsetParent", "isSubset", "isTemplatedCohort") %in% colnames(cohortDefinitionSet))) {
+    cohortDefinitionSet <- cohortDefinitionSet |>
+    dplyr::mutate(
+        subsetParent = dplyr::if_else(is.na(subsetParent), cohortId, subsetParent),
+        isSubset = dplyr::if_else(is.na(isSubset), FALSE, isSubset),
+        isTemplatedCohort = dplyr::if_else(is.na(isTemplatedCohort), FALSE, isTemplatedCohort)
+      )
+  }
   # END TMP
   results <- CohortGenerator::generateCohortSet(
     connection = connection,

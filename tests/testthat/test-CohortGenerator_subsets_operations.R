@@ -136,7 +136,9 @@ test_that("Operation Subset works with in CohortHandled", {
   cohortDefinitionSetOp <- cohortDefinitionSet |>
     CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 1)
 
-  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetOp)
+  suppressWarnings({
+    cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetOp)
+  })
 
   cohortTableHandler$getCohortCounts()
 
