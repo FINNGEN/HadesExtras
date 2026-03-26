@@ -14,7 +14,6 @@ test_that("Operation subset naming and instantitation", {
 })
 
 
-
 test_that("Operation Subset works", {
   testthat::skip_if_not(testingDatabase |> stringr::str_starts("Eunomia"))
 
@@ -22,8 +21,8 @@ test_that("Operation Subset works", {
 
   cohortDatabaseSchema <- cohortTableHandlerConfig$cohortTable$cohortDatabaseSchema
   cdmDatabaseSchema <- cohortTableHandlerConfig$cdm$cdmDatabaseSchema
-  cohortTableName <- helper_tableNameWithTimestamp("test_cohort") 
-  
+  cohortTableName <- helper_tableNameWithTimestamp("test_cohort")
+
   connection <- helper_createNewConnection()
   withr::defer({
     CohortGenerator_dropCohortStatsTables(
@@ -50,7 +49,6 @@ test_that("Operation Subset works", {
     packageName = NULL,
     verbose = FALSE
   )
-
 
   # Match to sex only, match ratio 20
   subsetDef <- CohortGenerator::createCohortSubsetDefinition(
@@ -93,4 +91,63 @@ test_that("Operation Subset works", {
   cohortDemographics |>
     dplyr::pull(cohortSubjects) |>
     expect_equal(c(2, 40, 42))
+})
+
+
+test_that("Operation Subset works with in CohortHandled", {
+  testthat::skip_if_not(testingDatabase |> stringr::str_starts("Eunomia"))
+  suppressWarnings({
+    cohortTableHandler <- helper_createNewCohortTableHandler(
+      loadConnectionChecksLevel = "allChecks"
+    )
+  })
+  # withr::defer({
+  #   rm(cohortTableHandler)
+  #   gc()
+  # })
+
+  #tmp
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = helper_getTestDataPath("testdata/asthma/Cohorts.csv"),
+    jsonFolder = helper_getTestDataPath("testdata/asthma/cohorts"),
+    sqlFolder = helper_getTestDataPath("testdata/asthma/sql/sql_server"),
+    cohortFileNameFormat = "%s",
+    cohortFileNameValue = c("cohortId"),
+    packageName = NULL,
+    verbose = FALSE
+)
+
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
+
+   cohortTableHandler$getCohortCounts()
+  
+  # make operation subset definition
+  subsetDef <- CohortGenerator::createCohortSubsetDefinition(
+    name = "test",
+    definitionId = 300,
+    subsetOperators = list(
+      createOperationSubset(
+        name = NULL,
+        operationString = "1Upd2"
+      )
+    )
+  ) 
+
+  cohortDefinitionSetOp <- cohortDefinitionSet |>
+    CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 1)
+
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetOp)
+
+  cohortTableHandler$getCohortCounts()
+
+
+  # adding second
+  cohortDefinitionSet2 <- cohortDefinitionSet |>
+    dplyr::mutate(cohortId = cohortId + 9000) # to avoid conflict with existing cohorts in the handler
+  cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet2)
+
+  a <- cohortTableHandler$getCohortCounts()
+
+  anyNA(a |> dplyr::pull(cohortEntries)) |> expect_false()
+
 })
