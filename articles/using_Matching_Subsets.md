@@ -26,7 +26,7 @@ if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
 # Get the path to the Eunomia database
 pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
 #> attempting to download GiBleed
-#> attempting to extract and load: /tmp/RtmpkeZTmi/GiBleed_5.3.zip to: /tmp/RtmpkeZTmi/GiBleed_5.3.sqlite
+#> attempting to extract and load: /tmp/RtmplwBxsX/GiBleed_5.3.zip to: /tmp/RtmplwBxsX/GiBleed_5.3.sqlite
 ```
 
 ## Configuration
@@ -66,7 +66,7 @@ As in `CDMHandled`, to create a `CohortTableHandles`, for convenience
 ``` r
 cohortTableHandler <- createCohortTableHandlerFromList(config)
 #> Connecting using SQLite driver
-#> Inserting data took 0.00842 secs
+#> Inserting data took 0.0094 secs
 #> Creating cohort tables
 #> - Created table main.test_cohort_table
 #> - Created table main.test_cohort_table
@@ -77,7 +77,7 @@ cohortTableHandler <- createCohortTableHandlerFromList(config)
 #> - Created table main.test_cohort_table_censor_stats
 #> - Created table main.test_cohort_table_subset_attrition
 #> - Created table main.test_cohort_table_checksum
-#> Creating cohort tables took 0.04secs
+#> Creating cohort tables took 0.06secs
 ```
 
 In addition to the checks performed by `CDMHandled`,
@@ -156,15 +156,15 @@ cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSetWithSubsetDef )
 #> Initiating cluster consisting only of main thread
 #> 1/3- Generating cohort: Matching cases (id = 10)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00589 secs
+#> Executing SQL took 0.00772 secs
 #> 2/3- Generating cohort: Matching controls (id = 20)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00555 secs
+#> Executing SQL took 0.0102 secs
 #> 3/3- Generating cohort: Matching controls - test (id = 20020)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |=========                                                             |  13%  |                                                                              |==============                                                        |  20%  |                                                                              |===================                                                   |  27%  |                                                                              |=======================                                               |  33%  |                                                                              |============================                                          |  40%  |                                                                              |=================================                                     |  47%  |                                                                              |=====================================                                 |  53%  |                                                                              |==========================================                            |  60%  |                                                                              |===============================================                       |  67%  |                                                                              |===================================================                   |  73%  |                                                                              |========================================================              |  80%  |                                                                              |=============================================================         |  87%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0191 secs
-#> Generating cohort set took 0.23 secs
-#> getCohortDemograpics took 0.0895 secs
+#> Executing SQL took 0.0123 secs
+#> Generating cohort set took 0.28 secs
+#> getCohortDemograpics took 0.11 secs
 ```
 
 ``` r
