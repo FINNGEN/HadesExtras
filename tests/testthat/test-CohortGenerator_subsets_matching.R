@@ -15,6 +15,40 @@ test_that("Matching subset naming and instantitation", {
   expectedName <- "Match to cohort 11 by sex and birth year with ratio 1:10; cohort start date as in matched subject; cohort end date as in matched subject"
   expect_equal(expectedName, matchingSubsetNamed$name)
 
+
+  matchingSubsetObservedAtTargetStart <- createMatchingSubset(
+    matchToCohortId = 11,
+    requireMatchObservedAtTargetStartDate = TRUE,
+    newCohortStartDate = "asMatch",
+    newCohortEndDate = "keep"
+  )
+  expect_true(matchingSubsetObservedAtTargetStart$requireMatchObservedAtTargetStartDate)
+  expect_equal(matchingSubsetObservedAtTargetStart$newCohortStartDate, "asMatch")
+  expect_equal(matchingSubsetObservedAtTargetStart$newCohortEndDate, "keep")
+  expect_match(
+    matchingSubsetObservedAtTargetStart$name,
+    "observation at matched cohort start date"
+  )
+
+  renderedSql <- matchingSubsetObservedAtTargetStart$getQueryBuilder(1)$getQuery("target_table")
+  expect_match(
+    renderedSql,
+    "intput_to_match\\.cohort_start_date <= target_matching_rules\\.cohort_start_date"
+  )
+  expect_match(
+    renderedSql,
+    "target_matching_rules\\.cohort_start_date <= intput_to_match\\.cohort_end_date"
+  )
+  expect_match(
+    renderedSql,
+    "target_matching_rules\\.cohort_start_date,\\s+intput_to_match\\.cohort_end_date"
+  )
+
+  renderedDefaultSql <- createMatchingSubset(matchToCohortId = 11)$getQueryBuilder(1)$getQuery("target_table")
+  expect_false(grepl(
+    "intput_to_match\\.cohort_start_date <= target_matching_rules\\.cohort_start_date",
+    renderedDefaultSql
+  ))
   matchingSubsetNamed$name <- "foo"
   expect_equal("foo", matchingSubsetNamed$name)
 
@@ -287,4 +321,67 @@ test_that("Matching Subset works for different parameters", {
   cohortDemographics$histogramBirthYear[[3]]$n[[2]] |> expect_equal(10) # 1971, there is only 10 in controls
 
   cohortDemographics$histogramBirthYear[[1]]$year |> expect_equal(cohortDemographics$histogramBirthYear[[3]]$year)
+
+  # CodeWAS-style matching: controls must be observed at the case index date,
+  # then receive that date as their cohort start while retaining their own end.
+  subsetDef <- CohortGenerator::createCohortSubsetDefinition(
+    name = "index-date controls",
+    definitionId = 301,
+    subsetOperators = list(
+      createMatchingSubset(
+        matchToCohortId = 10,
+        matchRatio = 20,
+        matchSex = TRUE,
+        matchBirthYear = TRUE,
+        matchCohortStartDateWithInDuration = FALSE,
+        requireMatchObservedAtTargetStartDate = TRUE,
+        newCohortStartDate = "asMatch",
+        newCohortEndDate = "keep"
+      )
+    )
+  )
+
+  cohortDefinitionSetWithSubsetDef <- cohortDefinitionSet |>
+    CohortGenerator::addCohortSubsetDefinition(subsetDef, targetCohortIds = 20)
+
+  CohortGenerator::generateCohortSet(
+    connection = connection,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortDatabaseSchema = cohortDatabaseSchema,
+    cohortTableNames = getCohortTableNames(cohortTableName),
+    cohortDefinitionSet = cohortDefinitionSetWithSubsetDef,
+    incremental = FALSE
+  )
+
+  getCohortRows <- function(cohortId) {
+    sql <- SqlRender::render(
+      "SELECT subject_id, cohort_start_date, cohort_end_date FROM @cohort_database_schema.@cohort_table WHERE cohort_definition_id = @cohort_id",
+      cohort_database_schema = cohortDatabaseSchema,
+      cohort_table = cohortTableName,
+      cohort_id = cohortId
+    ) |>
+      SqlRender::translate(targetDialect = DatabaseConnector::dbms(connection))
+
+    DatabaseConnector::querySql(connection, sql) |>
+      tibble::as_tibble()
+  }
+
+  cases <- getCohortRows(10)
+  candidateControls <- getCohortRows(20)
+  matchedControls <- getCohortRows(20301)
+
+  expect_gt(nrow(matchedControls), 0)
+  expect_equal(length(unique(cases$cohort_start_date)), 1)
+  expect_true(all(matchedControls$cohort_start_date == cases$cohort_start_date[[1]]))
+
+  matchedWithCandidateEnd <- dplyr::left_join(
+    matchedControls,
+    candidateControls,
+    by = "subject_id",
+    suffix = c("_matched", "_candidate")
+  )
+  expect_equal(nrow(matchedWithCandidateEnd), nrow(matchedControls))
+  expect_true(all(matchedWithCandidateEnd$cohort_end_date_matched == matchedWithCandidateEnd$cohort_end_date_candidate))
+  expect_true(all(matchedWithCandidateEnd$cohort_start_date_matched >= matchedWithCandidateEnd$cohort_start_date_candidate))
+  expect_true(all(matchedWithCandidateEnd$cohort_start_date_matched <= matchedWithCandidateEnd$cohort_end_date_candidate))
 })
