@@ -39,6 +39,7 @@ FROM(
     {@match_sex == '1'} ? {AND target_matching_rules.gender_concept_id = intput_to_match.gender_concept_id}
     {@match_birth_year == '1'} ? {AND target_matching_rules.year_of_birth = intput_to_match.year_of_birth}
     {@match_start_date_with_in_duration == '1'} ? {AND ( target_matching_rules.cohort_start_date <= intput_to_match.cohort_start_date AND intput_to_match.cohort_start_date <= target_matching_rules.cohort_end_date)}
+    {@require_match_observed_at_target_start_date == '1'} ? {AND ( intput_to_match.cohort_start_date <= target_matching_rules.cohort_start_date AND target_matching_rules.cohort_start_date <= intput_to_match.cohort_end_date)}
   ) AS ST
   WHERE row_num <= @match_ratio
 ) AS ST2

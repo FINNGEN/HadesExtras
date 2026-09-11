@@ -11,6 +11,7 @@ createMatchingSubset(
   matchSex = TRUE,
   matchBirthYear = TRUE,
   matchCohortStartDateWithInDuration = FALSE,
+  requireMatchObservedAtTargetStartDate = FALSE,
   newCohortStartDate = "keep",
   newCohortEndDate = "keep"
 )
@@ -27,6 +28,8 @@ createMatchingSubset(
 \item{matchBirthYear}{match to target birth year}
 
 \item{matchCohortStartDateWithInDuration}{cohort_start_date of the matching subject must be within the duration of the target cohort}
+
+\item{requireMatchObservedAtTargetStartDate}{require the matching subject to be observed at the target cohort start date}
 
 \item{newCohortStartDate}{change cohort start date to the matched person}
 

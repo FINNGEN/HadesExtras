@@ -12,8 +12,9 @@ CohortGenerator_MatchingSubsetQb <- R6::R6Class(
         match_sex = ifelse(private$operator$matchSex == TRUE, yes = "1", no = "0"),
         match_birth_year = ifelse(private$operator$matchBirthYear == TRUE, yes = "1", no = "0"),
         match_start_date_with_in_duration = ifelse(private$operator$matchCohortStartDateWithInDuration == TRUE, yes = "1", no = "0"),
+        require_match_observed_at_target_start_date = ifelse(private$operator$requireMatchObservedAtTargetStartDate == TRUE, yes = "1", no = "0"),
         new_cohort_start_date_as_match = ifelse(private$operator$newCohortStartDate == "asMatch", yes = "1", no = "0"),
-        new_cohort_end_date_as_match = ifelse(private$operator$newCohortStartDate == "asMatch", yes = "1", no = "0"),
+        new_cohort_end_date_as_match = ifelse(private$operator$newCohortEndDate == "asMatch", yes = "1", no = "0"),
         warnOnMissingParameters = TRUE
       )
       return(sql)
@@ -37,6 +38,7 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
     .matchSex = TRUE,
     .matchBirthYear = TRUE,
     .matchCohortStartDateWithInDuration = FALSE,
+    .requireMatchObservedAtTargetStartDate = FALSE,
     .newCohortStartDate = "keep",
     .newCohortEndDate = "keep"
   ),
@@ -50,6 +52,7 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
       objRepr$matchSex <- private$.matchSex
       objRepr$matchBirthYear <- private$.matchBirthYear
       objRepr$matchCohortStartDateWithInDuration <- private$.matchCohortStartDateWithInDuration
+      objRepr$requireMatchObservedAtTargetStartDate <- private$.requireMatchObservedAtTargetStartDate
       objRepr$newCohortStartDate <- private$.newCohortStartDate
       objRepr$newCohortEndDate <- private$.newCohortEndDate
 
@@ -71,6 +74,9 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
       }
       if (private$.matchCohortStartDateWithInDuration) {
         matchBy <- append(matchBy, "cohort start date within cohort duration")
+      }
+      if (private$.requireMatchObservedAtTargetStartDate) {
+        matchBy <- append(matchBy, "observation at matched cohort start date")
       }
 
       nameString <- paste(nameString, paste(matchBy, collapse = " and "))
@@ -139,6 +145,16 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
       private$.matchCohortStartDateWithInDuration <- matchCohortStartDateWithInDuration
       self
     },
+    #' @field requireMatchObservedAtTargetStartDate require the matching subject to be observed at the target cohort start date
+    requireMatchObservedAtTargetStartDate = function(requireMatchObservedAtTargetStartDate) {
+      if (missing(requireMatchObservedAtTargetStartDate)) {
+        return(private$.requireMatchObservedAtTargetStartDate)
+      }
+
+      checkmate::assertLogical(requireMatchObservedAtTargetStartDate, len = 1)
+      private$.requireMatchObservedAtTargetStartDate <- requireMatchObservedAtTargetStartDate
+      self
+    },
     #' @field newCohortStartDate change cohort start date to the matched person
     newCohortStartDate = function(newCohortStartDate) {
       if (missing(newCohortStartDate)) {
@@ -172,6 +188,7 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
 #' @param matchSex match to target sex
 #' @param matchBirthYear match to target birth year
 #' @param matchCohortStartDateWithInDuration cohort_start_date of the matching subject must be within the duration of the target cohort
+#' @param requireMatchObservedAtTargetStartDate require the matching subject to be observed at the target cohort start date
 #' @param newCohortStartDate change cohort start date to the matched person
 #' @param newCohortEndDate  change cohort end date to the matched person
 #'
@@ -183,6 +200,7 @@ createMatchingSubset <- function(
     matchSex = TRUE,
     matchBirthYear = TRUE,
     matchCohortStartDateWithInDuration = FALSE,
+    requireMatchObservedAtTargetStartDate = FALSE,
     newCohortStartDate = "keep",
     newCohortEndDate = "keep") {
   if (!matchSex & !matchBirthYear) {
@@ -195,6 +213,7 @@ createMatchingSubset <- function(
   subset$matchRatio <- matchRatio
   subset$matchSex <- matchSex
   subset$matchCohortStartDateWithInDuration <- matchCohortStartDateWithInDuration
+  subset$requireMatchObservedAtTargetStartDate <- requireMatchObservedAtTargetStartDate
   subset$matchBirthYear <- matchBirthYear
   subset$newCohortStartDate <- newCohortStartDate
   subset$newCohortEndDate <- newCohortEndDate

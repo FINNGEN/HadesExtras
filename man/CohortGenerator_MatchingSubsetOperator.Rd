@@ -23,6 +23,8 @@ to List
 
 \item{\code{matchCohortStartDateWithInDuration}}{match have start date as in cohort duration}
 
+\item{\code{requireMatchObservedAtTargetStartDate}}{require the matching subject to be observed at the target cohort start date}
+
 \item{\code{newCohortStartDate}}{change cohort start date to the matched person}
 
 \item{\code{newCohortEndDate}}{change cohort end date to the matched person}
