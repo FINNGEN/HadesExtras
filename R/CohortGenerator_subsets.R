@@ -13,7 +13,7 @@ CohortGenerator_MatchingSubsetQb <- R6::R6Class(
         match_birth_year = ifelse(private$operator$matchBirthYear == TRUE, yes = "1", no = "0"),
         match_start_date_with_in_duration = ifelse(private$operator$matchCohortStartDateWithInDuration == TRUE, yes = "1", no = "0"),
         new_cohort_start_date_as_match = ifelse(private$operator$newCohortStartDate == "asMatch", yes = "1", no = "0"),
-        new_cohort_end_date_as_match = ifelse(private$operator$newCohortStartDate == "asMatch", yes = "1", no = "0"),
+        new_cohort_end_date_as_match = ifelse(private$operator$newCohortEndDate == "asMatch", yes = "1", no = "0"),
         warnOnMissingParameters = TRUE
       )
       return(sql)
@@ -70,7 +70,7 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
         matchBy <- append(matchBy, "birth year")
       }
       if (private$.matchCohortStartDateWithInDuration) {
-        matchBy <- append(matchBy, "cohort start date within cohort duration")
+        matchBy <- append(matchBy, "matched cohort start date within candidate duration")
       }
 
       nameString <- paste(nameString, paste(matchBy, collapse = " and "))
@@ -129,7 +129,7 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
       private$.matchBirthYear <- matchBirthYear
       self
     },
-    #' @field matchCohortStartDateWithInDuration match have start date as in cohort duration
+    #' @field matchCohortStartDateWithInDuration require candidate cohort duration to cover the matched cohort start date
     matchCohortStartDateWithInDuration = function(matchCohortStartDateWithInDuration) {
       if (missing(matchCohortStartDateWithInDuration)) {
         return(private$.matchCohortStartDateWithInDuration)
@@ -171,7 +171,7 @@ CohortGenerator_MatchingSubsetOperator <- R6::R6Class(
 #' @param matchRatio matching ratio
 #' @param matchSex match to target sex
 #' @param matchBirthYear match to target birth year
-#' @param matchCohortStartDateWithInDuration cohort_start_date of the matching subject must be within the duration of the target cohort
+#' @param matchCohortStartDateWithInDuration candidate cohort duration must cover the matched cohort start date
 #' @param newCohortStartDate change cohort start date to the matched person
 #' @param newCohortEndDate  change cohort end date to the matched person
 #'
