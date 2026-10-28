@@ -11,10 +11,13 @@ INNER JOIN (
       subject_id,
       ROW_NUMBER() OVER (
         ORDER BY
-          ABS((
-            (ABS(CAST(subject_id AS BIGINT)) % 2147483647) * 1103515245
-            + @random_seed
-          ) % 2147483647),
+          ABS(
+            MOD(
+              MOD(ABS(CAST(subject_id AS BIGINT)), 2147483647) * 1103515245
+              + @random_seed,
+              2147483647
+            )
+          ),
           subject_id
       ) AS row_num
     FROM (
