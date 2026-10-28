@@ -57,3 +57,19 @@ test_that("Random subset query contains a deterministic seed-based ordering", {
   expect_no_match(sqliteSql, "CHECKSUM")
   expect_match(sqliteSql, "1103515245")
 })
+
+test_that("Random subset query uses BigQuery-compatible modulo syntax", {
+  subsetDefinition <- CohortGenerator::createCohortSubsetDefinition(
+    name = "random",
+    definitionId = 301,
+    subsetOperators = list(
+      createRandomSubset(numberOfSubjects = 10, randomSeed = 12345)
+    )
+  )
+
+  bigquerySql <- subsetDefinition$getSubsetQuery(c(2, 2002)) |>
+    SqlRender::translate(targetDialect = "bigquery")
+
+  expect_match(bigquerySql, "mod\\(")
+  expect_no_match(bigquerySql, "%")
+})
