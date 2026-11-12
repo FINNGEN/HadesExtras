@@ -21,7 +21,7 @@ to List
 
 \item{\code{matchBirthYear}}{match to target birth year}
 
-\item{\code{matchCohortStartDateWithInDuration}}{match have start date as in cohort duration}
+\item{\code{matchCohortStartDateWithInDuration}}{require candidate cohort duration to cover the matched cohort start date}
 
 \item{\code{newCohortStartDate}}{change cohort start date to the matched person}
 
