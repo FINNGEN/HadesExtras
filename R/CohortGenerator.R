@@ -93,6 +93,17 @@ CohortGenerator_generateCohortSet <- function(
   cohortDefinitionSetCohortDataType <- cohortDefinitionSet |>
     dplyr::filter(cohortType == "FromCohortData")
 
+  # Older CohortGenerator releases do not export the checksum helper needed
+  # for incremental generation. Fall back to a full generation in that case.
+  if (incremental &&
+      !"getLastGeneratedCohortChecksums" %in% getNamespaceExports("CohortGenerator")) {
+    warning(
+      "CohortGenerator does not export getLastGeneratedCohortChecksums(); ",
+      "falling back to full cohort generation."
+    )
+    incremental <- FALSE
+  }
+
   # if incremental mode, ignore cohorts that are not changed
   if (incremental == TRUE) {
     recordKeeping <- CohortGenerator::getLastGeneratedCohortChecksums(
