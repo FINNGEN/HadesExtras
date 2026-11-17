@@ -26,7 +26,7 @@ createMatchingSubset(
 
 \item{matchBirthYear}{match to target birth year}
 
-\item{matchCohortStartDateWithInDuration}{cohort_start_date of the matching subject must be within the duration of the target cohort}
+\item{matchCohortStartDateWithInDuration}{candidate cohort duration must cover the matched cohort start date}
 
 \item{newCohortStartDate}{change cohort start date to the matched person}
 

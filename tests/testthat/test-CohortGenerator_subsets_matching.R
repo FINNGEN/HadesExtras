@@ -32,6 +32,27 @@ test_that("Matching subset naming and instantitation", {
 
 
 
+
+test_that("matching start date option requires candidate duration to cover matched start", {
+  renderedSql <- createMatchingSubset(
+    matchToCohortId = 11,
+    matchCohortStartDateWithInDuration = TRUE
+  )$getQueryBuilder(1)$getQuery("target_table")
+
+  expect_true(grepl(
+    "intput_to_match\\.cohort_start_date <= target_matching_rules\\.cohort_start_date",
+    renderedSql
+  ))
+  expect_true(grepl(
+    "target_matching_rules\\.cohort_start_date <= intput_to_match\\.cohort_end_date",
+    renderedSql
+  ))
+  expect_false(grepl(
+    "target_matching_rules\\.cohort_start_date <= intput_to_match\\.cohort_start_date",
+    renderedSql
+  ))
+})
+
 test_that("Matching Subset works", {
   connection <- helper_createNewConnection()
 
