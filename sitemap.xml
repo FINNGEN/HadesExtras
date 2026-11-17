@@ -13,6 +13,7 @@
 <url><loc>https://finngen.github.io/HadesExtras/reference/CDMdbHandler.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_MatchingSubsetOperator.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_OperationSubsetOperator.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_RandomSubsetOperator.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_createCohortTables.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_deleteCohortFromCohortTable.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/CohortGenerator_dropCohortStatsTables.html</loc></url>
@@ -40,6 +41,7 @@
 <url><loc>https://finngen.github.io/HadesExtras/reference/createEmptyCohortsSummary.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/createMatchingSubset.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/createOperationSubset.html</loc></url>
+<url><loc>https://finngen.github.io/HadesExtras/reference/createRandomSubset.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-.binaryTreeToSQL.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-assertCollectionCohortData.html</loc></url>
 <url><loc>https://finngen.github.io/HadesExtras/reference/dot-assertCollectionCohortsSummary.html</loc></url>

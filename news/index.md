@@ -1,5 +1,13 @@
 # Changelog
 
+## HadesExtras 2.2.0
+
+- Added deterministic random cohort subsets for reproducible subject
+  subsampling, including BigQuery support.
+- Fixed date matching so the matched cohort start date (case) must fall
+  within the candidate cohort period (control).
+- Fixed a bug that could assign the wrong end date to a matched cohort.
+
 ## HadesExtras 2.1.2
 
 - Added resultsDatabaseSchema parameter to CohortTableHandler

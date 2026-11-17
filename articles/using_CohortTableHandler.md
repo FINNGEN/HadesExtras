@@ -1,6 +1,7 @@
 # Using CohortTableHandler
 
 ``` r
+
 library(HadesExtras)
 # options("DEBUG_DATABASECONNECTOR_DBPLYR" = FALSE)
 ```
@@ -17,6 +18,7 @@ A testing database can be downloaded from Eunomia. See
 for more details.
 
 ``` r
+
 # Set EUNOMIA_DATA_FOLDER if not already set
 if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
     Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
@@ -25,7 +27,7 @@ if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
 # Get the path to the Eunomia database
 pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
 #> attempting to download GiBleed
-#> attempting to extract and load: /tmp/Rtmp5kDYRb/GiBleed_5.3.zip to: /tmp/Rtmp5kDYRb/GiBleed_5.3.sqlite
+#> attempting to extract and load: /tmp/Rtmpkg1YFm/GiBleed_5.5.zip to: /tmp/Rtmpkg1YFm/GiBleed_5.5.sqlite
 ```
 
 ## Configuration
@@ -37,6 +39,7 @@ We need the following configuration. We write this in yaml format for
 clarity.
 
 ``` r
+
 config_yaml <- "
   database:
     databaseId: E1
@@ -59,6 +62,7 @@ writeLines(config_yaml, pathToConfigYaml)
 ```
 
 ``` r
+
 config <- readAndParseYaml(pathToConfigYaml, pathToGiBleedEunomiaSqlite = pathToGiBleedEunomiaSqlite)
 ```
 
@@ -68,9 +72,10 @@ As in `CDMHandled`, to create a `CohortTableHandles`, for convenience
 `createCohortTableHandlerFromList` can be used.
 
 ``` r
+
 cohortTableHandler <- createCohortTableHandlerFromList(config)
 #> Connecting using SQLite driver
-#> Inserting data took 0.0111 secs
+#> Inserting data took 0.00757 secs
 #> Creating cohort tables
 #> - Created table main.test_cohort_table
 #> - Created table main.test_cohort_table
@@ -81,7 +86,7 @@ cohortTableHandler <- createCohortTableHandlerFromList(config)
 #> - Created table main.test_cohort_table_censor_stats
 #> - Created table main.test_cohort_table_subset_attrition
 #> - Created table main.test_cohort_table_checksum
-#> Creating cohort tables took 0.05secs
+#> Creating cohort tables took 0.04secs
 ```
 
 In addition to the checks performed by `CDMHandled`,
@@ -89,6 +94,7 @@ In addition to the checks performed by `CDMHandled`,
 table.
 
 ``` r
+
 cohortTableHandler$connectionStatusLog |>
     reactable_connectionStatus()
 ```
@@ -113,6 +119,7 @@ person field person_source_value).
 Get `cohortDefinitionSet` form 3 cohort definitions in Atlas demo.
 
 ``` r
+
 # webAPI url for the Atlas demo
 baseUrl <- "https://api.ohdsi.org/WebAPI"
 # A list of cohort IDs for use in this vignette
@@ -125,6 +132,7 @@ cohortDefinitionSet <- ROhdsiWebApi::exportCohortDefinitionSet(
 ```
 
 ``` r
+
 cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
     settingsFileName = "testdata/name/Cohorts.csv",
     jsonFolder = "testdata/name/cohorts",
@@ -140,28 +148,30 @@ cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
 Build cohorts
 
 ``` r
+
 cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 #> Skipping cohorts already generated:  
 #> Initiating cluster consisting only of main thread
 #> 1/4- Generating cohort: celecoxib (id = 1)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  12%  |                                                                              |===========                                                           |  16%  |                                                                              |==============                                                        |  20%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  28%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  40%  |                                                                              |===============================                                       |  44%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  56%  |                                                                              |==========================================                            |  60%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  80%  |                                                                              |===========================================================           |  84%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0549 secs
+#> Executing SQL took 0.0293 secs
 #> 2/4- Generating cohort: celecoxibAge40 (id = 2)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |=====                                                                 |   7%  |                                                                              |=======                                                               |  10%  |                                                                              |=========                                                             |  13%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  20%  |                                                                              |================                                                      |  23%  |                                                                              |===================                                                   |  27%  |                                                                              |=====================                                                 |  30%  |                                                                              |=======================                                               |  33%  |                                                                              |==========================                                            |  37%  |                                                                              |============================                                          |  40%  |                                                                              |==============================                                        |  43%  |                                                                              |=================================                                     |  47%  |                                                                              |===================================                                   |  50%  |                                                                              |=====================================                                 |  53%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  60%  |                                                                              |============================================                          |  63%  |                                                                              |===============================================                       |  67%  |                                                                              |=================================================                     |  70%  |                                                                              |===================================================                   |  73%  |                                                                              |======================================================                |  77%  |                                                                              |========================================================              |  80%  |                                                                              |==========================================================            |  83%  |                                                                              |=============================================================         |  87%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0568 secs
+#> Executing SQL took 0.0343 secs
 #> 3/4- Generating cohort: celecoxibAge40Male (id = 3)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |====                                                                  |   6%  |                                                                              |======                                                                |   9%  |                                                                              |========                                                              |  12%  |                                                                              |==========                                                            |  15%  |                                                                              |============                                                          |  18%  |                                                                              |==============                                                        |  21%  |                                                                              |================                                                      |  24%  |                                                                              |===================                                                   |  26%  |                                                                              |=====================                                                 |  29%  |                                                                              |=======================                                               |  32%  |                                                                              |=========================                                             |  35%  |                                                                              |===========================                                           |  38%  |                                                                              |=============================                                         |  41%  |                                                                              |===============================                                       |  44%  |                                                                              |=================================                                     |  47%  |                                                                              |===================================                                   |  50%  |                                                                              |=====================================                                 |  53%  |                                                                              |=======================================                               |  56%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  62%  |                                                                              |=============================================                         |  65%  |                                                                              |===============================================                       |  68%  |                                                                              |=================================================                     |  71%  |                                                                              |===================================================                   |  74%  |                                                                              |======================================================                |  76%  |                                                                              |========================================================              |  79%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  85%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  91%  |                                                                              |==================================================================    |  94%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0395 secs
+#> Executing SQL took 0.0276 secs
 #> 4/4- Generating cohort: celecoxibCensored (id = 4)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   4%  |                                                                              |=====                                                                 |   7%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  18%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  39%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  61%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  96%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0427 secs
-#> Generating cohort set took 0.57 secs
-#> getCohortDemograpics took 0.115 secs
+#> Executing SQL took 0.0277 secs
+#> Generating cohort set took 0.39 secs
+#> getCohortDemograpics took 0.0865 secs
 ```
 
 Check cohort counts
 
 ``` r
+
 cohortTableHandler$getCohortCounts()
 #> # A tibble: 4 × 4
 #>   cohortName         cohortId cohortEntries cohortSubjects
@@ -173,16 +183,19 @@ cohortTableHandler$getCohortCounts()
 ```
 
 ``` r
+
 cohortsSummary <- cohortTableHandler$getCohortsSummary()
 ```
 
 ``` r
+
 rectable_cohortsSummary(cohortsSummary)
 ```
 
 Check Cohorts Overlap
 
 ``` r
+
 cohortTableHandler$getCohortsOverlap()
 #> # A tibble: 6 × 2
 #>   cohortIdCombinations numberOfSubjects
@@ -201,6 +214,7 @@ Create tibble of `cohortData` format. See the documentation for the
 correct format.
 
 ``` r
+
 cohortData <- tibble::tribble(
     ~cohort_name, ~person_source_value, ~cohort_start_date, ~cohort_end_date,
     "Cohort A", "000728a7-80de-420a-9286-2c20e81cb7b8", as.Date("2020-01-01"), as.Date("2020-01-03"),
@@ -222,6 +236,7 @@ documentation for the checks
 If correct, It will return TRUE.
 
 ``` r
+
 checkCohortData(cohortData)
 #> [1] TRUE
 ```
@@ -230,6 +245,7 @@ If any error, It will return an array of strings with the errors
 detected.
 
 ``` r
+
 cohortDataWithErrors <- cohortData
 cohortDataWithErrors[1, 1] <- as.character(NA)
 cohortDataWithErrors[1, 3] <- as.Date("2030-01-01")
@@ -242,6 +258,7 @@ To copy the `cohortData` into the `cohort`it has to be converted to a
 `cohortDefinitionSet`.
 
 ``` r
+
 cohortDefinitionSet <- cohortDataToCohortDefinitionSet(
     cohortData = cohortData
 )
@@ -250,28 +267,31 @@ cohortDefinitionSet <- cohortDataToCohortDefinitionSet(
 Copy `cohortDefinitionSet` to `cohort` table
 
 ``` r
+
 cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet)
 #> Warning in cohortTableHandler$insertOrUpdateCohorts(cohortDefinitionSet):
 #> Following cohort ids already exists on the cohort table and will be updated: 1,
 #> 2
-#> Inserting data took 0.00851 secs
+#> Inserting data took 0.0066 secs
 #> Skipping cohorts already generated:  3, 4
 #> Initiating cluster consisting only of main thread
 #> 1/4- Generating cohort: Cohort A (id = 1)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0119 secs
+#> Executing SQL took 0.0083 secs
 #> 2/4- Generating cohort: Cohort B (id = 2)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00896 secs
-#> Generating cohort set took 0.17 secs
-#> Counting cohorts took 0.0169 secs
-#> getCohortDemograpics took 0.0951 secs
+#> Executing SQL took 0.00645 secs
+#> Generating cohort set took 0.11 secs
+#> Counting cohorts took 0.0177 secs
+#> getCohortDemograpics took 0.0642 secs
 ```
 
 ``` r
+
 cohortsSummary <- cohortTableHandler$getCohortsSummary()
 ```
 
 ``` r
+
 rectable_cohortsSummary(cohortsSummary)
 ```

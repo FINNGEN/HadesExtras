@@ -28,7 +28,8 @@ within defined cohort to List
 
 - `matchCohortStartDateWithInDuration`:
 
-  match have start date as in cohort duration
+  require candidate cohort duration to cover the matched cohort start
+  date
 
 - `newCohortStartDate`:
 

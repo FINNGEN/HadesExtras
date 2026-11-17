@@ -10,6 +10,8 @@
   : Matching Subset Operator
 - [`CohortGenerator_OperationSubsetOperator`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_OperationSubsetOperator.md)
   : Operation Subset Operator
+- [`CohortGenerator_RandomSubsetOperator`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_RandomSubsetOperator.md)
+  : Deterministic Random Subset Operator
 - [`CohortGenerator_createCohortTables()`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_createCohortTables.md)
   : CohortGenerator_createCohortTables
 - [`CohortGenerator_deleteCohortFromCohortTable()`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_deleteCohortFromCohortTable.md)
@@ -65,6 +67,8 @@
   : A definition of subset functions to be applied to a set of cohorts
 - [`createOperationSubset()`](https://finngen.github.io/HadesExtras/reference/createOperationSubset.md)
   : A definition of subset functions to be applied to a set of cohorts
+- [`createRandomSubset()`](https://finngen.github.io/HadesExtras/reference/createRandomSubset.md)
+  : Create a deterministic random cohort subset
 - [`..binaryTreeToSQL()`](https://finngen.github.io/HadesExtras/reference/dot-.binaryTreeToSQL.md)
   : Convert Binary Tree to SQL Query
 - [`.assertCollectionCohortData()`](https://finngen.github.io/HadesExtras/reference/dot-assertCollectionCohortData.md)

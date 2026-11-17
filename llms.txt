@@ -8,6 +8,7 @@ You can install the development version of HadesExtras from
 [GitHub](https://github.com/) with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("FINNGEN/HadesExtras")
 ```
@@ -17,6 +18,7 @@ devtools::install_github("FINNGEN/HadesExtras")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
+
 library(HadesExtras)
 ## basic example code
 ```
@@ -33,6 +35,8 @@ library(HadesExtras)
   : Matching Subset Operator
 - [`CohortGenerator_OperationSubsetOperator`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_OperationSubsetOperator.md)
   : Operation Subset Operator
+- [`CohortGenerator_RandomSubsetOperator`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_RandomSubsetOperator.md)
+  : Deterministic Random Subset Operator
 - [`CohortGenerator_createCohortTables()`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_createCohortTables.md)
   : CohortGenerator_createCohortTables
 - [`CohortGenerator_deleteCohortFromCohortTable()`](https://finngen.github.io/HadesExtras/reference/CohortGenerator_deleteCohortFromCohortTable.md)
@@ -88,6 +92,8 @@ library(HadesExtras)
   : A definition of subset functions to be applied to a set of cohorts
 - [`createOperationSubset()`](https://finngen.github.io/HadesExtras/reference/createOperationSubset.md)
   : A definition of subset functions to be applied to a set of cohorts
+- [`createRandomSubset()`](https://finngen.github.io/HadesExtras/reference/createRandomSubset.md)
+  : Create a deterministic random cohort subset
 - [`..binaryTreeToSQL()`](https://finngen.github.io/HadesExtras/reference/dot-.binaryTreeToSQL.md)
   : Convert Binary Tree to SQL Query
 - [`.assertCollectionCohortData()`](https://finngen.github.io/HadesExtras/reference/dot-assertCollectionCohortData.md)

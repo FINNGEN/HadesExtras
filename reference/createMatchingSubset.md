@@ -41,8 +41,7 @@ createMatchingSubset(
 
 - matchCohortStartDateWithInDuration:
 
-  cohort_start_date of the matching subject must be within the duration
-  of the target cohort
+  candidate cohort duration must cover the matched cohort start date
 
 - newCohortStartDate:
 

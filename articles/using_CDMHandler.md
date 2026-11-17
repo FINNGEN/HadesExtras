@@ -1,6 +1,7 @@
 # Using CDMHandler
 
 ``` r
+
 library(HadesExtras)
 # options("DEBUG_DATABASECONNECTOR_DBPLYR" = FALSE)
 ```
@@ -8,6 +9,7 @@ library(HadesExtras)
 ## Getting an Eunomia database for testing
 
 ``` r
+
 # Set EUNOMIA_DATA_FOLDER if not already set
 if (dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER")) == FALSE) {
     Sys.setenv(EUNOMIA_DATA_FOLDER = tempdir())
@@ -16,7 +18,7 @@ if (dir.exists(Sys.getenv("EUNOMIA_DATA_FOLDER")) == FALSE) {
 # Get the path to the Eunomia database
 pathToGiBleedEunomiaSqlite <- Eunomia::getDatabaseFile("GiBleed", overwrite = FALSE)
 #> attempting to download GiBleed
-#> attempting to extract and load: /tmp/RtmpsLOjPE/GiBleed_5.3.zip to: /tmp/RtmpsLOjPE/GiBleed_5.3.sqlite
+#> attempting to extract and load: /tmp/RtmpKfXXVn/GiBleed_5.5.zip to: /tmp/RtmpKfXXVn/GiBleed_5.5.sqlite
 ```
 
 ## Configuration
@@ -27,6 +29,7 @@ parameterized yaml format and some parameters can be set using
 `readAndParseYaml` function.
 
 ``` r
+
 config_yaml <- "
   database:
       databaseId: E1
@@ -46,6 +49,7 @@ writeLines(config_yaml, pathToConfigYaml)
 ```
 
 ``` r
+
 config <- readAndParseYaml(pathToConfigYaml, pathToGiBleedEunomiaSqlite = pathToGiBleedEunomiaSqlite)
 ```
 
@@ -56,6 +60,7 @@ attributes and functions to retrieve information from the database and
 work with the tables.
 
 ``` r
+
 connectionDetails <- rlang::exec(DatabaseConnector::createConnectionDetails, !!!config$connection$connectionDetailsSettings)
 
 connectionHandler <- ResultModelManager::ConnectionHandler$new(
@@ -76,9 +81,10 @@ CDMdb <- CDMdbHandler$new(
 Or for convenience `createCDMdbHandlerFromList` can be used.
 
 ``` r
+
 CDMdb <- createCDMdbHandlerFromList(config)
 #> Connecting using SQLite driver
-#> Inserting data took 0.00883 secs
+#> Inserting data took 0.00754 secs
 ```
 
 First thing to do is to check the status of the connection.
@@ -87,6 +93,7 @@ but also if the `tempEmulationSchema` works, and all the CDM and
 Vocabulary tables are available in the database.
 
 ``` r
+
 CDMdb$connectionStatusLog
 #> # A tibble: 5 × 5
 #>   databaseId databaseName type    step                                message   
@@ -102,6 +109,7 @@ Function `reactable_connectionStatus` creates an interactive table with
 this information.
 
 ``` r
+
 CDMdb$connectionStatusLog |>
     reactable_connectionStatus()
 ```
@@ -109,14 +117,16 @@ CDMdb$connectionStatusLog |>
 We can get information on the CDM and Vocabulary version:
 
 ``` r
+
 CDMdb$CDMInfo
 #> # A tibble: 1 × 3
 #>   cdm_source_name                   cdm_source_abbreviation cdm_version
 #>   <chr>                             <chr>                   <chr>      
-#> 1 Synthea synthetic health database Synthea                 v5.3.1
+#> 1 Synthea synthetic health database Synthea                 v5.5
 ```
 
 ``` r
+
 CDMdb$vocabularyInfo
 #> # A tibble: 1 × 2
 #>   vocabulary_name                vocabulary_version
@@ -128,9 +138,10 @@ Tables in the database can be used as if they were tibbles thanks to
 [dbplyr](https://dbplyr.tidyverse.org/).
 
 ``` r
+
 CDMdb$getTblCDMSchema$person() |>
     dplyr::count(year_of_birth)
-#> # Source:   SQL [?? x 2]
+#> # A query:  ?? x 2
 #> # Database: DatabaseConnectorDbiConnection
 #>    year_of_birth     n
 #>            <int> <int>
@@ -148,6 +159,7 @@ CDMdb$getTblCDMSchema$person() |>
 ```
 
 ``` r
+
 CDMdb$getTblCDMSchema$person() |>
     dplyr::left_join(
         CDMdb$getTblVocabularySchema$concept() |> dplyr::select(concept_id, concept_name),
@@ -155,9 +167,6 @@ CDMdb$getTblCDMSchema$person() |>
     ) |>
     ggplot2::ggplot(ggplot2::aes(x = year_of_birth, fill = factor(concept_name))) +
     ggplot2::geom_bar()
-#> Note: method with signature 'DBIConnection#SQL' chosen for function 'dbQuoteIdentifier',
-#>  target signature 'DatabaseConnectorDbiConnection#SQL'.
-#>  "DatabaseConnectorConnection#character" would also be valid
 ```
 
 ![](using_CDMHandler_files/figure-html/unnamed-chunk-12-1.png)
